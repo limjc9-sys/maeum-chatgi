@@ -216,6 +216,15 @@ h1:focus { outline: none; }
 }
 .soft-icon { font-size: 44px; line-height: 1.2; text-align: center; }
 
+/* ───── 게임 방법 안내 ───── */
+.intro-spacer { min-width: 84px; }
+.intro-card { padding: 28px 20px; margin-top: 8px; }
+.intro-card .soft-icon { font-size: 56px; }
+.intro-card .body-text { text-align: left; word-break: keep-all; }
+.intro-nav { display: flex; gap: 10px; align-items: stretch; }
+.intro-nav .btn-secondary { flex: 0 0 34%; min-height: 60px; }
+.intro-nav .btn-primary { flex: 1; }
+
 /* ───── 결과 카드 ───── */
 .card {
   background: var(--surface);

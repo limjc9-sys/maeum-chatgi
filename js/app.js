@@ -149,6 +149,19 @@
   }
   function records() { return load().records; }
   function addRecord(r) { var d = load(); d.records.push(r); save(d); }
+  /* 게임 방법 안내를 본 적이 있는지 (기록과 따로 저장해서 기록을 지워도 다시 안 나와요) */
+  var INTRO_KEY = 'maeum-chatgi-intro-seen';
+  var introSeenMemory = false;
+  function introSeen() {
+    if (introSeenMemory) return true;
+    try { return window.localStorage.getItem(INTRO_KEY) === '1'; } catch (e) { return false; }
+  }
+  function markIntroSeen() {
+    introSeenMemory = true;
+    try { window.localStorage.setItem(INTRO_KEY, '1'); } catch (e) { /* 무시 */ }
+  }
+  function introCards() { return Array.isArray(D.intro) ? D.intro.filter(function (c) { return c && c.title; }) : []; }
+
   function clearAll() {
     memoryStore = { version: 1, records: [] };
     try { window.localStorage.removeItem(STORE_KEY); } catch (e) { /* 무시 */ }
@@ -400,7 +413,8 @@
         menuBtn('📖', '감정 도감', '찾은 감정 단어 모아 보기', function () { go('dex', {}); }, 'menu-dex'),
         menuBtn('📊', '주간 감정 보고서', '자주 나온 감정과 바람', function () { go('report', { offset: 0 }); }, 'menu-report'),
         menuBtn('🗂', '지난 기록', '지금까지 만든 마음 카드', function () { go('records', {}); }, 'menu-records'),
-        menuBtn('💾', '기록 옮기기', '파일로 저장하기·불러오기', function () { go('backup', {}); }, 'menu-backup')
+        menuBtn('💾', '기록 옮기기', '파일로 저장하기·불러오기', function () { go('backup', {}); }, 'menu-backup'),
+        introCards().length ? menuBtn('❓', T.introMenu || '게임 방법', T.introMenuHint || '', function () { go('intro', { page: 0 }); }, 'menu-intro') : null
       ),
       installHelp(),
       el('p', { class: 'privacy' }, T.privacy),
@@ -445,6 +459,38 @@
       el('p', null, '한 번 연 뒤에는 인터넷이 없어도 열려요.')
     );
   }
+
+  /* 게임 방법 안내 (카드 한 장씩) */
+  screens.intro = function (p) {
+    var cards = introCards();
+    if (!cards.length) { markIntroSeen(); return screens.home(); }
+    var i = Math.max(0, Math.min(cards.length - 1, p.page || 0));
+    var c = cards[i];
+    var last = i === cards.length - 1;
+    function done() { markIntroSeen(); goHome(); }
+    function page(n) { go('intro', { page: n }, { push: false }); }
+    var dots = cards.map(function (x, k) { return el('span', { class: 'dot' + (k <= i ? ' on' : '') }); });
+    return screen('intro', { 'data-page': String(i) },
+      el('header', { class: 'topbar' },
+        el('span', { class: 'top-spacer intro-spacer' }),
+        el('span', { class: 'top-step' }, (i + 1) + ' / ' + cards.length),
+        el('button', { class: 'top-btn', type: 'button', onclick: done, 'data-testid': 'intro-skip' }, T.introSkip || '건너뛰기')
+      ),
+      el('div', { class: 'progress', 'aria-hidden': 'true' }, dots),
+      el('div', { class: 'soft-card intro-card' },
+        c.icon ? el('div', { class: 'soft-icon', 'aria-hidden': 'true' }, c.icon) : null,
+        heading(c.title),
+        el('p', { class: 'body-text', 'data-testid': 'intro-body' }, c.body || '')
+      ),
+      el('div', { class: 'intro-nav' },
+        i > 0 ? el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'intro-prev', onclick: function () { page(i - 1); } }, T.introPrev || '← 이전') : null,
+        el('button', {
+          class: 'btn btn-primary btn-big', type: 'button', 'data-testid': last ? 'intro-done' : 'intro-next',
+          onclick: last ? done : function () { page(i + 1); }
+        }, last ? (T.introDone || '시작할게요') : (T.introNext || '다음 →'))
+      )
+    );
+  };
 
   screens.situation = function () {
     var ta = el('textarea', {
@@ -1064,6 +1110,9 @@
     totalNeeds: function () { return D.needs.length; },
     records: function () { return records(); }
   };
+
+  /* 처음 여는 사람(기록도 없고 안내도 안 본 사람)에게만 게임 방법 안내를 먼저 보여 줘요 */
+  if (!introSeen() && !records().length && introCards().length) current = { screen: 'intro', params: { page: 0 } };
 
   render();
 

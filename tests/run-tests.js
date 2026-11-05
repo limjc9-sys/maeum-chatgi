@@ -89,6 +89,8 @@ function checkData() {
   D.needRounds.slice(1).forEach((r, i) => r.pool.forEach((id) => ok(!!need[id], `needRounds[${i + 1}]: 없는 욕구 id ${id}`)));
   ok(new Set(D.needRounds.map((r) => r.question)).size === D.needRounds.length, '욕구 질문이 서로 다름');
   ok(D.causes.length === 5, '원인 보기 5개');
+  ok(Array.isArray(D.intro) && D.intro.length === 3, `게임 방법 안내 카드 3장 (지금 ${D.intro && D.intro.length}장)`);
+  (D.intro || []).forEach((c, i) => ok(c.title && c.body, `게임 방법 안내 ${i + 1}번째 카드: title/body 모두 있어야 함`));
   console.log(`  감정 ${total}개(숨은 감정 ${hidden}개), 욕구 ${D.needs.length}개`);
   return D;
 }
@@ -200,6 +202,44 @@ async function runForWidth(browser, base, width, D) {
   const h = makeHelpers(page, width);
 
   await page.goto(base + '/index.html');
+
+  /* 2-0. 처음 열면 게임 방법 안내가 한 번만 나옴 */
+  await h.expect('intro', '처음 열면 게임 방법 안내');
+  const introTitles = [];
+  for (let k = 0; k < D.intro.length; k++) {
+    ok((await page.getAttribute('#app > section', 'data-page')) === String(k), `[${width}px] 안내 ${k + 1}번째 장`);
+    introTitles.push(await h.question());
+    ok((await page.textContent('[data-testid="intro-body"]')).trim() === D.intro[k].body, `[${width}px] 안내 ${k + 1}번째 장 문장이 data와 같음`);
+    ok(!!(await page.$('[data-testid="intro-prev"]')) === (k > 0), `[${width}px] 안내 ${k + 1}번째 장 이전 버튼 ${k > 0 ? '있음' : '없음'}`);
+    await h.snap(`intro-${k + 1}`);
+    if (k < D.intro.length - 1) await page.click('[data-testid="intro-next"]');
+  }
+  ok(introTitles.join('|') === D.intro.map((c) => c.title).join('|'), `[${width}px] 안내 제목이 차례대로 나옴`);
+  await page.click('[data-testid="intro-prev"]');
+  ok((await page.getAttribute('#app > section', 'data-page')) === String(D.intro.length - 2), `[${width}px] 안내 이전 버튼`);
+  await page.click('[data-testid="intro-next"]');
+  await page.click('[data-testid="intro-done"]');
+  await h.expect('home', '안내 끝 → 처음 화면');
+  await page.reload();
+  await h.expect('home', '안내를 본 뒤 다시 열면 바로 처음 화면');
+  // 처음 화면 메뉴에서 다시 보기 → 건너뛰기
+  await page.click('[data-testid="menu-intro"]');
+  await h.expect('intro', '메뉴에서 게임 방법 다시 보기');
+  await page.click('[data-testid="intro-next"]');
+  await page.click('[data-testid="intro-skip"]');
+  await h.expect('home', '건너뛰기 → 처음 화면');
+  // 건너뛰기만 해도 다시 안 나옴 (새 창)
+  {
+    const p2 = await context.newPage();
+    await p2.goto(base + '/index.html');
+    await p2.evaluate(() => localStorage.removeItem('maeum-chatgi-intro-seen'));
+    await p2.reload();
+    await p2.waitForSelector('#app > [data-screen="intro"]', { timeout: 4000 }).catch(() => {});
+    await p2.click('[data-testid="intro-skip"]');
+    await p2.reload();
+    ok((await p2.getAttribute('#app > section', 'data-screen')) === 'home', `[${width}px] 건너뛰기를 눌러도 다음부터 안내가 안 나옴`);
+    await p2.close();
+  }
   await h.expect('home', '처음 화면');
   const disclaimer = await page.textContent('[data-testid="disclaimer"]');
   ok(disclaimer.includes('상담·치료를 대신하지 않습니다'), `[${width}px] 첫 화면 안내 문구`);
@@ -494,6 +534,12 @@ async function runForWidth(browser, base, width, D) {
   await page.click('.topbar .top-btn');
   await page.click('.topbar .top-btn');
   await h.expect('home', '기록 옮기기 → 삭제 화면 → 처음 화면');
+
+  /* 2-10b. 기록이 이미 있는 사람에게는 안내를 자동으로 띄우지 않음 */
+  await page.evaluate(() => localStorage.removeItem('maeum-chatgi-intro-seen'));
+  await page.reload();
+  await h.expect('home', '기록이 있으면 안내 없이 처음 화면');
+  await page.evaluate(() => localStorage.setItem('maeum-chatgi-intro-seen', '1'));
 
   /* 2-11. 인터넷 없이 열기 (service worker) */
   const swReady = await page.evaluate(() => Promise.race([navigator.serviceWorker.ready.then(() => true), new Promise((r) => setTimeout(() => r(false), 5000))]));
