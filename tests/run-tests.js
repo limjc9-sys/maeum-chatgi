@@ -41,6 +41,22 @@ function startServer() {
 }
 
 /* ───── 1. 데이터 점검 (브라우저 없이) ───── */
+/* 처음 만든 감정 id 88개 (지난 기록·도감과 연결돼 있어 지우거나 다른 쪽·숨은 감정으로 옮기면 안 됨) */
+const ORIGINAL_IDS = {
+  joy: { groups: 16, hidden: 6 }, sad: { groups: 16, hidden: 6 }, anger: { groups: 16, hidden: 6, prefix: 'ang' }, fear: { groups: 16, hidden: 6 }
+};
+/* 같은 화면(묶음 하나, 또는 5번 질문의 보기 하나)에 함께 나오면 안 되는 비슷한 단어 쌍
+   근거와 구분 기준: docs/emotion-words-research.md 3·4번 */
+const KEEP_APART = [
+  ['joy01', 'joy03'], ['joy09', 'joy10'], ['joy11', 'joy12'], ['joy28', 'joy29'], ['joy14', 'joy32'], ['joy17', 'joy20'], ['joy02', 'joyH5'], ['joy06', 'joyH3'],
+  ['sad02', 'sad04'], ['sad06', 'sad08'], ['sad13', 'sad14'], ['sad14', 'sad15'], ['sadH1', 'sadH6'], ['sadH1', 'sad11'], ['sadH1', 'sad04'], ['sad01', 'angH5'],
+  ['sad20', 'sadH2'], ['sad21', 'sadH3'], ['sad30', 'sadH5'], ['sad24', 'angH1'], ['sad27', 'angH1'],
+  ['ang01', 'ang03'], ['ang01', 'ang04'], ['ang03', 'ang04'], ['ang09', 'ang12'], ['ang06', 'ang15'], ['ang16', 'angH3'], ['ang27', 'angH2'],
+  ['fear01', 'fear02'], ['fear01', 'fear03'], ['fear01', 'fear04'], ['fear02', 'fear03'], ['fear02', 'fear04'], ['fear03', 'fear04'],
+  ['fear05', 'fear06'], ['fear05', 'fear07'], ['fear06', 'fear07'], ['fear10', 'fear11'], ['fear15', 'fear16'], ['fear09', 'fear12'],
+  ['fear01', 'fear31'], ['fear14', 'fear29'], ['fear26', 'fearH2'], ['fear26', 'fearH1'], ['fear24', 'fearH2'],
+  ['fear28', 'sad25']
+];
 function checkData() {
   console.log('■ 데이터 파일 점검');
   const ctx = { window: {} };
@@ -52,15 +68,36 @@ function checkData() {
   const emo = {};
   let total = 0, hidden = 0;
   D.families.forEach((f) => {
-    ok(f.groups.length === 4, `${f.id}: 세부 묶음이 4개여야 함`);
+    ok(f.groups.length >= 4, `${f.id}: 세부 묶음이 4개 이상이어야 함 (지금 ${f.groups.length}개)`);
+    ok(new Set(f.groups.map((g) => g.label)).size === f.groups.length, `${f.id}: 묶음 이름이 서로 겹치지 않음`);
     f.groups.forEach((g) => {
+      ok(g.label && g.hint, `${f.id}/${g.label}: 묶음 label/hint 모두 있어야 함`);
       ok(g.emotions.length === 4, `${f.id}/${g.label}: 감정이 4개여야 함`);
+      g.emotions.forEach((e) => ok(e.word && e.desc, `${e.id}: word/desc 모두 있어야 함`));
       g.emotions.forEach((e) => { ok(!emo[e.id], `감정 id 중복: ${e.id}`); emo[e.id] = { ...e, hidden: false }; total++; });
     });
     f.hidden.forEach((e) => { ok(!emo[e.id], `감정 id 중복: ${e.id}`); emo[e.id] = { ...e, hidden: true }; total++; hidden++; });
   });
-  ok(D.families.length === 4, '감정 묶음 4개');
-  ok(total >= 80, `세부 감정 단어 80개 이상 (지금 ${total}개)`);
+  ok(D.families.length === 4, '큰 감정 쪽 4개');
+  ok(total >= 140, `감정 단어 140개 이상 (지금 ${total}개)`);
+  // 처음 만든 id가 그대로 있고, 같은 쪽·같은 종류(일반/숨은)에 있는지
+  Object.entries(ORIGINAL_IDS).forEach(([fam, c]) => {
+    const pre = c.prefix || fam;
+    const famObj = D.families.find((f) => f.id === fam);
+    const inGroups = new Set(famObj.groups.flatMap((g) => g.emotions.map((e) => e.id)));
+    const inHidden = new Set(famObj.hidden.map((e) => e.id));
+    for (let k = 1; k <= c.groups; k++) { const id = pre + String(k).padStart(2, '0'); ok(inGroups.has(id), `처음 id ${id}가 ${fam} 묶음에 그대로 있음`); }
+    for (let k = 1; k <= c.hidden; k++) { const id = pre + 'H' + k; ok(inHidden.has(id), `처음 id ${id}가 ${fam} 숨은 감정에 그대로 있음`); }
+  });
+  // 비슷한 단어가 같은 화면에 함께 나오지 않는지
+  const screens = [];
+  D.families.forEach((f) => f.groups.forEach((g) => screens.push({ name: `${f.id}/${g.label}`, ids: g.emotions.map((e) => e.id) })));
+  D.approaches.forEach((a) => a.options.forEach((o) => screens.push({ name: `접근 ${a.key}/${o.label}`, ids: o.emotions })));
+  KEEP_APART.forEach(([a, b]) => {
+    ok(!!emo[a] && !!emo[b], `떨어뜨릴 단어 쌍의 id가 있음: ${a}, ${b}`);
+    screens.forEach((sc) => ok(!(sc.ids.includes(a) && sc.ids.includes(b)), `같은 화면에 비슷한 단어: ${emo[a] && emo[a].word}·${emo[b] && emo[b].word} (${sc.name})`));
+  });
+  screens.forEach((sc) => ok(new Set(sc.ids).size === sc.ids.length, `한 화면에 같은 단어 두 번: ${sc.name}`));
   const words = Object.values(emo).map((e) => e.word);
   ok(new Set(words).size === words.length, '감정 단어가 서로 겹치지 않음');
   const need = {};
@@ -319,6 +356,9 @@ async function runForWidth(browser, base, width, D) {
   await h.snap('result-unnamed');
   await page.click('[data-testid="home"]');
 
+  /* 2-2b. 묶음 고르기 여러 장 */
+  await checkGroupPages(page, h, width, D);
+
   /* 2-3. 세부 감정에서 5번 → 몸 감각 → 숨은 감정 발견 + 욕구 5번 연속 */
   await newGame(page, h, '친구들이 나만 빼고 놀러 갔다는 걸 알았다.');
   await h.opt(2); await h.expect('group', '숨은 감정: 묶음');
@@ -557,6 +597,43 @@ async function runForWidth(browser, base, width, D) {
 
   ok(errors.length === 0, `[${width}px] 브라우저 오류 없음 ${errors.join(' / ')}`);
   await context.close();
+}
+
+async function checkGroupPages(page, h, width, D) {
+  /* 묶음이 4개를 넘으면 5번으로 다음 묶음 장을 보고, 마지막 장의 5번은 질문 방법 바꾸기 */
+  for (let fi = 0; fi < D.families.length; fi++) {
+    const fam = D.families[fi];
+    const pages = Math.ceil(fam.groups.length / 4);
+    await newGame(page, h, `묶음 넘기기 ${fam.label}: 오늘 있었던 일.`);
+    await h.expect('family', `${fam.label} 묶음 넘기기: 큰 감정`);
+    await h.opt(fi + 1);
+    for (let pg = 0; pg < pages; pg++) {
+      await h.expect('group', `${fam.label} 묶음 ${pg + 1}장`);
+      ok((await page.getAttribute('#app > section', 'data-page')) === String(pg), `[${width}px ${fam.label}] 묶음 ${pg + 1}장 표시`);
+      const labels = await optLabels(page);
+      ok(labels.join('|') === fam.groups.slice(pg * 4, pg * 4 + 4).map((g) => g.label).join('|'), `[${width}px ${fam.label}] 묶음 ${pg + 1}장의 보기가 data 순서와 같음`);
+      const five = (await page.textContent('#app .opt[data-num="5"] .opt-label')).trim();
+      ok(five === (pg < pages - 1 ? D.text.groupMore : D.text.noneOfThese), `[${width}px ${fam.label}] 묶음 ${pg + 1}장 5번 글자: ${five}`);
+      await h.snap(`group-${fam.id}-p${pg + 1}`);
+      if (pg < pages - 1) await h.opt(5);
+    }
+    // 마지막 장의 1번 묶음 → 그 묶음의 단어 4개
+    const lastStart = (pages - 1) * 4;
+    await h.opt(1);
+    await h.expect('words', `${fam.label} 마지막 장 묶음의 단어`);
+    const words = await optLabels(page);
+    ok(words.join('|') === fam.groups[lastStart].emotions.map((e) => e.word).join('|'), `[${width}px ${fam.label}] 뒷장 묶음 "${fam.groups[lastStart].label}" 단어가 나옴`);
+    await h.snap(`words-${fam.id}-p${pages}`);
+    // 이전 → 마지막 장으로 돌아와 5번 → 첫 번째 질문 방법(몸 감각). 묶음 넘기기는 5번 횟수에 안 셈
+    await page.click('#app .top-btn');
+    await h.expect('group', `${fam.label} 이전 버튼으로 묶음 마지막 장`);
+    ok((await page.getAttribute('#app > section', 'data-page')) === String(pages - 1), `[${width}px ${fam.label}] 이전 버튼으로 같은 장에 돌아옴`);
+    await h.opt(5);
+    await h.expect('approach', `${fam.label} 묶음 마지막 장 5번`);
+    ok((await page.getAttribute('#app > section', 'data-approach')) === 'body', `[${width}px ${fam.label}] 묶음 마지막 장 5번 → 몸 감각 질문`);
+    await page.click('#app .top-btn[aria-label="그만하고 처음 화면으로"]');
+    await h.expect('home', `${fam.label} 묶음 넘기기 후 처음 화면`);
+  }
 }
 
 function countWords(D) {

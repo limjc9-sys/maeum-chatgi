@@ -36,6 +36,8 @@ window.MAEUM_DATA.text = {
 
   /* ③ 세부 감정 고르기 */
   groupTitle: '조금 더 좁혀 볼게요. 어떤 느낌에 가까웠나요?',
+  groupMore: '다른 묶음 더 보기',
+  groupMoreHint: '비슷한 느낌 묶음이 더 있어요',
   wordsTitle: '이 중 가장 가까운 감정을 골라 보세요.',
   noneOfThese: '이 중엔 없어요',
   noneOfTheseHint: '다른 방법으로 물어볼게요',
@@ -130,8 +132,8 @@ window.MAEUM_DATA.approaches = [
     question: '그 일이 있던 순간, 몸은 어땠나요?',
     wordsQuestion: '그 몸의 느낌에 이름을 붙인다면 무엇에 가까울까요?',
     options: [
-      { label: '가슴이 두근거리고 몸이 가벼웠어요', emotions: ['joyH1', 'joyH5', 'joyH4', 'joy02'] },
-      { label: '목이 메고 가슴이 텅 빈 것 같았어요', emotions: ['sadH5', 'sadH1', 'sadH6', 'sad02'] },
+      { label: '가슴이 두근거리고 몸이 가벼웠어요', emotions: ['joyH1', 'joyH5', 'joyH4', 'joy01'] },
+      { label: '목이 메고 가슴이 텅 빈 것 같았어요', emotions: ['sadH5', 'sadH6', 'sad02', 'sad32'] },
       { label: '얼굴이 뜨겁고 주먹에 힘이 들어갔어요', emotions: ['angH4', 'angH3', 'angH6', 'ang14'] },
       { label: '배가 아프고 몸이 굳었어요', emotions: ['fearH5', 'fearH2', 'fearH6', 'fear09'] }
     ]
@@ -166,8 +168,8 @@ window.MAEUM_DATA.approaches = [
     question: '예전에 비슷한 기분이 들었던 때가 있다면, 어떤 장면과 가장 닮았나요?',
     wordsQuestion: '그 장면 속 마음에 이름을 붙인다면요?',
     options: [
-      { label: '힘든 일을 끝내고 한숨 돌렸던 때', emotions: ['joyH3', 'joy06', 'joy07', 'joyH6'] },
-      { label: '아끼던 사람과 멀어졌던 때', emotions: ['sadH1', 'sad10', 'sad01', 'angH5'] },
+      { label: '힘든 일을 끝내고 한숨 돌렸던 때', emotions: ['joyH3', 'joy05', 'joy07', 'joyH6'] },
+      { label: '아끼던 사람과 멀어졌던 때', emotions: ['sadH1', 'sad10', 'sad12', 'angH5'] },
       { label: '내 잘못이 아닌데 꾸중을 들었던 때', emotions: ['ang05', 'ang06', 'angH4', 'ang11'] },
       { label: '처음 가는 곳에 혼자 남겨졌던 때', emotions: ['sad16', 'fear07', 'fearH6', 'fearH1'] }
     ]

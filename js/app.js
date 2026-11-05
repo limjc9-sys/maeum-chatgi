@@ -530,14 +530,28 @@
     return el('p', { class: 'sit-chip' }, '“' + draft.situation + '”');
   }
 
+  /* 묶음은 한 장에 4개씩 보여 줘요. 묶음이 더 있으면 5번이 "다른 묶음 더 보기"가 되고,
+     마지막 장의 5번은 "이 중엔 없어요"(질문 방법 바꾸기)예요. */
+  var GROUPS_PER_PAGE = 4;
   screens.group = function (p) {
     var f = FAMILY[p.family];
-    var opts = f.groups.map(function (g, i) {
-      return option(i + 1, g.label, g.hint, function () { go('words', { family: f.id, group: i }); }, { color: f.color });
+    var pages = Math.max(1, Math.ceil(f.groups.length / GROUPS_PER_PAGE));
+    var pg = Math.min(Math.max(p.page || 0, 0), pages - 1);
+    var start = pg * GROUPS_PER_PAGE;
+    var opts = f.groups.slice(start, start + GROUPS_PER_PAGE).map(function (g, k) {
+      var gi = start + k;
+      return option(k + 1, g.label, g.hint, function () { go('words', { family: f.id, group: gi }); }, { color: f.color });
     });
-    opts.push(fiveOption());
-    return screen('group', { 'data-family': f.id }, topBar(), progress(),
-      heading(T.groupTitle, f.emoji + ' ' + f.label), el('div', { class: 'opts' }, opts));
+    if (pg < pages - 1) {
+      opts.push(option(5, T.groupMore || '다른 묶음 더 보기', T.groupMoreHint || '', function () {
+        go('group', { family: f.id, page: pg + 1 });
+      }, { id: 'group-more' }));
+    } else {
+      opts.push(fiveOption());
+    }
+    var lead = f.emoji + ' ' + f.label + (pages > 1 ? ' (' + (pg + 1) + ' / ' + pages + ')' : '');
+    return screen('group', { 'data-family': f.id, 'data-page': String(pg) }, topBar(), progress(),
+      heading(T.groupTitle, lead), el('div', { class: 'opts' }, opts));
   };
 
   screens.words = function (p) {
