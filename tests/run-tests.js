@@ -107,7 +107,9 @@ async function layoutCheck(page, label) {
       return r.width > 0 && r.height > 0;
     };
     const leaves = [];
-    document.querySelectorAll('#app *').forEach((el) => {
+    // 설명 창이 열려 있으면 그 창 안만 점검 (뒤 화면은 가려져 있음)
+    const root = document.querySelector('#app .sheet') || document.querySelector('#app');
+    root.querySelectorAll('*').forEach((el) => {
       if (!visible(el)) return;
       const hasText = Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim());
       if (!hasText) return;
@@ -139,7 +141,7 @@ async function layoutCheck(page, label) {
       }
     }
     // 누르는 버튼 크기
-    document.querySelectorAll('#app button, #app a.phone, #app summary').forEach((b) => {
+    root.querySelectorAll('button, a.phone, summary').forEach((b) => {
       if (!visible(b)) return;
       const r = b.getBoundingClientRect();
       if (r.height < 44 || r.width < 44) out.push(`버튼이 작음(${Math.round(r.width)}×${Math.round(r.height)}): "${b.textContent.trim().slice(0, 15)}"`);
@@ -173,7 +175,7 @@ function makeHelpers(page, width) {
       if (seen.has(name)) return;
       seen.add(name);
       shotNo++;
-      await page.screenshot({ path: path.join(dir, `${String(shotNo).padStart(2, '0')}-${name}.png`), fullPage: true });
+      await page.screenshot({ path: path.join(dir, `${String(shotNo).padStart(2, '0')}-${name}.png`), fullPage: !(await page.$('.sheet-wrap')) });
     }
   };
 }
@@ -400,6 +402,23 @@ async function runForWidth(browser, base, width, D) {
   const dexTotal = await page.textContent('[data-testid="dex-total"]');
   ok(dexTotal.includes(`${countWords(D)}개 중 8개 발견`), `[${width}px] 도감 "${countWords(D)}개 중 8개 발견" (실제: ${dexTotal})`);
   await h.snap('dex');
+  // 도감 단어를 누르면 설명·처음 찾은 날·찾은 횟수가 나옴
+  await page.click('.dex-chip[data-id="sad01"]');
+  ok(await page.isVisible('[data-testid="dex-detail"]'), `[${width}px] 도감 단어 누르면 설명 창이 열림`);
+  ok((await page.textContent('#sheet-title')).includes('서운함'), `[${width}px] 설명 창 제목 "서운함"`);
+  ok((await page.textContent('[data-testid="dex-detail-desc"]')).includes(D.families[1].groups[0].emotions[0].desc), `[${width}px] 설명 창에 감정 설명`);
+  ok((await page.textContent('[data-testid="dex-detail-count"]')).includes('2번'), `[${width}px] 찾은 횟수 2번`);
+  const firstDay = await page.evaluate(() => { const t = new Date(); t.setDate(t.getDate() - 2); return t.getFullYear() + '년 ' + (t.getMonth() + 1) + '월 ' + t.getDate() + '일'; });
+  ok((await page.textContent('[data-testid="dex-detail-first"]')) === firstDay, `[${width}px] 처음 찾은 날 ${firstDay}`);
+  await h.snap('dex-detail');
+  await page.click('[data-testid="dex-detail-close"]');
+  ok(!(await page.isVisible('[data-testid="dex-detail"]')), `[${width}px] 닫기 버튼으로 설명 창 닫힘`);
+  await page.click('.dex-chip[data-id="joyH1"]');
+  ok((await page.textContent('[data-testid="dex-detail-desc"]')).includes('아직 못 찾은'), `[${width}px] 못 찾은 숨은 감정은 이름을 감춤`);
+  ok(!(await page.textContent('[data-testid="dex-detail"]')).includes('벅참'), `[${width}px] 못 찾은 감정의 이름이 드러나지 않음`);
+  await h.snap('dex-detail-locked');
+  await page.keyboard.press('Escape');
+  ok(!(await page.isVisible('[data-testid="dex-detail"]')), `[${width}px] Esc 키로 설명 창 닫힘`);
   await page.click('.topbar .top-btn');
   await page.click('[data-testid="menu-records"]');
   await h.expect('records', '지난 기록');
@@ -407,7 +426,33 @@ async function runForWidth(browser, base, width, D) {
   await h.snap('records');
   await page.click('.topbar .top-btn');
 
-  /* 2-8. 기록 전체 삭제 */
+  /* 2-8. 기록 옮기기: 내보내기 */
+  await page.click('[data-testid="menu-backup"]');
+  await h.expect('backup', '기록 옮기기');
+  await h.snap('backup');
+  const [download] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid="export-download"]')]);
+  const backupPath = path.join(SHOTS, `backup-${width}.json`);
+  await download.saveAs(backupPath);
+  const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+  ok(backup.app === 'maeum-chatgi' && backup.records.length === 10, `[${width}px] 내보낸 파일에 기록 10개 (실제 ${backup.records && backup.records.length})`);
+  ok(/^maeum-chatgi-backup-\d{4}-\d{2}-\d{2}\.json$/.test(download.suggestedFilename()), `[${width}px] 파일 이름 ${download.suggestedFilename()}`);
+  // 같은 파일을 다시 불러오면 모두 건너뜀
+  await page.setInputFiles('[data-testid="import-file"]', backupPath);
+  await h.expect('importConfirm', '같은 파일 불러오기');
+  ok((await page.textContent('[data-testid="import-summary"]')).includes('새 기록은 0개'), `[${width}px] 이미 있는 기록은 건너뜀`);
+  ok(!(await page.$('[data-testid="import-confirm"]')), `[${width}px] 새 기록이 없으면 불러오기 버튼 없음`);
+  await page.click('[data-testid="import-cancel"]');
+  await h.expect('backup', '불러오기 취소');
+  // 엉뚱한 파일은 거절
+  const badPath = path.join(SHOTS, `bad-${width}.json`);
+  fs.writeFileSync(badPath, '이건 기록 파일이 아니에요');
+  await page.setInputFiles('[data-testid="import-file"]', badPath);
+  await page.waitForTimeout(200);
+  ok((await page.textContent('[data-testid="import-error"]')).includes('기록 파일이 아니에요'), `[${width}px] 엉뚱한 파일은 오류 안내`);
+  await h.expect('backup', '엉뚱한 파일 후에도 같은 화면');
+  await page.click('.topbar .top-btn');
+
+  /* 2-9. 기록 전체 삭제 */
   await page.click('[data-testid="delete-all"]');
   await h.expect('deleteConfirm', '삭제 확인');
   await h.snap('delete-confirm');
@@ -421,7 +466,36 @@ async function runForWidth(browser, base, width, D) {
   ok((await page.textContent('[data-testid="stat-dex"]')).includes('0 /'), `[${width}px] 삭제 후 도감 0개`);
   ok((await page.evaluate(() => localStorage.getItem('maeum-chatgi-v1'))) === null, `[${width}px] 휴대폰 저장소에서도 지워짐`);
 
-  /* 2-9. 인터넷 없이 열기 (service worker) */
+  /* 2-10. 지운 뒤 파일을 불러와 되살리기 (휴대폰을 바꾼 경우와 같음) */
+  // 일부 기록을 망가뜨린 파일도 나머지는 불러와야 함
+  const mixed = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+  mixed.records.push({ id: 'broken', ts: 'not-a-date', intensity: 99 });
+  const mixedPath = path.join(SHOTS, `mixed-${width}.json`);
+  fs.writeFileSync(mixedPath, JSON.stringify(mixed));
+  await page.click('[data-testid="menu-backup"]');
+  ok(await page.isDisabled('[data-testid="export-download"]'), `[${width}px] 기록이 없으면 저장 버튼이 꺼짐`);
+  await page.setInputFiles('[data-testid="import-file"]', mixedPath);
+  await h.expect('importConfirm', '지운 뒤 불러오기');
+  ok((await page.textContent('[data-testid="import-summary"]')).includes('새 기록은 10개'), `[${width}px] 새 기록 10개`);
+  ok((await page.textContent('#app')).includes('망가진 기록 1개'), `[${width}px] 망가진 기록은 빼고 알려 줌`);
+  await h.snap('import-confirm');
+  await page.click('[data-testid="import-confirm"]');
+  await h.expect('home', '불러온 뒤 처음 화면');
+  ok((await page.textContent('[data-testid="stat-count"]')).includes('10개'), `[${width}px] 불러온 뒤 기록 10개`);
+  ok((await page.textContent('[data-testid="stat-dex"]')).includes('8 /'), `[${width}px] 불러온 뒤 도감 8개`);
+  ok((await page.textContent('[data-testid="stat-streak"]')).includes('3일'), `[${width}px] 불러온 뒤 연속 기록 3일`);
+  await page.reload();
+  ok((await page.textContent('[data-testid="stat-count"]')).includes('10개'), `[${width}px] 새로 열어도 불러온 기록이 남아 있음`);
+  // 삭제 화면에서 먼저 저장하기 안내
+  await page.click('[data-testid="delete-all"]');
+  ok(await page.isVisible('[data-testid="delete-export"]'), `[${width}px] 삭제 전에 파일로 저장하기 안내`);
+  await page.click('[data-testid="delete-export"]');
+  await h.expect('backup', '삭제 화면 → 기록 옮기기');
+  await page.click('.topbar .top-btn');
+  await page.click('.topbar .top-btn');
+  await h.expect('home', '기록 옮기기 → 삭제 화면 → 처음 화면');
+
+  /* 2-11. 인터넷 없이 열기 (service worker) */
   const swReady = await page.evaluate(() => Promise.race([navigator.serviceWorker.ready.then(() => true), new Promise((r) => setTimeout(() => r(false), 5000))]));
   ok(swReady, `[${width}px] service worker 등록됨`);
   await page.reload();

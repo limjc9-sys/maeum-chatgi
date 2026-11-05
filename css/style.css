@@ -267,8 +267,10 @@ h1:focus { outline: none; }
 .dex-head { font-size: 19px; font-weight: 800; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
 .dex-count { font-size: 16px; color: var(--ink-soft); font-weight: 700; }
 .dex-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.dex-grid li { display: flex; }
 .dex-chip {
-  font-size: 16px; text-align: center;
+  font: inherit; font-size: 16px; text-align: center;
+  width: 100%; border: 2px solid transparent; cursor: pointer;
   min-height: 44px; display: flex; align-items: center; justify-content: center;
   padding: 6px 8px; border-radius: 12px;
   background: #F2EEEA; color: #9A97A5;
@@ -296,6 +298,34 @@ h1:focus { outline: none; }
 .rec-emotion { font-size: 20px; font-weight: 800; }
 .rec-need, .rec-summary { font-size: 16px; }
 .rec-sit { font-size: 16px; color: var(--ink-soft); }
+
+/* ───── 도감 설명 창 ───── */
+body.no-scroll { overflow: hidden; }
+.sheet-wrap {
+  position: fixed; inset: 0; z-index: 30;
+  background: rgba(30, 20, 15, 0.45);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.sheet {
+  width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto;
+  background: var(--surface);
+  border-radius: 22px 22px 0 0; border-top: 8px solid var(--accent);
+  padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 12px;
+}
+.sheet-title { font-size: 26px; font-weight: 900; }
+.sheet-title:focus { outline: none; }
+.sheet-desc { font-size: 18px; }
+.sheet-facts { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.sheet-facts div { display: flex; justify-content: space-between; gap: 12px; font-size: 16px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.sheet-facts dt { color: var(--ink-soft); }
+.sheet-facts dd { margin: 0; font-weight: 700; text-align: right; }
+.sheet-last { display: flex; flex-direction: column; gap: 4px; }
+.sheet-summary { font-size: 16px; background: var(--brand-soft); border-radius: 12px; padding: 10px 12px; }
+
+/* ───── 기록 옮기기 ───── */
+.tip-box { font-size: 16px; background: #EAF6EF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.btn:disabled { opacity: .45; cursor: default; }
 
 /* ───── 알림 ───── */
 .toast {

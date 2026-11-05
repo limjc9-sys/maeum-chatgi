@@ -399,7 +399,8 @@
       el('nav', { class: 'menu' },
         menuBtn('📖', '감정 도감', '찾은 감정 단어 모아 보기', function () { go('dex', {}); }, 'menu-dex'),
         menuBtn('📊', '주간 감정 보고서', '자주 나온 감정과 바람', function () { go('report', { offset: 0 }); }, 'menu-report'),
-        menuBtn('🗂', '지난 기록', '지금까지 만든 마음 카드', function () { go('records', {}); }, 'menu-records')
+        menuBtn('🗂', '지난 기록', '지금까지 만든 마음 카드', function () { go('records', {}); }, 'menu-records'),
+        menuBtn('💾', '기록 옮기기', '파일로 저장하기·불러오기', function () { go('backup', {}); }, 'menu-backup')
       ),
       installHelp(),
       el('p', { class: 'privacy' }, T.privacy),
@@ -706,8 +707,12 @@
         el('h2', { class: 'dex-head' }, f.emoji + ' ' + f.label + ' ', el('span', { class: 'dex-count' }, got + ' / ' + words.length)),
         el('ul', { class: 'dex-grid' }, words.map(function (w) {
           var on = !!found[w.id];
-          return el('li', { class: 'dex-chip' + (on ? ' on' : '') + (w.hidden ? ' hidden-word' : ''), title: on ? w.desc : '아직 못 찾았어요' },
-            on ? (w.hidden ? '★ ' : '') + w.word : (w.hidden ? '★ ？？？' : '？？？'));
+          return el('li', null, el('button', {
+            class: 'dex-chip' + (on ? ' on' : '') + (w.hidden ? ' hidden-word' : ''),
+            type: 'button', 'data-id': w.id,
+            'aria-label': on ? w.word + ' 자세히 보기' : '아직 못 찾은 감정',
+            onclick: function () { openDexDetail(w, f); }
+          }, on ? (w.hidden ? '★ ' : '') + w.word : (w.hidden ? '★ ？？？' : '？？？')));
         }))
       );
     });
@@ -719,6 +724,64 @@
       sections
     );
   };
+
+  /* 도감 단어를 누르면 나오는 설명 창 */
+  function openDexDetail(w, f) {
+    closeDexDetail();
+    var recs = records().filter(function (r) { return r.emotionId === w.id; });
+    var opener = document.activeElement;
+    var body;
+    if (recs.length) {
+      var first = recs.reduce(function (a, r) { return r.ts < a.ts ? r : a; });
+      var last = recs.reduce(function (a, r) { return r.ts > a.ts ? r : a; });
+      body = [
+        el('p', { class: 'sheet-desc', 'data-testid': 'dex-detail-desc' }, w.desc),
+        el('dl', { class: 'sheet-facts' },
+          el('div', null, el('dt', null, '처음 찾은 날'), el('dd', { 'data-testid': 'dex-detail-first' }, longDate(first.ts))),
+          el('div', null, el('dt', null, '찾은 횟수'), el('dd', { 'data-testid': 'dex-detail-count' }, recs.length + '번')),
+          recs.length > 1 ? el('div', null, el('dt', null, '가장 최근'), el('dd', null, longDate(last.ts))) : null
+        ),
+        el('div', { class: 'sheet-last' },
+          el('p', { class: 'card-label' }, '가장 최근 한 줄 정리'),
+          el('p', { class: 'sheet-summary' }, last.summary)
+        )
+      ];
+    } else {
+      body = [
+        el('p', { class: 'sheet-desc', 'data-testid': 'dex-detail-desc' }, '아직 못 찾은 감정이에요.'),
+        el('p', { class: 'guide' }, w.hidden
+          ? '숨은 감정은 "이 중엔 없어요"를 눌러 몸 감각, 하고 싶었던 행동, 옛 경험으로 찾을 때 만날 수 있어요.'
+          : f.label + '에서 만날 수 있어요. 게임을 하다 보면 이름이 채워질 거예요.')
+      ];
+    }
+    var title = recs.length ? (w.hidden ? '★ ' : '') + w.word : (w.hidden ? '★ 숨은 감정' : '？？？');
+    var closeBtn = el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'dex-detail-close', onclick: closeDexDetail }, '닫기');
+    var sheet = el('div', { class: 'sheet-wrap', 'data-testid': 'dex-detail', onclick: function (ev) { if (ev.target === sheet) closeDexDetail(); } },
+      el('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'sheet-title', style: '--accent:' + f.color },
+        el('p', { class: 'lead' }, f.emoji + ' ' + f.label + (w.hidden ? ' · 숨은 감정' : '')),
+        el('h2', { class: 'sheet-title', id: 'sheet-title', tabindex: '-1' }, title),
+        body,
+        closeBtn
+      )
+    );
+    sheet._opener = opener;
+    app.appendChild(sheet);
+    document.body.classList.add('no-scroll');
+    try { sheet.querySelector('h2').focus({ preventScroll: true }); } catch (e) { /* 무시 */ }
+  }
+  function closeDexDetail() {
+    var s = app.querySelector('.sheet-wrap');
+    if (!s) return false;
+    var opener = s._opener;
+    s.remove();
+    document.body.classList.remove('no-scroll');
+    if (opener && opener.focus) { try { opener.focus({ preventScroll: true }); } catch (e) { /* 무시 */ } }
+    return true;
+  }
+  function longDate(iso) {
+    var d = new Date(iso);
+    return d.getFullYear() + '년 ' + prettyDate(d);
+  }
 
   function countBy(list, keyFn) {
     var m = {};
@@ -798,6 +861,10 @@
     return screen('deleteConfirm', null, simpleTop('기록 전체 삭제'),
       heading('기록을 모두 지울까요?'),
       el('p', { class: 'body-text' }, '마음 카드 ' + records().length + '개, 감정 도감, 연속 기록, 주간 보고서가 모두 지워져요. 지운 기록은 되살릴 수 없어요.'),
+      records().length ? el('div', { class: 'tip-box' },
+        el('p', null, '지우기 전에 기록을 파일로 저장해 둘 수 있어요. 나중에 그 파일을 불러오면 되살릴 수 있어요.'),
+        el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'delete-export', onclick: function () { go('backup', {}); } }, '💾 먼저 파일로 저장하기')
+      ) : null,
       el('button', {
         class: 'btn btn-danger btn-big', type: 'button', 'data-testid': 'confirm-delete',
         onclick: function () { clearAll(); goHome(); toast('모든 기록을 지웠어요.'); }
@@ -806,8 +873,160 @@
     );
   };
 
+  /* ───────── 기록 옮기기 (내보내기·불러오기) ───────── */
+  var BACKUP_APP = 'maeum-chatgi';
+  var pendingImport = null;
+
+  function backupFile() {
+    var payload = { app: BACKUP_APP, version: 1, exportedAt: new Date().toISOString(), count: records().length, records: records() };
+    var name = 'maeum-chatgi-backup-' + dateKey(new Date()) + '.json';
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    return { name: name, blob: blob };
+  }
+  function downloadBackup() {
+    if (!records().length) { toast('저장할 기록이 아직 없어요.'); return; }
+    var f = backupFile();
+    var url = URL.createObjectURL(f.blob);
+    var a = el('a', { href: url, download: f.name, class: 'sr-only' }, f.name);
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1000);
+    toast('기록 ' + records().length + '개를 파일로 저장했어요.');
+  }
+  function canShareFile() {
+    try {
+      var test = new File(['{}'], 'test.json', { type: 'application/json' });
+      return !!(navigator.share && navigator.canShare && navigator.canShare({ files: [test] }));
+    } catch (e) { return false; }
+  }
+  function shareBackup() {
+    if (!records().length) { toast('보낼 기록이 아직 없어요.'); return; }
+    var f = backupFile();
+    var file = new File([f.blob], f.name, { type: 'application/json' });
+    navigator.share({ files: [file], title: '내 마음 찾기 기록' }).catch(function (e) {
+      if (e && e.name === 'AbortError') return;
+      downloadBackup();
+    });
+  }
+
+  function cleanRecord(r) {
+    if (!r || typeof r !== 'object') return null;
+    function s(v, max) { return typeof v === 'string' ? v.slice(0, max) : ''; }
+    var d = new Date(s(r.ts, 40));
+    if (isNaN(d.getTime())) return null;
+    var intensity = Math.round(Number(r.intensity));
+    if (!(intensity >= 1 && intensity <= 10)) return null;
+    var emotionId = s(r.emotionId, 40);
+    var known = EMO[emotionId];
+    var emotionWord = s(r.emotionWord, 40) || (known && known.word);
+    if (!emotionWord) return null;
+    var needId = s(r.needId, 40);
+    var needWord = s(r.needWord, 40) || (NEED[needId] && NEED[needId].word) || UNNAMED_NEED.word;
+    return {
+      id: s(r.id, 60) || ('r' + d.getTime() + emotionId),
+      ts: d.toISOString(),
+      date: /^\d{4}-\d{2}-\d{2}$/.test(r.date) ? r.date : dateKey(d),
+      situation: s(r.situation, 200),
+      family: known ? known.family : (FAMILY[r.family] ? r.family : 'unknown'),
+      emotionId: emotionId || 'imported',
+      emotionWord: emotionWord,
+      hidden: known ? known.hidden : r.hidden === true,
+      intensity: intensity,
+      cause: CAUSE[r.cause] ? r.cause : 'other',
+      causeText: s(r.causeText, 60),
+      needId: needId || UNNAMED_NEED.id,
+      needWord: needWord,
+      summary: s(r.summary, 400),
+      tip: s(r.tip, 300),
+      path: s(r.path, 20) || 'normal',
+      five: Math.max(0, Math.round(Number(r.five)) || 0)
+    };
+  }
+  function parseBackup(text) {
+    var data;
+    try { data = JSON.parse(text); } catch (e) { return { error: '이 파일은 "내 마음 찾기" 기록 파일이 아니에요. 내보내기로 저장한 .json 파일을 골라 주세요.' }; }
+    var list = Array.isArray(data) ? data : (data && Array.isArray(data.records) ? data.records : null);
+    if (!list || (data && !Array.isArray(data) && data.app && data.app !== BACKUP_APP)) {
+      return { error: '이 파일은 "내 마음 찾기" 기록 파일이 아니에요. 내보내기로 저장한 .json 파일을 골라 주세요.' };
+    }
+    var clean = list.map(cleanRecord).filter(Boolean);
+    if (!clean.length) return { error: '파일 안에 불러올 수 있는 기록이 없어요.' };
+    return { records: clean, broken: list.length - clean.length };
+  }
+  function handleImportFile(file, errBox) {
+    errBox.textContent = '';
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { errBox.textContent = '파일이 너무 커요. 내보내기로 저장한 파일이 맞는지 확인해 주세요.'; return; }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var res = parseBackup(String(reader.result || ''));
+      if (res.error) { errBox.textContent = res.error; return; }
+      var have = {};
+      records().forEach(function (r) { have[r.id] = true; });
+      var fresh = [];
+      res.records.forEach(function (r) { if (!have[r.id]) { have[r.id] = true; fresh.push(r); } });
+      pendingImport = { total: res.records.length, fresh: fresh, broken: res.broken, name: file.name };
+      go('importConfirm', {});
+    };
+    reader.onerror = function () { errBox.textContent = '파일을 읽지 못했어요. 다시 골라 주세요.'; };
+    reader.readAsText(file);
+  }
+
+  screens.backup = function () {
+    var n = records().length;
+    var err = el('p', { class: 'error', role: 'alert', 'data-testid': 'import-error' });
+    var input = el('input', { type: 'file', accept: '.json,application/json', class: 'sr-only', id: 'import-file', 'data-testid': 'import-file', tabindex: '-1' });
+    input.addEventListener('change', function () { handleImportFile(input.files && input.files[0], err); input.value = ''; });
+    return screen('backup', null, simpleTop('기록 옮기기'),
+      heading('기록 옮기기', '휴대폰을 바꾸거나 기록을 지우기 전에'),
+      el('section', { class: 'report-sec' },
+        el('h2', { class: 'sec-title' }, '1. 파일로 내보내기'),
+        el('p', { class: 'body-text' }, '지금 기록 ' + n + '개를 파일 하나로 저장해요. 도감·연속 기록·주간 보고서는 기록에서 다시 계산되니 함께 옮겨져요.'),
+        el('button', { class: 'btn btn-primary', type: 'button', 'data-testid': 'export-download', onclick: downloadBackup, disabled: !n }, '💾 파일로 저장하기'),
+        canShareFile() ? el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'export-share', onclick: shareBackup, disabled: !n }, '📤 다른 앱으로 보내기 (메일·드라이브 등)') : null,
+        el('p', { class: 'guide' }, '⚠️ 파일 안에는 적은 글이 그대로 들어 있어요. 다른 사람에게 보내지 않도록 조심하세요.')
+      ),
+      el('section', { class: 'report-sec' },
+        el('h2', { class: 'sec-title' }, '2. 파일 불러오기'),
+        el('p', { class: 'body-text' }, '내보낸 파일을 고르면 그 안의 기록을 이 휴대폰에 더해요. 지금 있는 기록은 지워지지 않고, 이미 있는 기록은 건너뛰어요.'),
+        el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'import-pick', onclick: function () { input.click(); } }, '📂 파일 고르기'),
+        input,
+        err
+      ),
+      el('p', { class: 'guide' }, '새 휴대폰으로 옮길 때: 옛 휴대폰에서 "파일로 저장하기" 또는 "다른 앱으로 보내기" → 새 휴대폰에서 그 파일을 받아 "파일 고르기"를 누르세요.')
+    );
+  };
+
+  screens.importConfirm = function () {
+    var p = pendingImport;
+    if (!p) return screens.backup();
+    var n = p.fresh.length;
+    var lines = [
+      el('p', { class: 'body-text', 'data-testid': 'import-summary' }, '파일에서 기록 ' + p.total + '개를 찾았어요. 그중 새 기록은 ' + n + '개, 이미 있는 기록은 ' + (p.total - n) + '개예요.'),
+      p.broken ? el('p', { class: 'guide' }, '내용이 망가진 기록 ' + p.broken + '개는 뺐어요.') : null
+    ];
+    return screen('importConfirm', null, simpleTop('기록 불러오기'),
+      heading(n ? '새 기록 ' + n + '개를 더할까요?' : '모두 이미 있는 기록이에요'),
+      lines,
+      n ? el('p', { class: 'guide' }, '지금 이 휴대폰에 있는 기록 ' + records().length + '개는 그대로 남아요.') : null,
+      n ? el('button', {
+        class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'import-confirm',
+        onclick: function () {
+          var d = load();
+          d.records = d.records.concat(p.fresh).sort(function (a, b) { return a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0; });
+          save(d);
+          pendingImport = null;
+          goHome();
+          toast('기록 ' + n + '개를 불러왔어요.');
+        }
+      }, '네, 불러올게요') : null,
+      el('button', { class: 'btn btn-secondary btn-big', type: 'button', 'data-testid': 'import-cancel', onclick: function () { pendingImport = null; back(); } }, n ? '아니요, 그만둘게요' : '돌아가기')
+    );
+  };
+
   /* ───────── 그리기 ───────── */
   function render() {
+    document.body.classList.remove('no-scroll');
     var fn = screens[current.screen] || screens.home;
     var node;
     try {
@@ -829,6 +1048,8 @@
 
   /* 컴퓨터에서 숫자 1~5 키로도 고를 수 있어요 */
   document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && closeDexDetail()) { ev.preventDefault(); return; }
+    if (app.querySelector('.sheet-wrap')) return;
     if (ev.target && (ev.target.tagName === 'TEXTAREA' || ev.target.tagName === 'INPUT')) return;
     if (/^[1-5]$/.test(ev.key)) {
       var b = app.querySelector('.opt[data-num="' + ev.key + '"]');
