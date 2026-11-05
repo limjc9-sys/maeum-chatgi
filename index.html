@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>내 마음 찾기</title>
+  <meta name="description" content="오늘 있었던 일 속에서 내 감정의 이름을 찾아보는 1인용 게임">
+  <meta name="theme-color" content="#F2795B">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="내 마음 찾기">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/favicon-64.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main id="app" aria-live="polite">
+    <noscript><p style="padding:24px;font-size:18px">이 게임은 자바스크립트가 켜져 있어야 작동해요.</p></noscript>
+  </main>
+
+  <!-- 문장·단어 데이터 (이 파일들만 고치면 돼요) -->
+  <script src="data/emotions.js"></script>
+  <script src="data/needs.js"></script>
+  <script src="data/questions.js"></script>
+  <script src="data/safety.js"></script>
+  <!-- 게임 동작 코드 -->
+  <script src="js/app.js"></script>
+</body>
+</html>
