@@ -6,6 +6,7 @@
   - id: '...' 부분은 절대 고치지 마세요. (기록과 도감이 이 이름표로 연결돼요)
   - word  = 감정 이름
   - desc  = 버튼 아래 작게 나오는 설명
+  - ask   = 비슷한 감정과 견주어 볼 때 나오는 구별 질문 문장 (아래 compareSets에 있는 감정만)
   - same  = 같은 뜻 다른 말 (0~3개). 감정을 고르면 "어느 말이 가장 가까운가요?" 화면에
             원래 단어와 함께 나와요. 설명(desc)은 원래 단어의 것을 함께 써요.
             새로 더할 때 id는 원래 단어 id 뒤에 a, b, c를 붙여요. (예: fear01 → fear01a)
@@ -22,18 +23,38 @@ window.MAEUM_DATA.families = [
   {
     id: 'joy',
     label: '기쁨 쪽',
-    hint: '좋았다, 편했다, 뿌듯했다',
+    hint: '기뻤다, 행복했다, 편했다, 뿌듯했다',
     emoji: '🌞',
     color: '#E9A800',
     groups: [
       {
-        label: '신나고 설레요',
-        hint: '몸이 들썩이는 즐거움',
+        label: '기쁘고 자랑스러워요',
+        hint: '좋은 소식을 들은 느낌',
         emotions: [
-          { id: 'joy01', word: '신남', desc: '몸이 들썩일 만큼 즐거워요', same: [{ id: 'joy01a', word: '신명남' }, { id: 'joy01b', word: '신바람 남' }, { id: 'joy01c', word: '아주 신남' }] },
-          { id: 'joy02', word: '설렘', desc: '좋은 일이 올 것 같아 두근거려요', same: [{ id: 'joy02a', word: '콩닥거림' }] },
-          { id: 'joy04', word: '짜릿함', desc: '순간 온몸이 찌릿할 만큼 좋아요', same: [{ id: 'joy04a', word: '전율' }, { id: 'joy04b', word: '스릴' }] },
-          { id: 'joy17', word: '재미있음', desc: '웃음이 절로 나올 만큼 즐거워요' }
+          { id: 'joy28', word: '기쁨', desc: '바라던 일이 이루어져 마음이 환해요', ask: '바라던 좋은 일이 생겼어요', same: [{ id: 'joy28a', word: '기분 좋음' }, { id: 'joy28b', word: '좋음' }] },
+          { id: 'joy10', word: '자랑스러움', desc: '누군가에게 보여 주고 싶을 만큼 좋아요', ask: '내가 해낸 일을 남에게 보여 주고 싶었어요', same: [{ id: 'joy10a', word: '으쓱함' }] },
+          { id: 'joy11', word: '당당함', desc: '고개를 들고 내 모습 그대로 있어도 돼요', same: [{ id: 'joy11a', word: '의기양양함' }, { id: 'joy11b', word: '기고만장함' }] },
+          { id: 'joy03', word: '들뜸', desc: '마음이 붕 떠서 가만있기 어려워요', same: [{ id: 'joy03a', word: '흥분됨' }, { id: 'joy03b', word: '상기됨' }, { id: 'joy03c', word: '충동적인 마음' }] }
+        ]
+      },
+      {
+        label: '행복하고 사랑스러워요',
+        hint: '마음이 꽉 차는 느낌',
+        emotions: [
+          { id: 'joy29', word: '행복함', desc: '지금 이대로 참 좋다고 느껴요', ask: '지금 이대로 모든 것이 좋았어요', same: [{ id: 'joy29a', word: '더없이 행복함' }, { id: 'joy29b', word: '충만함' }] },
+          { id: 'joy30', word: '만족스러움', desc: '이만하면 충분해서 더 바랄 게 없어요', same: [{ id: 'joy30a', word: '흡족함' }, { id: 'joy30b', word: '자족함' }] },
+          { id: 'joy31', word: '사랑스러움', desc: '너무 소중하고 예뻐 꼭 안아 주고 싶어요', same: [{ id: 'joy31a', word: '예쁨' }, { id: 'joy31b', word: '어여쁨' }] },
+          { id: 'joy32', word: '정다움', desc: '서로 마음이 가까워 함께 있는 게 좋아요', same: [{ id: 'joy32a', word: '친근함' }, { id: 'joy32b', word: '친숙함' }, { id: 'joy32c', word: '다정함' }] }
+        ]
+      },
+      {
+        label: '즐겁고 유쾌해요',
+        hint: '웃음이 나는 느낌',
+        emotions: [
+          { id: 'joy33', word: '즐거움', desc: '하는 동안 내내 마음이 즐거워요', same: [{ id: 'joy33a', word: '유쾌함' }, { id: 'joy33b', word: '쾌활함' }, { id: 'joy33c', word: '경쾌함' }] },
+          { id: 'joy34', word: '웃음이 터짐', desc: '참으려 해도 깔깔 웃음이 터져 나와요', same: [{ id: 'joy34a', word: '함박웃음' }, { id: 'joy34b', word: '싱글벙글함' }, { id: 'joy34c', word: '희희낙락함' }] },
+          { id: 'joy35', word: '흥겨움', desc: '노래나 놀이에 어깨가 들썩여요' },
+          { id: 'joy36', word: '통쾌함', desc: '이겨 내거나 바로잡혀 속이 시원해요', same: [{ id: 'joy36a', word: '속 시원함' }] }
         ]
       },
       {
@@ -42,8 +63,18 @@ window.MAEUM_DATA.families = [
         emotions: [
           { id: 'joy05', word: '편안함', desc: '몸과 마음에 불편한 곳이 없어요', same: [{ id: 'joy05a', word: '편함' }, { id: 'joy05b', word: '안락함' }, { id: 'joy05c', word: '안온함' }] },
           { id: 'joy06', word: '홀가분함', desc: '무거운 짐을 내려놓은 것 같아요', same: [{ id: 'joy06a', word: '가뿐함' }, { id: 'joy06b', word: '가벼움' }] },
-          { id: 'joy07', word: '안심됨', desc: '걱정하던 일이 괜찮아져 숨이 놓여요', same: [{ id: 'joy07a', word: '천만다행' }, { id: 'joy07b', word: '안전한 느낌' }, { id: 'joy07c', word: '안정감' }] },
+          { id: 'joy07', word: '안심됨', desc: '걱정하던 일이 괜찮아져 숨이 놓여요', ask: '걱정하던 일이 괜찮아졌어요', same: [{ id: 'joy07a', word: '천만다행' }, { id: 'joy07b', word: '안전한 느낌' }, { id: 'joy07c', word: '안정감' }] },
           { id: 'joy08', word: '느긋함', desc: '서두를 것 없이 여유로워요', same: [{ id: 'joy08a', word: '여유로움' }, { id: 'joy08b', word: '한가로움' }] }
+        ]
+      },
+      {
+        label: '신나고 설레요',
+        hint: '몸이 들썩이는 즐거움',
+        emotions: [
+          { id: 'joy01', word: '신남', desc: '몸이 들썩일 만큼 즐거워요', same: [{ id: 'joy01a', word: '신명남' }, { id: 'joy01b', word: '신바람 남' }, { id: 'joy01c', word: '아주 신남' }] },
+          { id: 'joy02', word: '설렘', desc: '좋은 일이 올 것 같아 두근거려요', same: [{ id: 'joy02a', word: '콩닥거림' }] },
+          { id: 'joy04', word: '짜릿함', desc: '순간 온몸이 찌릿할 만큼 좋아요', same: [{ id: 'joy04a', word: '전율' }, { id: 'joy04b', word: '스릴' }] },
+          { id: 'joy17', word: '재미있음', desc: '웃음이 절로 나올 만큼 즐거워요' }
         ]
       },
       {
@@ -67,6 +98,16 @@ window.MAEUM_DATA.families = [
         ]
       },
       {
+        label: '놀랍고 감탄스러워요',
+        hint: '"와!" 하는 느낌',
+        emotions: [
+          { id: 'joy24', word: '신기함', desc: '어떻게 이럴 수 있지 싶어 눈이 동그래져요', ask: '놀라웠지만 좋은 쪽으로 놀라웠어요', same: [{ id: 'joy24a', word: '신비로움' }, { id: 'joy24b', word: '기상천외' }] },
+          { id: 'joy25', word: '감탄', desc: '정말 대단해서 "와" 소리가 절로 나요', same: [{ id: 'joy25a', word: '감복' }, { id: 'joy25b', word: '탄복' }] },
+          { id: 'joy26', word: '황홀함', desc: '너무 아름다워 넋을 놓고 바라봐요', same: [{ id: 'joy26a', word: '경이로움' }, { id: 'joy26b', word: '감미로움' }] },
+          { id: 'joy27', word: '존경스러움', desc: '그 사람이 대단해 닮고 싶어요' }
+        ]
+      },
+      {
         label: '궁금하고 빠져들어요',
         hint: '더 알고 싶은 느낌',
         emotions: [
@@ -74,46 +115,6 @@ window.MAEUM_DATA.families = [
           { id: 'joy21', word: '궁금함', desc: '어떻게 된 건지 답을 알고 싶어요', same: [{ id: 'joy21a', word: '감질남' }] },
           { id: 'joy22', word: '몰입됨', desc: '시간 가는 줄 모르고 푹 빠져 있어요', same: [{ id: 'joy22a', word: '집중됨' }] },
           { id: 'joy23', word: '신선함', desc: '처음 겪는 일이라 새롭고 산뜻해요', same: [{ id: 'joy23a', word: '상큼함' }] }
-        ]
-      },
-      {
-        label: '놀랍고 감탄스러워요',
-        hint: '"와!" 하는 느낌',
-        emotions: [
-          { id: 'joy24', word: '신기함', desc: '어떻게 이럴 수 있지 싶어 눈이 동그래져요', same: [{ id: 'joy24a', word: '신비로움' }, { id: 'joy24b', word: '기상천외' }] },
-          { id: 'joy25', word: '감탄', desc: '정말 대단해서 "와" 소리가 절로 나요', same: [{ id: 'joy25a', word: '감복' }, { id: 'joy25b', word: '탄복' }] },
-          { id: 'joy26', word: '황홀함', desc: '너무 아름다워 넋을 놓고 바라봐요', same: [{ id: 'joy26a', word: '경이로움' }, { id: 'joy26b', word: '감미로움' }] },
-          { id: 'joy27', word: '존경스러움', desc: '그 사람이 대단해 닮고 싶어요' }
-        ]
-      },
-      {
-        label: '기쁘고 자랑스러워요',
-        hint: '좋은 소식을 들은 느낌',
-        emotions: [
-          { id: 'joy28', word: '기쁨', desc: '바라던 일이 이루어져 마음이 환해요', same: [{ id: 'joy28a', word: '기분 좋음' }, { id: 'joy28b', word: '좋음' }] },
-          { id: 'joy10', word: '자랑스러움', desc: '누군가에게 보여 주고 싶을 만큼 좋아요', same: [{ id: 'joy10a', word: '으쓱함' }] },
-          { id: 'joy11', word: '당당함', desc: '고개를 들고 내 모습 그대로 있어도 돼요', same: [{ id: 'joy11a', word: '의기양양함' }, { id: 'joy11b', word: '기고만장함' }] },
-          { id: 'joy03', word: '들뜸', desc: '마음이 붕 떠서 가만있기 어려워요', same: [{ id: 'joy03a', word: '흥분됨' }, { id: 'joy03b', word: '상기됨' }, { id: 'joy03c', word: '충동적인 마음' }] }
-        ]
-      },
-      {
-        label: '행복하고 사랑스러워요',
-        hint: '마음이 꽉 차는 느낌',
-        emotions: [
-          { id: 'joy29', word: '행복함', desc: '지금 이대로 참 좋다고 느껴요', same: [{ id: 'joy29a', word: '더없이 행복함' }, { id: 'joy29b', word: '충만함' }] },
-          { id: 'joy30', word: '만족스러움', desc: '이만하면 충분해서 더 바랄 게 없어요', same: [{ id: 'joy30a', word: '흡족함' }, { id: 'joy30b', word: '자족함' }] },
-          { id: 'joy31', word: '사랑스러움', desc: '너무 소중하고 예뻐 꼭 안아 주고 싶어요', same: [{ id: 'joy31a', word: '예쁨' }, { id: 'joy31b', word: '어여쁨' }] },
-          { id: 'joy32', word: '정다움', desc: '서로 마음이 가까워 함께 있는 게 좋아요', same: [{ id: 'joy32a', word: '친근함' }, { id: 'joy32b', word: '친숙함' }, { id: 'joy32c', word: '다정함' }] }
-        ]
-      },
-      {
-        label: '즐겁고 유쾌해요',
-        hint: '웃음이 나는 느낌',
-        emotions: [
-          { id: 'joy33', word: '즐거움', desc: '하는 동안 내내 마음이 즐거워요', same: [{ id: 'joy33a', word: '유쾌함' }, { id: 'joy33b', word: '쾌활함' }, { id: 'joy33c', word: '경쾌함' }] },
-          { id: 'joy34', word: '웃음이 터짐', desc: '참으려 해도 깔깔 웃음이 터져 나와요', same: [{ id: 'joy34a', word: '함박웃음' }, { id: 'joy34b', word: '싱글벙글함' }, { id: 'joy34c', word: '희희낙락함' }] },
-          { id: 'joy35', word: '흥겨움', desc: '노래나 놀이에 어깨가 들썩여요' },
-          { id: 'joy36', word: '통쾌함', desc: '이겨 내거나 바로잡혀 속이 시원해요', same: [{ id: 'joy36a', word: '속 시원함' }] }
         ]
       },
       {
@@ -159,28 +160,18 @@ window.MAEUM_DATA.families = [
   {
     id: 'sad',
     label: '슬픔 쪽',
-    hint: '서운했다, 미안했다, 힘이 빠졌다',
+    hint: '슬펐다, 서운했다, 미안했다, 잃은 것 같았다',
     emoji: '🌧️',
     color: '#3F7FE0',
     groups: [
       {
-        label: '서운하고 외로워요',
-        hint: '혼자인 것 같은 느낌',
+        label: '슬프고 먹먹해요',
+        hint: '눈물이 날 것 같은 느낌',
         emotions: [
-          { id: 'sad01', word: '서운함', desc: '기대한 만큼 마음을 받지 못했어요', same: [{ id: 'sad01a', word: '섭섭함' }] },
-          { id: 'sad02', word: '외로움', desc: '곁에 아무도 없는 것 같아요', same: [{ id: 'sad02a', word: '고독함' }, { id: 'sad02b', word: '적적함' }, { id: 'sad02c', word: '외톨이가 된 느낌' }] },
-          { id: 'sad03', word: '소외감', desc: '무리 밖으로 밀려난 것 같아요' },
-          { id: 'sad17', word: '서러움', desc: '나만 홀로 힘든 것 같아 눈물이 북받쳐요' }
-        ]
-      },
-      {
-        label: '실망하고 힘이 빠져요',
-        hint: '바라던 대로 되지 않은 느낌',
-        emotions: [
-          { id: 'sad05', word: '실망', desc: '바라던 대로 되지 않아 마음이 내려앉아요', same: [{ id: 'sad05a', word: '낙담' }, { id: 'sad05b', word: '낙심' }, { id: 'sad05c', word: '낙망' }] },
-          { id: 'sad06', word: '허탈함', desc: '애쓴 것이 한순간에 사라진 것 같아요', same: [{ id: 'sad06a', word: '허무함' }, { id: 'sad06b', word: '망연' }, { id: 'sad06c', word: '망연자실' }] },
-          { id: 'sad07', word: '아쉬움', desc: '조금만 더 했으면 하는 마음이 남아요', same: [{ id: 'sad07a', word: '아까움' }, { id: 'sad07b', word: '애석함' }, { id: 'sad07c', word: '유감스러움' }] },
-          { id: 'sad18', word: '좌절감', desc: '애써도 안 돼서 주저앉고 싶어요', same: [{ id: 'sad18a', word: '좌절' }, { id: 'sad18b', word: '기죽음' }, { id: 'sad18c', word: '의기소침' }] }
+          { id: 'sad30', word: '슬픔', desc: '마음이 아래로 가라앉고 울고 싶어요', ask: '마음이 아파 눈물이 날 것 같았어요', same: [{ id: 'sad30a', word: '구슬픔' }, { id: 'sad30b', word: '비감함' }] },
+          { id: 'sad04', word: '쓸쓸함', desc: '조용하고 텅 빈 느낌이 들어요', same: [{ id: 'sad04a', word: '스산함' }, { id: 'sad04b', word: '을씨년스러움' }] },
+          { id: 'sad31', word: '안타까움', desc: '돕고 싶은데 어쩔 수 없어 마음이 쓰여요', same: [{ id: 'sad31a', word: '안쓰러움' }, { id: 'sad31b', word: '측은함' }, { id: 'sad31c', word: '짠함' }] },
+          { id: 'sad32', word: '먹먹함', desc: '슬픔이 차올라 목이 메고 말이 안 나와요', same: [{ id: 'sad32a', word: '찡함' }, { id: 'sad32b', word: '복받침' }] }
         ]
       },
       {
@@ -189,38 +180,58 @@ window.MAEUM_DATA.families = [
         emotions: [
           { id: 'sad09', word: '속상함', desc: '마음이 상해서 자꾸 생각나요', same: [{ id: 'sad09a', word: '속앓이' }, { id: 'sad09b', word: '가슴앓이' }, { id: 'sad09c', word: '냉가슴' }] },
           { id: 'sad10', word: '그리움', desc: '다시 보고 싶고 함께하고 싶어요', same: [{ id: 'sad10a', word: '아련함' }, { id: 'sad10b', word: '사무침' }] },
-          { id: 'sad11', word: '상실감', desc: '소중한 것을 잃어 빈 곳이 커요', same: [{ id: 'sad11a', word: '애도' }] },
+          { id: 'sad11', word: '상실감', desc: '소중한 것을 잃어 빈 곳이 커요', ask: '소중한 사람이나 물건, 기회를 잃었어요', same: [{ id: 'sad11a', word: '애도' }] },
           { id: 'sad12', word: '애틋함', desc: '안쓰럽고 아끼는 마음이 겹쳐요', same: [{ id: 'sad12a', word: '애잔함' }, { id: 'sad12b', word: '애달픔' }, { id: 'sad12c', word: '절절함' }] }
-        ]
-      },
-      {
-        label: '지치고 기운이 없어요',
-        hint: '몸도 마음도 무거운 느낌',
-        emotions: [
-          { id: 'sad13', word: '지침', desc: '몸도 마음도 다 써 버린 것 같아요', same: [{ id: 'sad13a', word: '기진맥진' }, { id: 'sad13b', word: '진이 빠짐' }, { id: 'sad13c', word: '소모됨' }] },
-          { id: 'sad15', word: '우울함', desc: '마음이 오래 가라앉아 있어요', same: [{ id: 'sad15a', word: '울적함' }, { id: 'sad15b', word: '침울함' }, { id: 'sad15c', word: '음울함' }] },
-          { id: 'sad16', word: '막막함', desc: '어디서부터 해야 할지 모르겠어요', same: [{ id: 'sad16a', word: '망막함' }, { id: 'sad16b', word: '암담함' }, { id: 'sad16c', word: '암울함' }] },
-          { id: 'sad19', word: '절망감', desc: '아무리 봐도 나아질 길이 안 보여요', same: [{ id: 'sad19a', word: '절망' }, { id: 'sad19b', word: '가망 없음' }, { id: 'sad19c', word: '비관적인 마음' }] }
         ]
       },
       {
         label: '미안하고 내 탓 같아요',
         hint: '잘못한 것 같은 느낌',
         emotions: [
-          { id: 'sad20', word: '죄책감', desc: '내 잘못으로 누군가 힘들어져 마음이 무거워요' },
-          { id: 'sad21', word: '자책감', desc: '"다 내 탓이야" 하며 나를 계속 꾸짖어요', same: [{ id: 'sad21a', word: '자책' }] },
-          { id: 'sad22', word: '면목 없음', desc: '그 사람 얼굴을 볼 낯이 없어요' },
-          { id: 'sad23', word: '양심이 찔림', desc: '작은 잘못이 생각나 마음이 콕콕 찔려요' }
+          { id: 'sad20', word: '죄책감', desc: '내 잘못으로 누군가 힘들어져 마음이 무거워요', ask: '내가 한 행동이 남에게 잘못이었다는 생각이 들었어요' },
+          { id: 'sad21', word: '자책감', desc: '"다 내 탓이야" 하며 나를 계속 꾸짖어요', ask: '"내가 왜 그랬을까" 하고 나를 꾸짖었어요', same: [{ id: 'sad21a', word: '자책' }] },
+          { id: 'sad22', word: '면목 없음', desc: '그 사람 얼굴을 볼 낯이 없어요', ask: '볼 낯이 없어 그 사람 앞에 서기 어려웠어요' },
+          { id: 'sad23', word: '양심이 찔림', desc: '작은 잘못이 생각나 마음이 콕콕 찔려요', ask: '옳지 않은 줄 알면서 해서 마음이 찔렸어요' }
+        ]
+      },
+      {
+        label: '서운하고 외로워요',
+        hint: '혼자인 것 같은 느낌',
+        emotions: [
+          { id: 'sad01', word: '서운함', desc: '기대한 만큼 마음을 받지 못했어요', ask: '가까운 사람이 내 마음을 몰라 줬어요', same: [{ id: 'sad01a', word: '섭섭함' }] },
+          { id: 'sad02', word: '외로움', desc: '곁에 아무도 없는 것 같아요', ask: '곁에 아무도 없는 것 같았어요', same: [{ id: 'sad02a', word: '고독함' }, { id: 'sad02b', word: '적적함' }, { id: 'sad02c', word: '외톨이가 된 느낌' }] },
+          { id: 'sad03', word: '소외감', desc: '무리 밖으로 밀려난 것 같아요' },
+          { id: 'sad17', word: '서러움', desc: '나만 홀로 힘든 것 같아 눈물이 북받쳐요' }
+        ]
+      },
+      {
+        label: '실망하고 힘이 빠져요',
+        hint: '바라던 대로 되지 않은 느낌',
+        emotions: [
+          { id: 'sad05', word: '실망', desc: '바라던 대로 되지 않아 마음이 내려앉아요', ask: '기대한 만큼 되지 않았어요', same: [{ id: 'sad05a', word: '낙담' }, { id: 'sad05b', word: '낙심' }, { id: 'sad05c', word: '낙망' }] },
+          { id: 'sad06', word: '허탈함', desc: '애쓴 것이 한순간에 사라진 것 같아요', same: [{ id: 'sad06a', word: '허무함' }, { id: 'sad06b', word: '망연' }, { id: 'sad06c', word: '망연자실' }] },
+          { id: 'sad07', word: '아쉬움', desc: '조금만 더 했으면 하는 마음이 남아요', same: [{ id: 'sad07a', word: '아까움' }, { id: 'sad07b', word: '애석함' }, { id: 'sad07c', word: '유감스러움' }] },
+          { id: 'sad18', word: '좌절감', desc: '애써도 안 돼서 주저앉고 싶어요', same: [{ id: 'sad18a', word: '좌절' }, { id: 'sad18b', word: '기죽음' }, { id: 'sad18c', word: '의기소침' }] }
+        ]
+      },
+      {
+        label: '지치고 기운이 없어요',
+        hint: '몸도 마음도 무거운 느낌',
+        emotions: [
+          { id: 'sad13', word: '지침', desc: '몸도 마음도 다 써 버린 것 같아요', ask: '힘을 많이 써서 기운이 다 빠졌어요', same: [{ id: 'sad13a', word: '기진맥진' }, { id: 'sad13b', word: '진이 빠짐' }, { id: 'sad13c', word: '소모됨' }] },
+          { id: 'sad15', word: '우울함', desc: '마음이 오래 가라앉아 있어요', ask: '며칠째 마음이 가라앉아 있어요', same: [{ id: 'sad15a', word: '울적함' }, { id: 'sad15b', word: '침울함' }, { id: 'sad15c', word: '음울함' }] },
+          { id: 'sad16', word: '막막함', desc: '어디서부터 해야 할지 모르겠어요', same: [{ id: 'sad16a', word: '망막함' }, { id: 'sad16b', word: '암담함' }, { id: 'sad16c', word: '암울함' }] },
+          { id: 'sad19', word: '절망감', desc: '아무리 봐도 나아질 길이 안 보여요', same: [{ id: 'sad19a', word: '절망' }, { id: 'sad19b', word: '가망 없음' }, { id: 'sad19c', word: '비관적인 마음' }] }
         ]
       },
       {
         label: '부럽고 작아져요',
         hint: '남과 비교되는 느낌',
         emotions: [
-          { id: 'sad24', word: '부러움', desc: '남이 가진 것을 나도 갖고 싶어요', same: [{ id: 'sad24a', word: '남부러움' }, { id: 'sad24b', word: '탐남' }] },
-          { id: 'sad25', word: '열등감', desc: '남과 비교하면 내가 못나 보여요', same: [{ id: 'sad25a', word: '초라함' }] },
-          { id: 'sad26', word: '박탈감', desc: '남들은 다 받는데 나만 못 받은 것 같아요' },
-          { id: 'sad27', word: '샘남', desc: '나보다 잘되는 게 은근히 싫어요' }
+          { id: 'sad24', word: '부러움', desc: '남이 가진 것을 나도 갖고 싶어요', ask: '남이 가진 것을 나도 갖고 싶었어요', same: [{ id: 'sad24a', word: '남부러움' }, { id: 'sad24b', word: '탐남' }] },
+          { id: 'sad25', word: '열등감', desc: '남과 비교하면 내가 못나 보여요', ask: '남과 견주어 보니 내가 못나 보였어요', same: [{ id: 'sad25a', word: '초라함' }] },
+          { id: 'sad26', word: '박탈감', desc: '남들은 다 받는데 나만 못 받은 것 같아요', ask: '당연히 내 몫이어야 할 것을 빼앗긴 것 같았어요' },
+          { id: 'sad27', word: '샘남', desc: '나보다 잘되는 게 은근히 싫어요', ask: '남이 잘되는 것이 괜히 싫었어요' }
         ]
       },
       {
@@ -230,17 +241,7 @@ window.MAEUM_DATA.families = [
           { id: 'sad28', word: '지루함', desc: '하는 일이 재미없고 시간이 안 가요', same: [{ id: 'sad28a', word: '따분함' }, { id: 'sad28b', word: '무료함' }, { id: 'sad28c', word: '심심함' }] },
           { id: 'sad29', word: '시큰둥함', desc: '무엇을 봐도 별로 마음이 안 움직여요', same: [{ id: 'sad29a', word: '심드렁함' }, { id: 'sad29b', word: '시덥잖음' }, { id: 'sad29c', word: '신통찮음' }] },
           { id: 'sad08', word: '김빠짐', desc: '신났던 마음이 갑자기 식었어요', same: [{ id: 'sad08a', word: '맥빠짐' }, { id: 'sad08b', word: '재미없음' }] },
-          { id: 'sad14', word: '무기력', desc: '아무것도 하고 싶지 않아요', same: [{ id: 'sad14a', word: '의욕 없음' }, { id: 'sad14b', word: '기운 없음' }, { id: 'sad14c', word: '자포자기' }] }
-        ]
-      },
-      {
-        label: '슬프고 먹먹해요',
-        hint: '눈물이 날 것 같은 느낌',
-        emotions: [
-          { id: 'sad30', word: '슬픔', desc: '마음이 아래로 가라앉고 울고 싶어요', same: [{ id: 'sad30a', word: '구슬픔' }, { id: 'sad30b', word: '비감함' }] },
-          { id: 'sad04', word: '쓸쓸함', desc: '조용하고 텅 빈 느낌이 들어요', same: [{ id: 'sad04a', word: '스산함' }, { id: 'sad04b', word: '을씨년스러움' }] },
-          { id: 'sad31', word: '안타까움', desc: '돕고 싶은데 어쩔 수 없어 마음이 쓰여요', same: [{ id: 'sad31a', word: '안쓰러움' }, { id: 'sad31b', word: '측은함' }, { id: 'sad31c', word: '짠함' }] },
-          { id: 'sad32', word: '먹먹함', desc: '슬픔이 차올라 목이 메고 말이 안 나와요', same: [{ id: 'sad32a', word: '찡함' }, { id: 'sad32b', word: '복받침' }] }
+          { id: 'sad14', word: '무기력', desc: '아무것도 하고 싶지 않아요', ask: '무엇을 해도 소용없을 것 같았어요', same: [{ id: 'sad14a', word: '의욕 없음' }, { id: 'sad14b', word: '기운 없음' }, { id: 'sad14c', word: '자포자기' }] }
         ]
       },
       {
@@ -316,38 +317,18 @@ window.MAEUM_DATA.families = [
   {
     id: 'anger',
     label: '화남 쪽',
-    hint: '짜증 났다, 억울했다, 싫었다',
+    hint: '화났다, 짜증 났다, 억울했다, 역겨웠다',
     emoji: '🔥',
     color: '#D9473A',
     groups: [
       {
-        label: '짜증 나고 답답해요',
-        hint: '신경이 곤두서는 느낌',
+        label: '몹시 화가 나요',
+        hint: '화가 크게 난 느낌',
         emotions: [
-          { id: 'ang01', word: '짜증', desc: '작은 일에도 신경이 곤두서요' },
-          { id: 'ang02', word: '답답함', desc: '말이 통하지 않아 가슴이 막혀요', same: [{ id: 'ang02a', word: '갑갑함' }] },
-          { id: 'ang17', word: '어이없음', desc: '말도 안 되는 일이라 황당하고 화가 나요', same: [{ id: 'ang17a', word: '가당찮음' }, { id: 'ang17b', word: '가관' }] },
-          { id: 'ang16', word: '불쾌함', desc: '기분이 상해서 찝찝해요', same: [{ id: 'ang16a', word: '불유쾌함' }, { id: 'ang16b', word: '기분 나쁨' }] }
-        ]
-      },
-      {
-        label: '억울하고 분해요',
-        hint: '불공평하다는 느낌',
-        emotions: [
-          { id: 'ang05', word: '억울함', desc: '내 잘못이 아닌데 탓을 들었어요', same: [{ id: 'ang05a', word: '원통함' }, { id: 'ang05b', word: '반칙당한 느낌' }] },
-          { id: 'ang06', word: '분함', desc: '진 것 같아 이가 꽉 물려요', same: [{ id: 'ang06a', word: '분개' }, { id: 'ang06b', word: '울분' }] },
-          { id: 'ang07', word: '원망', desc: '그 사람 때문이라는 생각이 들어요' },
-          { id: 'ang08', word: '배신감', desc: '믿었던 사람이 등을 돌렸어요' }
-        ]
-      },
-      {
-        label: '무시당한 것 같아요',
-        hint: '내가 작게 취급된 느낌',
-        emotions: [
-          { id: 'ang09', word: '무시당한 느낌', desc: '내가 없는 사람처럼 취급받았어요', same: [{ id: 'ang09a', word: '멸시당함' }] },
-          { id: 'ang10', word: '모욕감', desc: '나를 깎아내리는 말에 상처받았어요', same: [{ id: 'ang10a', word: '모멸감' }, { id: 'ang10b', word: '모욕적인 느낌' }, { id: 'ang10c', word: '굴욕감' }] },
-          { id: 'ang11', word: '자존심 상함', desc: '내 체면이 구겨진 것 같아요', same: [{ id: 'ang11a', word: '치욕' }, { id: 'ang11b', word: '웃음거리가 된 느낌' }] },
-          { id: 'ang18', word: '푸대접받은 느낌', desc: '나만 소홀히 대해서 화가 나요', same: [{ id: 'ang18a', word: '야박함' }] }
+          { id: 'ang29', word: '화남', desc: '마음에 안 들어 화가 나요', same: [{ id: 'ang29a', word: '노여움' }, { id: 'ang29b', word: '몹시 화남' }, { id: 'ang29c', word: '쌕쌕거림' }] },
+          { id: 'ang30', word: '격해짐', desc: '감정이 점점 거세져 목소리가 커져요', same: [{ id: 'ang30a', word: '격앙됨' }, { id: 'ang30b', word: '격양됨' }] },
+          { id: 'ang31', word: '치 떨림', desc: '너무 분하고 화가 나 몸이 부들부들 떨려요' },
+          { id: 'ang32', word: '증오', desc: '그 사람을 몹시 미워해요' }
         ]
       },
       {
@@ -357,17 +338,47 @@ window.MAEUM_DATA.families = [
           { id: 'ang13', word: '부글부글함', desc: '화가 속에서 계속 끓어올라요', same: [{ id: 'ang13a', word: '울화통' }, { id: 'ang13b', word: '속 썩음' }] },
           { id: 'ang14', word: '울컥함', desc: '갑자기 화가 확 치밀어요', same: [{ id: 'ang14a', word: '화가 치밀어 오름' }] },
           { id: 'ang15', word: '약오름', desc: '놀림받은 것 같아 분해요', same: [{ id: 'ang15a', word: '아니꼬움' }] },
-          { id: 'ang19', word: '분노', desc: '참기 어려울 만큼 크게 화가 나요', same: [{ id: 'ang19a', word: '격분' }, { id: 'ang19b', word: '격노' }, { id: 'ang19c', word: '진노' }] }
+          { id: 'ang19', word: '분노', desc: '참기 어려울 만큼 크게 화가 나요', ask: '옳지 않은 일에 화가 크게 치밀었어요', same: [{ id: 'ang19a', word: '격분' }, { id: 'ang19b', word: '격노' }, { id: 'ang19c', word: '진노' }] }
         ]
       },
       {
         label: '싫고 역겨워요',
         hint: '멀리 밀어내고 싶은 느낌',
         emotions: [
-          { id: 'ang20', word: '역겨움', desc: '속이 메스꺼울 만큼 싫어요', same: [{ id: 'ang20a', word: '구역질남' }, { id: 'ang20b', word: '느글거림' }, { id: 'ang20c', word: '느끼함' }] },
+          { id: 'ang20', word: '역겨움', desc: '속이 메스꺼울 만큼 싫어요', ask: '더럽거나 징그러운 것에 속이 울렁거렸어요', same: [{ id: 'ang20a', word: '구역질남' }, { id: 'ang20b', word: '느글거림' }, { id: 'ang20c', word: '느끼함' }] },
           { id: 'ang21', word: '징그러움', desc: '보기만 해도 몸이 움찔할 만큼 싫어요', same: [{ id: 'ang21a', word: '흉측함' }, { id: 'ang21b', word: '망측함' }, { id: 'ang21c', word: '해괴함' }] },
-          { id: 'ang22', word: '정떨어짐', desc: '그 사람에게 마음이 싹 식었어요' },
+          { id: 'ang22', word: '정떨어짐', desc: '그 사람에게 마음이 싹 식었어요', ask: '좋던 사람에게 마음이 확 식었어요' },
           { id: 'ang23', word: '한심함', desc: '하는 모습이 못나고 하찮아 보여요', same: [{ id: 'ang23a', word: '가소로움' }, { id: 'ang23b', word: '꼴불견' }, { id: 'ang23c', word: '우스움' }] }
+        ]
+      },
+      {
+        label: '짜증 나고 답답해요',
+        hint: '신경이 곤두서는 느낌',
+        emotions: [
+          { id: 'ang01', word: '짜증', desc: '작은 일에도 신경이 곤두서요', ask: '자잘한 일이 자꾸 신경을 건드렸어요' },
+          { id: 'ang02', word: '답답함', desc: '말이 통하지 않아 가슴이 막혀요', same: [{ id: 'ang02a', word: '갑갑함' }] },
+          { id: 'ang17', word: '어이없음', desc: '말도 안 되는 일이라 황당하고 화가 나요', same: [{ id: 'ang17a', word: '가당찮음' }, { id: 'ang17b', word: '가관' }] },
+          { id: 'ang16', word: '불쾌함', desc: '기분이 상해서 찝찝해요', same: [{ id: 'ang16a', word: '불유쾌함' }, { id: 'ang16b', word: '기분 나쁨' }] }
+        ]
+      },
+      {
+        label: '억울하고 분해요',
+        hint: '불공평하다는 느낌',
+        emotions: [
+          { id: 'ang05', word: '억울함', desc: '내 잘못이 아닌데 탓을 들었어요', ask: '내 잘못이 아닌데 탓을 듣거나 손해를 봤어요', same: [{ id: 'ang05a', word: '원통함' }, { id: 'ang05b', word: '반칙당한 느낌' }] },
+          { id: 'ang06', word: '분함', desc: '진 것 같아 이가 꽉 물려요', same: [{ id: 'ang06a', word: '분개' }, { id: 'ang06b', word: '울분' }] },
+          { id: 'ang07', word: '원망', desc: '그 사람 때문이라는 생각이 들어요' },
+          { id: 'ang08', word: '배신감', desc: '믿었던 사람이 등을 돌렸어요' }
+        ]
+      },
+      {
+        label: '무시당한 것 같아요',
+        hint: '내가 작게 취급된 느낌',
+        emotions: [
+          { id: 'ang09', word: '무시당한 느낌', desc: '내가 없는 사람처럼 취급받았어요', ask: '그 사람이 나를 하찮게 대했어요', same: [{ id: 'ang09a', word: '멸시당함' }] },
+          { id: 'ang10', word: '모욕감', desc: '나를 깎아내리는 말에 상처받았어요', same: [{ id: 'ang10a', word: '모멸감' }, { id: 'ang10b', word: '모욕적인 느낌' }, { id: 'ang10c', word: '굴욕감' }] },
+          { id: 'ang11', word: '자존심 상함', desc: '내 체면이 구겨진 것 같아요', same: [{ id: 'ang11a', word: '치욕' }, { id: 'ang11b', word: '웃음거리가 된 느낌' }] },
+          { id: 'ang18', word: '푸대접받은 느낌', desc: '나만 소홀히 대해서 화가 나요', same: [{ id: 'ang18a', word: '야박함' }] }
         ]
       },
       {
@@ -391,21 +402,11 @@ window.MAEUM_DATA.families = [
         ]
       },
       {
-        label: '몹시 화가 나요',
-        hint: '화가 크게 난 느낌',
-        emotions: [
-          { id: 'ang29', word: '화남', desc: '마음에 안 들어 화가 나요', same: [{ id: 'ang29a', word: '노여움' }, { id: 'ang29b', word: '몹시 화남' }, { id: 'ang29c', word: '쌕쌕거림' }] },
-          { id: 'ang30', word: '격해짐', desc: '감정이 점점 거세져 목소리가 커져요', same: [{ id: 'ang30a', word: '격앙됨' }, { id: 'ang30b', word: '격양됨' }] },
-          { id: 'ang31', word: '치 떨림', desc: '너무 분하고 화가 나 몸이 부들부들 떨려요' },
-          { id: 'ang32', word: '증오', desc: '그 사람을 몹시 미워해요' }
-        ]
-      },
-      {
         label: '밉고 경멸스러워요',
         hint: '그 사람이 싫은 느낌',
         emotions: [
-          { id: 'ang33', word: '미움', desc: '그 사람이 싫고 밉게 느껴져요', same: [{ id: 'ang33a', word: '싫음' }] },
-          { id: 'ang34', word: '경멸', desc: '하찮게 여겨 깔보고 싶어요', same: [{ id: 'ang34a', word: '코웃음 침' }, { id: 'ang34b', word: '비아냥거림' }, { id: 'ang34c', word: '빈정거림' }] },
+          { id: 'ang33', word: '미움', desc: '그 사람이 싫고 밉게 느껴져요', ask: '그 사람이 싫어서 멀리하고 싶었어요', same: [{ id: 'ang33a', word: '싫음' }] },
+          { id: 'ang34', word: '경멸', desc: '하찮게 여겨 깔보고 싶어요', ask: '그 사람이 한참 못나 보여 깔보고 싶었어요', same: [{ id: 'ang34a', word: '코웃음 침' }, { id: 'ang34b', word: '비아냥거림' }, { id: 'ang34c', word: '빈정거림' }] },
           { id: 'ang35', word: '복수심', desc: '당한 만큼 똑같이 갚아 주고 싶어요' },
           { id: 'ang36', word: '고약함', desc: '성질이나 하는 짓이 거칠고 나빠 보여요', same: [{ id: 'ang36a', word: '괴팍함' }, { id: 'ang36b', word: '지독함' }] }
         ]
@@ -433,7 +434,7 @@ window.MAEUM_DATA.families = [
   {
     id: 'fear',
     label: '불안·두려움 쪽',
-    hint: '걱정됐다, 창피했다, 깜짝 놀랐다',
+    hint: '불안했다, 무서웠다, 부끄러웠다, 놀랐다',
     emoji: '🌀',
     color: '#7B5BD0',
     groups: [
@@ -441,17 +442,47 @@ window.MAEUM_DATA.families = [
         label: '걱정되고 두려워요',
         hint: '앞일이 마음 쓰이는 느낌',
         emotions: [
-          { id: 'fear01', word: '걱정', desc: '나쁜 일이 생길까 봐 마음이 쓰여요', same: [{ id: 'fear01a', word: '근심' }, { id: 'fear01b', word: '염려' }, { id: 'fear01c', word: '우려' }] },
-          { id: 'fear07', word: '두려움', desc: '앞으로 닥칠 큰일이 겁나 마음이 무거워요' },
+          { id: 'fear01', word: '걱정', desc: '나쁜 일이 생길까 봐 마음이 쓰여요', ask: '안 좋은 일이 생길까 봐 자꾸 생각이 났어요', same: [{ id: 'fear01a', word: '근심' }, { id: 'fear01b', word: '염려' }, { id: 'fear01c', word: '우려' }] },
+          { id: 'fear07', word: '두려움', desc: '앞으로 닥칠 큰일이 겁나 마음이 무거워요', ask: '앞으로 큰일이 닥칠 것 같아 겁이 났어요' },
           { id: 'fear17', word: '망설여짐', desc: '할까 말까 정하지 못해 마음이 왔다 갔다 해요', same: [{ id: 'fear17a', word: '갈등' }] },
           { id: 'fear21', word: '조심스러움', desc: '실수할까 봐 하나하나 살피게 돼요', same: [{ id: 'fear21a', word: '노파심' }, { id: 'fear21b', word: '심려' }] }
+        ]
+      },
+      {
+        label: '불안하고 가만있기 힘들어요',
+        hint: '마음이 놓이지 않는 느낌',
+        emotions: [
+          { id: 'fear31', word: '불안함', desc: '무엇 때문인지 몰라도 마음이 놓이지 않아요', ask: '무엇 때문인지 모르게 마음이 놓이지 않았어요', same: [{ id: 'fear31a', word: '불안정함' }] },
+          { id: 'fear04', word: '안절부절', desc: '가만히 있지 못하고 서성여요' },
+          { id: 'fear12', word: '떨림', desc: '손이나 목소리가 떨려요' },
+          { id: 'fear32', word: '예민함', desc: '작은 일에도 마음이 쉽게 흔들려요', same: [{ id: 'fear32a', word: '신경이 날카로움' }] }
+        ]
+      },
+      {
+        label: '창피하고 부끄러워요',
+        hint: '얼굴이 화끈한 느낌',
+        emotions: [
+          { id: 'fear13', word: '창피함', desc: '다른 사람 앞에서 얼굴이 화끈거려요', ask: '남들 앞에서 내 실수나 모습이 드러났어요', same: [{ id: 'fear13a', word: '부끄러움' }, { id: 'fear13b', word: '남부끄러움' }, { id: 'fear13c', word: '낯뜨거움' }] },
+          { id: 'fear14', word: '민망함', desc: '어색한 상황이라 눈 둘 곳을 모르겠어요', ask: '어색한 상황에 놓여 어쩔 줄 몰랐어요', same: [{ id: 'fear14a', word: '무안함' }, { id: 'fear14b', word: '겸연쩍음' }, { id: 'fear14c', word: '계면쩍음' }] },
+          { id: 'fear22', word: '쑥스러움', desc: '칭찬이나 관심을 받아 낯이 간지러워요', same: [{ id: 'fear22a', word: '낯간지러움' }, { id: 'fear22b', word: '멋쩍음' }, { id: 'fear22c', word: '머쓱함' }] },
+          { id: 'fear23', word: '수치심', desc: '나라는 사람 자체가 부끄러워 숨고 싶어요', ask: '나라는 사람 자체가 못나고 작게 느껴졌어요', same: [{ id: 'fear23a', word: '수치스러움' }, { id: 'fear23b', word: '오그라듦' }] }
+        ]
+      },
+      {
+        label: '깜짝 놀랐어요',
+        hint: '갑자기 마음이 덜컥한 느낌',
+        emotions: [
+          { id: 'fear24', word: '깜짝 놀람', desc: '갑작스러운 일에 몸이 움찔했어요', ask: '예상 못 한 일이 갑자기 일어났어요', same: [{ id: 'fear24a', word: '놀람' }, { id: 'fear24b', word: '움찔함' }, { id: 'fear24c', word: '흠칫함' }] },
+          { id: 'fear25', word: '철렁함', desc: '나쁜 소식에 가슴이 덜컥 내려앉아요', ask: '나쁜 소식에 가슴이 쿵 내려앉았어요', same: [{ id: 'fear25a', word: '뜨끔함' }, { id: 'fear25b', word: '찔끔함' }] },
+          { id: 'fear26', word: '어리둥절함', desc: '무슨 일인지 몰라 멍하니 두리번거려요', same: [{ id: 'fear26a', word: '얼떨떨함' }, { id: 'fear26b', word: '휘둥그래짐' }] },
+          { id: 'fear27', word: '얼어붙음', desc: '놀라서 몸이 꼼짝도 안 해요', same: [{ id: 'fear27a', word: '새파래짐' }, { id: 'fear27b', word: '아연실색' }] }
         ]
       },
       {
         label: '무섭고 소름 끼쳐요',
         hint: '피하고 싶은 느낌',
         emotions: [
-          { id: 'fear05', word: '무서움', desc: '다칠 것 같아 피하고 싶어요', same: [{ id: 'fear05a', word: '공포감' }, { id: 'fear05b', word: '무시무시함' }, { id: 'fear05c', word: '살벌함' }] },
+          { id: 'fear05', word: '무서움', desc: '다칠 것 같아 피하고 싶어요', ask: '지금 바로 눈앞에 위험한 것이 있었어요', same: [{ id: 'fear05a', word: '공포감' }, { id: 'fear05b', word: '무시무시함' }, { id: 'fear05c', word: '살벌함' }] },
           { id: 'fear08', word: '오싹함', desc: '등이 서늘해지고 소름이 돋아요', same: [{ id: 'fear08a', word: '섬뜩함' }, { id: 'fear08b', word: '소름 끼침' }, { id: 'fear08c', word: '으스스함' }] },
           { id: 'fear19', word: '끔찍함', desc: '너무 나쁜 장면이라 다시 떠올리기도 싫어요', same: [{ id: 'fear19a', word: '몸서리침' }, { id: 'fear19b', word: '잔혹함' }, { id: 'fear19c', word: '잔인함' }] },
           { id: 'fear20', word: '도망치고 싶음', desc: '그곳을 당장 벗어나고 싶어요' }
@@ -465,26 +496,6 @@ window.MAEUM_DATA.families = [
           { id: 'fear10', word: '부담감', desc: '해야 할 일이 어깨를 누르는 것 같아요', same: [{ id: 'fear10a', word: '부담스러움' }, { id: 'fear10b', word: '스트레스 받음' }] },
           { id: 'fear03', word: '조마조마함', desc: '결과를 기다리며 마음을 졸여요', same: [{ id: 'fear03a', word: '아슬아슬함' }] },
           { id: 'fear18', word: '두근거림', desc: '심장이 쿵쿵 뛰어 숨이 가빠요' }
-        ]
-      },
-      {
-        label: '창피하고 부끄러워요',
-        hint: '얼굴이 화끈한 느낌',
-        emotions: [
-          { id: 'fear13', word: '창피함', desc: '다른 사람 앞에서 얼굴이 화끈거려요', same: [{ id: 'fear13a', word: '부끄러움' }, { id: 'fear13b', word: '남부끄러움' }, { id: 'fear13c', word: '낯뜨거움' }] },
-          { id: 'fear14', word: '민망함', desc: '어색한 상황이라 눈 둘 곳을 모르겠어요', same: [{ id: 'fear14a', word: '무안함' }, { id: 'fear14b', word: '겸연쩍음' }, { id: 'fear14c', word: '계면쩍음' }] },
-          { id: 'fear22', word: '쑥스러움', desc: '칭찬이나 관심을 받아 낯이 간지러워요', same: [{ id: 'fear22a', word: '낯간지러움' }, { id: 'fear22b', word: '멋쩍음' }, { id: 'fear22c', word: '머쓱함' }] },
-          { id: 'fear23', word: '수치심', desc: '나라는 사람 자체가 부끄러워 숨고 싶어요', same: [{ id: 'fear23a', word: '수치스러움' }, { id: 'fear23b', word: '오그라듦' }] }
-        ]
-      },
-      {
-        label: '깜짝 놀랐어요',
-        hint: '갑자기 마음이 덜컥한 느낌',
-        emotions: [
-          { id: 'fear24', word: '깜짝 놀람', desc: '갑작스러운 일에 몸이 움찔했어요', same: [{ id: 'fear24a', word: '놀람' }, { id: 'fear24b', word: '움찔함' }, { id: 'fear24c', word: '흠칫함' }] },
-          { id: 'fear25', word: '철렁함', desc: '나쁜 소식에 가슴이 덜컥 내려앉아요', same: [{ id: 'fear25a', word: '뜨끔함' }, { id: 'fear25b', word: '찔끔함' }] },
-          { id: 'fear26', word: '어리둥절함', desc: '무슨 일인지 몰라 멍하니 두리번거려요', same: [{ id: 'fear26a', word: '얼떨떨함' }, { id: 'fear26b', word: '휘둥그래짐' }] },
-          { id: 'fear27', word: '얼어붙음', desc: '놀라서 몸이 꼼짝도 안 해요', same: [{ id: 'fear27a', word: '새파래짐' }, { id: 'fear27b', word: '아연실색' }] }
         ]
       },
       {
@@ -508,20 +519,10 @@ window.MAEUM_DATA.families = [
         ]
       },
       {
-        label: '불안하고 가만있기 힘들어요',
-        hint: '마음이 놓이지 않는 느낌',
-        emotions: [
-          { id: 'fear31', word: '불안함', desc: '무엇 때문인지 몰라도 마음이 놓이지 않아요', same: [{ id: 'fear31a', word: '불안정함' }] },
-          { id: 'fear04', word: '안절부절', desc: '가만히 있지 못하고 서성여요' },
-          { id: 'fear12', word: '떨림', desc: '손이나 목소리가 떨려요' },
-          { id: 'fear32', word: '예민함', desc: '작은 일에도 마음이 쉽게 흔들려요', same: [{ id: 'fear32a', word: '신경이 날카로움' }] }
-        ]
-      },
-      {
         label: '크게 놀랐어요',
         hint: '큰일에 충격받은 느낌',
         emotions: [
-          { id: 'fear33', word: '충격받음', desc: '큰일을 겪어 머리를 한 대 맞은 것 같아요', same: [{ id: 'fear33a', word: '충격적' }, { id: 'fear33b', word: '쇼킹함' }, { id: 'fear33c', word: '경악' }] },
+          { id: 'fear33', word: '충격받음', desc: '큰일을 겪어 머리를 한 대 맞은 것 같아요', ask: '믿기 힘든 큰일에 마음이 크게 흔들렸어요', same: [{ id: 'fear33a', word: '충격적' }, { id: 'fear33b', word: '쇼킹함' }, { id: 'fear33c', word: '경악' }] },
           { id: 'fear34', word: '기겁', desc: '너무 놀라 겁에 질려 펄쩍 뛰었어요', same: [{ id: 'fear34a', word: '기절초풍' }, { id: 'fear34b', word: '까무러침' }, { id: 'fear34c', word: '기절할 것 같음' }] },
           { id: 'fear35', word: '기막힘', desc: '너무 뜻밖이라 말문이 막혀요', same: [{ id: 'fear35a', word: '뜨악함' }] },
           { id: 'fear36', word: '갑작스러움', desc: '예고 없이 닥친 일에 정신이 없어요', same: [{ id: 'fear36a', word: '급작스러움' }] }
@@ -558,6 +559,30 @@ window.MAEUM_DATA.families = [
     ]
   }
 ];
+
+/*
+  비슷한 감정 구별하기 (compareSets)
+  - 아래 목록에 있는 감정을 고르면, 같은 줄의 감정들과 견주어 보는 화면이 한 번 나와요.
+    화면에는 각 감정의 ask(구별 질문 문장)가 나오고, 사용자는 그때 일과 가장 맞는 문장을 골라요.
+  - 한 줄에 감정 4개. 고른 감정이 맨 위에 오고 나머지가 차례대로 나와요.
+  - 한 감정이 여러 줄에 있으면 위쪽 줄이 쓰여요.
+  - 근거: docs/emotion-words-research.md 8번 (Lazarus 1991 핵심 관계 주제, Tangney 외 1996 등)
+*/
+window.MAEUM_DATA.compareSets = [
+  { name: '나를 탓하고 부끄러운 마음', ids: ['fear23', 'sad20', 'fear13', 'fear14'] },
+  { name: '무섭고 불안한 마음', ids: ['fear05', 'fear07', 'fear31', 'fear01'] },
+  { name: '놀란 마음', ids: ['fear24', 'fear33', 'fear25', 'joy24'] },
+  { name: '슬프고 아쉬운 마음', ids: ['sad30', 'sad11', 'sad05', 'sad01'] },
+  { name: '화난 마음', ids: ['ang19', 'ang05', 'ang09', 'ang01'] },
+  { name: '싫고 밀어내고 싶은 마음', ids: ['ang20', 'ang34', 'ang33', 'ang22'] },
+  { name: '남과 견주는 마음', ids: ['sad24', 'sad27', 'sad25', 'sad26'] },
+  { name: '미안하고 내 탓 같은 마음', ids: ['sad21', 'sad20', 'sad22', 'sad23'] },
+  { name: '기쁜 마음', ids: ['joy28', 'joy29', 'joy07', 'joy10'] },
+  { name: '가라앉고 힘 빠진 마음', ids: ['sad15', 'sad13', 'sad14', 'sad02'] }
+];
+
+/* "단어로 찾기" 화면에서 아무것도 적지 않았을 때 먼저 보여 주는 감정 (핵심 감정) */
+window.MAEUM_DATA.searchSuggest = ['sad30', 'sad11', 'fear23', 'sad20', 'ang19', 'fear07', 'fear24', 'ang20'];
 
 /* 이름을 끝내 붙이지 못했을 때 저장되는 감정 (도감 개수에는 들어가지 않아요) */
 window.MAEUM_DATA.unnamedEmotion = {

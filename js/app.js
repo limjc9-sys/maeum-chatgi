@@ -37,7 +37,7 @@
   var FAMILY = {};       // id → family
   var ALL_WORDS = [];    // 도감에 들어가는 감정 전체 (같은 뜻 다른 말 포함)
   function addEmotion(e, f, hidden) {
-    var main = { id: e.id, word: e.word, desc: e.desc, family: f.id, hidden: hidden, parent: null, same: [] };
+    var main = { id: e.id, word: e.word, desc: e.desc, ask: e.ask || '', family: f.id, hidden: hidden, parent: null, same: [] };
     EMO[e.id] = main;
     ALL_WORDS.push(main);
     (e.same || []).forEach(function (x) {
@@ -60,7 +60,7 @@
 
   var NEED = {};
   D.needs.forEach(function (n) { NEED[n.id] = n; });
-  var UNNAMED_NEED = D.unnamedNeed || { id: 'unnamedNeed', word: '이름 붙이기 어려운 바람', text: '아직 이름을 찾지 못한 바람', tip: '' };
+  var UNNAMED_NEED = D.unnamedNeed || { id: 'unnamedNeed', word: '이름 붙이기 어려운 욕구', text: '아직 이름을 찾지 못한 욕구', tip: '' };
   NEED[UNNAMED_NEED.id] = UNNAMED_NEED;
 
   var CAUSE = {};
@@ -124,7 +124,7 @@
     return word + (b === 'none' ? pair[1] : pair[0]);
   }
   function fill(tpl, vals) {
-    return String(tpl).replace(/\{(원인|감정|강도|바람|글)(을|를|이|가|은|는|과|와|으로|로)?\}/g, function (all, name, j) {
+    return String(tpl).replace(/\{(원인|감정|강도|욕구|바람|글)(을|를|이|가|은|는|과|와|으로|로)?\}/g, function (all, name, j) {
       var v = vals[name];
       if (v === undefined) return all;
       return j ? josa(v, j) : v;
@@ -236,7 +236,7 @@
 
   /* ───────── 공통 화면 조각 ───────── */
   var STEP_OF = {
-    situation: 1, family: 2, group: 2, words: 2, wording: 2, approach: 2, unnamed: 2,
+    situation: 1, family: 2, group: 2, words: 2, wording: 2, compare: 2, search: 2, approach: 2, unnamed: 2,
     intensity: 3, cause: 4, causeOther: 4, need: 5, needUnnamed: 5, result: 6
   };
 
@@ -317,8 +317,25 @@
     }
   }
 
-  function pickEmotion(id, path, exact) {
-    /* 같은 뜻 다른 말이 있으면 어느 말이 가장 가까운지 한 번 더 물어요 */
+  /* 비슷한 감정 구별하기: 고른 감정이 들어 있는 첫 번째 줄 (없으면 null) */
+  function compareSetFor(id) {
+    var sets = D.compareSets || [];
+    for (var i = 0; i < sets.length; i++) {
+      var ids = (sets[i].ids || []).filter(function (x) { return EMO[x] && EMO[x].ask; });
+      if (ids.indexOf(id) !== -1 && ids.length > 1) return [id].concat(ids.filter(function (x) { return x !== id; })).slice(0, 4);
+    }
+    return null;
+  }
+
+  /* exact: 이 말 그대로 (같은 뜻 다른 말·비교 화면을 건너뜀)
+     compared: 비교 화면을 이미 지나옴 */
+  function pickEmotion(id, path, exact, compared) {
+    /* 비슷한 감정과 헷갈리기 쉬운 감정이면 구별 질문으로 한 번 견주어 봐요 */
+    if (!exact && !compared && compareSetFor(id)) {
+      go('compare', { id: id, path: path || null });
+      return;
+    }
+    /* 같은 뜻 다른 말이 있으면 평소 쓰는 말을 한 번 더 골라요 */
     if (!exact && EMO[id] && EMO[id].same && EMO[id].same.length) {
       go('wording', { id: id, path: path || null });
       return;
@@ -369,7 +386,7 @@
     if (need.id === UNNAMED_NEED.id) tpl = T.summaryNoNeed;
     else if (e.family === 'joy') tpl = T.summaryMet;
     else tpl = T.summaryUnmet;
-    var summary = fill(tpl, { '원인': causeSentence, '감정': e.word, '강도': intensityWord(draft.intensity), '바람': need.text });
+    var summary = fill(tpl, { '원인': causeSentence, '감정': e.word, '강도': intensityWord(draft.intensity), '욕구': need.text, '바람': need.text });
     var now = new Date();
     var rec = {
       id: 'r' + now.getTime() + Math.floor(Math.random() * 1000),
@@ -421,7 +438,7 @@
       ),
       el('nav', { class: 'menu' },
         menuBtn('📖', '감정 도감', '찾은 감정 단어 모아 보기', function () { go('dex', {}); }, 'menu-dex'),
-        menuBtn('📊', '주간 감정 보고서', '자주 나온 감정과 바람', function () { go('report', { offset: 0 }); }, 'menu-report'),
+        menuBtn('📊', '주간 감정 보고서', '자주 나온 감정과 욕구', function () { go('report', { offset: 0 }); }, 'menu-report'),
         menuBtn('🗂', '지난 기록', '지금까지 만든 마음 카드', function () { go('records', {}); }, 'menu-records'),
         menuBtn('💾', '기록 옮기기', '파일로 저장하기·불러오기', function () { go('backup', {}); }, 'menu-backup'),
         introCards().length ? menuBtn('❓', T.introMenu || '게임 방법', T.introMenuHint || '', function () { go('intro', { page: 0 }); }, 'menu-intro') : null
@@ -508,13 +525,15 @@
       placeholder: T.situationPlaceholder, 'aria-describedby': 'situation-guide'
     });
     ta.value = draft.situation || '';
-    var err = el('p', { class: 'error', role: 'alert' });
     var count = el('p', { class: 'counter' }, ta.value.length + ' / 200');
-    ta.addEventListener('input', function () { count.textContent = ta.value.length + ' / 200'; err.textContent = ''; });
+    /* 아무것도 안 적었으면 버튼이 "적지 않고 시작하기"가 돼요 (있었던 일은 적지 않아도 돼요) */
+    var nextBtn = el('button', { class: 'btn btn-primary btn-big', type: 'button', onclick: next, 'data-testid': 'next' });
+    function label() { nextBtn.textContent = ta.value.trim() ? T.nextButton : (T.situationSkip || T.nextButton); }
+    label();
+    ta.addEventListener('input', function () { count.textContent = ta.value.length + ' / 200'; label(); });
     function next() {
       var v = ta.value.trim();
-      if (!v) { err.textContent = T.situationEmpty; ta.focus(); return; }
-      if (isRisky(v)) { stack = []; draft = null; current = { screen: 'crisis', params: {} }; render(); return; }
+      if (v && isRisky(v)) { stack = []; draft = null; current = { screen: 'crisis', params: {} }; render(); return; }
       draft.situation = v;
       go('family', {});
     }
@@ -522,8 +541,8 @@
       heading(T.situationTitle),
       el('p', { class: 'guide', id: 'situation-guide' }, T.situationGuide),
       el('label', { class: 'sr-only', for: 'situation' }, T.situationTitle),
-      ta, count, err,
-      el('button', { class: 'btn btn-primary btn-big', type: 'button', onclick: next, 'data-testid': 'next' }, T.nextButton)
+      ta, count,
+      nextBtn
     );
   };
 
@@ -532,7 +551,7 @@
       return option(i + 1, f.emoji + ' ' + f.label, f.hint, function () { go('group', { family: f.id }); }, { color: f.color, id: f.id });
     });
     opts.push(fiveOption(T.familyNotSure, T.familyNotSureHint));
-    return screen('family', null, topBar(), progress(), situationChip(), heading(T.familyTitle), el('div', { class: 'opts' }, opts));
+    return screen('family', null, topBar(), progress(), situationChip(), heading(T.familyTitle), el('div', { class: 'opts' }, opts), searchButton());
   };
 
   function situationChip() {
@@ -561,7 +580,7 @@
     }
     var lead = f.emoji + ' ' + f.label + (pages > 1 ? ' (' + (pg + 1) + ' / ' + pages + ')' : '');
     return screen('group', { 'data-family': f.id, 'data-page': String(pg) }, topBar(), progress(),
-      heading(T.groupTitle, lead), el('div', { class: 'opts' }, opts));
+      heading(T.groupTitle, lead), el('div', { class: 'opts' }, opts), searchButton());
   };
 
   screens.words = function (p) {
@@ -592,8 +611,140 @@
     });
     opts.push(fiveOption());
     return screen('wording', { 'data-parent': e.id }, topBar(), progress(),
-      heading(T.wordingTitle || '같은 뜻의 말이 여러 개 있어요. 어느 말이 가장 가까운가요?', FAMILY[e.family].emoji + ' ' + e.word),
+      heading(T.wordingTitle || '뜻은 같은 말이에요. 평소에 쓰는 말을 골라 보세요.', FAMILY[e.family].emoji + ' ' + e.word),
+      T.wordingGuide ? el('p', { class: 'guide' }, T.wordingGuide) : null,
       el('div', { class: 'opts' }, opts));
+  };
+
+  /* 비슷한 감정 구별하기 — 감정 이름 대신 "그때 무슨 일이었는지"를 문장으로 견주어 골라요 */
+  screens.compare = function (p) {
+    var e = EMO[p.id];
+    var ids = compareSetFor(p.id) || [p.id];
+    var opts = ids.map(function (id, i) {
+      var w = EMO[id];
+      return option(i + 1, w.ask, '→ ' + w.word, function () { pickEmotion(id, p.path, false, true); },
+        { color: FAMILY[w.family].color, id: id, cls: id === p.id ? 'opt-picked' : '' });
+    });
+    opts.push(fiveOption());
+    return screen('compare', { 'data-picked': e.id }, topBar(), progress(),
+      heading(T.compareTitle || '비슷한 감정과 견주어 볼게요. 그때 일과 가장 맞는 문장을 골라 보세요.',
+        FAMILY[e.family].emoji + ' ' + fill(T.compareLead || '고른 감정: {감정}', { '감정': e.word })),
+      el('div', { class: 'opts' }, opts));
+  };
+
+  /* ───── 단어로 찾기 ───── */
+  function searchButton() {
+    return el('button', { class: 'btn btn-secondary search-open', type: 'button', 'data-testid': 'search-open', onclick: function () { go('search', {}); } },
+      T.searchButton || '🔍 단어로 찾기');
+  }
+
+  /* 한글 글자 나누기·붙이기 (받침 떼기, 모음 바꾸기에 써요) */
+  function syl(ch) {
+    var c = ch.charCodeAt(0) - 0xAC00;
+    if (c < 0 || c > 11171) return null;
+    return { cho: Math.floor(c / 588), jung: Math.floor((c % 588) / 28), jong: c % 28 };
+  }
+  function mk(x) { return String.fromCharCode(0xAC00 + x.cho * 588 + x.jung * 28 + x.jong); }
+  function dropJong(w, jongs) {
+    var last = syl(w.charAt(w.length - 1));
+    if (!last || jongs.indexOf(last.jong) === -1) return null;
+    last.jong = 0;
+    return w.slice(0, -1) + mk(last);
+  }
+  /* 적은 말에서 끝말(했다·웠어요 등)을 떼어 낸 줄기들 */
+  var ENDINGS = ['스러웠어요', '스러웠다', '스러워요', '스러워서', '스럽다', '스러움', '했어요', '했었다', '합니다', '했다', '하다', '해요', '해서', '했던', '하고', '하게',
+    '웠어요', '웠다', '워요', '워서', '었어요', '았어요', '었다', '았다', '어요', '아요', '어서', '아서', '이다',
+    '했어', '웠어', '었어', '았어', '해', '다', '요', '함', '음', '움', '됨'];
+  function queryStems(q) {
+    var out = [q];
+    ENDINGS.forEach(function (end) {
+      if (q.length > end.length && q.slice(-end.length) === end) out.push(q.slice(0, -end.length));
+    });
+    out.slice().forEach(function (v) {
+      var d = dropJong(v, [20, 16]); // ㅆ·ㅁ 받침 떼기 (놀랐 → 놀라, 놀람 → 놀라)
+      if (d) out.push(d);
+    });
+    out.slice().forEach(function (v) {
+      var last = syl(v.charAt(v.length - 1));
+      if (last && last.jong === 0 && (last.jung === 4 || last.jung === 0)) { // 슬퍼 → 슬프, 아파 → 아프
+        last.jung = 18;
+        out.push(v.slice(0, -1) + mk(last));
+      }
+    });
+    return out.filter(function (v, i) { return v && out.indexOf(v) === i; });
+  }
+  function squash(t) { return String(t || '').replace(/[\s.,!?~…·'"“”‘’()]/g, ''); }
+  function searchWords(text) {
+    var q = squash(text);
+    if (!q) return [];
+    var stems = queryStems(q);
+    var hits = [];
+    ALL_WORDS.forEach(function (w, order) {
+      var k = squash(w.word);
+      var kStem = dropJong(k, [16]) || k; // 놀람 → 놀라, 슬픔 → 슬프
+      var score = 0;
+      if (k === q) score = 100;
+      else if (k.indexOf(q) === 0) score = 90;
+      else if (k.indexOf(q) !== -1 && q.length >= 2) score = 70;
+      else {
+        stems.forEach(function (v) {
+          if (k === v + '함' || k === v + '음' || k === v + '움') score = Math.max(score, 68); // 편 → 편함
+          else if (v.length >= 2 && (k.indexOf(v) === 0 || kStem === v)) score = Math.max(score, 65);
+          else if (v.length === 1 && (k === v || kStem === v)) score = Math.max(score, 65);
+          else if (k.length >= 2 && v.indexOf(k) === 0) score = Math.max(score, 60); // 짜증났다 → 짜증
+          else if (kStem.length >= 2 && v.indexOf(kStem) === 0) score = Math.max(score, 55);
+        });
+      }
+      if (!score && q.length >= 2 && String(w.desc || '').replace(/\s/g, '').indexOf(q) !== -1) score = 20;
+      if (score) hits.push({ w: w, score: score - (w.parent ? 1 : 0), order: order });
+    });
+    hits.sort(function (a, b) { return b.score - a.score || a.order - b.order; });
+    return hits.slice(0, 12).map(function (h) { return h.w; });
+  }
+
+  screens.search = function () {
+    var input = el('input', {
+      id: 'search-text', class: 'input', type: 'search', maxlength: '20', autocomplete: 'off', enterkeyhint: 'search',
+      placeholder: T.searchPlaceholder || '감정 단어 적기', 'aria-describedby': 'search-guide', 'data-testid': 'search-input'
+    });
+    var info = el('p', { class: 'guide', 'aria-live': 'polite', 'data-testid': 'search-info' });
+    var list = el('div', { class: 'search-list', 'data-testid': 'search-results' });
+    function item(w) {
+      var fam = FAMILY[w.family];
+      var head = w.parent ? EMO[w.parent] : null;
+      var hint = (head ? fill(T.searchSame || '{감정과} 같은 뜻', { '감정': head.word }) + ' · ' : '') + w.desc;
+      return el('button', {
+        class: 'search-item', type: 'button', 'data-id': w.id, style: '--accent:' + fam.color,
+        onclick: function () { pickEmotion(w.id, 'search', true); }
+      },
+        el('span', { class: 'opt-body' },
+          el('span', { class: 'opt-label' }, (w.hidden ? '★ ' : '') + w.word),
+          el('span', { class: 'opt-hint' }, fam.emoji + ' ' + fam.label + ' · ' + hint)
+        )
+      );
+    }
+    function show() {
+      var v = input.value;
+      list.innerHTML = '';
+      var words;
+      if (!squash(v)) {
+        info.textContent = T.searchSuggest || '자주 찾는 감정';
+        words = (D.searchSuggest || []).filter(function (id) { return EMO[id]; }).map(function (id) { return EMO[id]; });
+      } else {
+        words = searchWords(v);
+        info.textContent = words.length ? fill(T.searchResults || '찾은 단어 {글}개', { '글': String(words.length) }) : (T.searchNone || '맞는 단어를 못 찾았어요.');
+      }
+      words.forEach(function (w) { list.appendChild(item(w)); });
+    }
+    input.addEventListener('input', show);
+    input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); } });
+    show();
+    return screen('search', null, topBar(), progress(),
+      heading(T.searchTitle || '떠오르는 감정 단어를 적어 보세요'),
+      el('p', { class: 'guide', id: 'search-guide' }, T.searchGuide || ''),
+      el('label', { class: 'sr-only', for: 'search-text' }, T.searchTitle || '단어로 찾기'),
+      input, info, list
+    );
   };
 
   screens.approach = function (p) {
@@ -749,7 +900,7 @@
           el('h2', { class: 'card-label' }, '🌱 ' + T.resultTip),
           el('p', { class: 'card-text', 'data-testid': 'result-tip' }, rec.tip)
         ),
-        el('p', { class: 'card-situation' }, '있었던 일: ' + rec.situation)
+        rec.situation ? el('p', { class: 'card-situation' }, '있었던 일: ' + rec.situation) : null
       ),
       el('p', { class: 'streak-line', 'data-testid': 'result-streak' }, '🔥 연속 기록 ' + streak() + '일 · 📖 도감 ' + found + ' / ' + ALL_WORDS.length),
       el('button', { class: 'btn btn-primary btn-big', type: 'button', onclick: goHome, 'data-testid': 'home' }, T.homeButton),
@@ -921,7 +1072,7 @@
       ),
       el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '자주 나온 감정'),
         bars(emo, function (k) { return (EMO[k] && EMO[k].word) || wordOf[k] || k; }, function (k) { return EMO[k] ? FAMILY[EMO[k].family].color : null; }, 'bars-emotion')),
-      el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '자주 나온 바람'),
+      el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '자주 나온 욕구'),
         bars(need, function (k) { return (NEED[k] && NEED[k].word) || wordOf['n:' + k] || k; }, null, 'bars-need')),
       el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '감정 쪽 나눠 보기'),
         bars(fam, function (k) { var f = FAMILY[k] || FAMILY.unknown; return f.emoji + ' ' + f.label; }, function (k) { return (FAMILY[k] || FAMILY.unknown).color; }, 'bars-family')),
@@ -932,7 +1083,7 @@
     var e = emo[0], n = need[0];
     var ew = (EMO[e.key] && EMO[e.key].word) || wordOf[e.key];
     var nw = (NEED[n.key] && NEED[n.key].word) || wordOf['n:' + n.key];
-    return '이번 주에는 "' + ew + '"' + (batchim(ew + '"') === 'none' ? '가' : '이') + ' 가장 자주 찾아왔고, "' + nw + '"에 대한 바람이 자주 보였어요.';
+    return '이번 주에는 "' + ew + '"' + (batchim(ew + '"') === 'none' ? '가' : '이') + ' 가장 자주 찾아왔고, "' + nw + '" 욕구가 자주 보였어요.';
   }
 
   screens.records = function () {
@@ -946,7 +1097,7 @@
           el('p', { class: 'rec-emotion' }, f.emoji + ' ' + r.emotionWord + (r.hidden ? ' ★' : '') + ' · ' + r.intensity + '점'),
           el('p', { class: 'rec-need' }, '필요했던 것: ' + r.needWord),
           el('p', { class: 'rec-summary' }, r.summary),
-          el('p', { class: 'rec-sit' }, '있었던 일: ' + r.situation)
+          r.situation ? el('p', { class: 'rec-sit' }, '있었던 일: ' + r.situation) : null
         );
       })) : el('p', { class: 'guide' }, '아직 기록이 없어요. 처음 화면에서 "시작하기"를 눌러 보세요.')
     );
@@ -1157,7 +1308,8 @@
     isRisky: isRisky, josa: josa, fill: fill, streak: streak,
     totalWords: function () { return ALL_WORDS.length; },
     totalNeeds: function () { return D.needs.length; },
-    records: function () { return records(); }
+    records: function () { return records(); },
+    searchWords: function (t) { return searchWords(t).map(function (w) { return w.word; }); }
   };
 
   /* 처음 여는 사람(기록도 없고 안내도 안 본 사람)에게만 게임 방법 안내를 먼저 보여 줘요 */

@@ -8,7 +8,7 @@
       {원인}   → "그 사람의 말에서" 같은 말
       {감정을} → "서운함을" / "짜증을" (을·를은 앱이 알아서 맞춰요)
       {강도}   → "많이" 같은 말
-      {바람이} → "들어 주는 것이" (이·가는 앱이 알아서 맞춰요)
+      {욕구가} → "들어 주는 것이" (이·가는 앱이 알아서 맞춰요)
 */
 window.MAEUM_DATA = window.MAEUM_DATA || {};
 
@@ -20,13 +20,13 @@ window.MAEUM_DATA.text = {
   startButton: '시작하기',
 
   /* 단계 이름 (화면 위쪽에 나와요) */
-  steps: ['있었던 일', '감정 고르기', '강도', '원인', '바람', '결과'],
+  steps: ['있었던 일', '감정 고르기', '강도', '원인', '욕구', '결과'],
 
   /* ① 상황 입력 */
   situationTitle: '오늘 어떤 일이 있었나요?',
-  situationGuide: '있었던 일을 1~3줄로 짧게 적어 주세요.',
+  situationGuide: '있었던 일을 1~3줄로 짧게 적어 주세요. 적지 않고 바로 시작해도 돼요.',
   situationPlaceholder: '예) 친구가 약속 시간에 30분이나 늦게 왔다.',
-  situationEmpty: '한 글자 이상 적어 주세요.',
+  situationSkip: '적지 않고 시작하기',
   nextButton: '다음',
 
   /* ② 큰 감정 고르기 */
@@ -41,8 +41,23 @@ window.MAEUM_DATA.text = {
   wordsTitle: '이 중 가장 가까운 감정을 골라 보세요.',
   noneOfThese: '이 중엔 없어요',
   noneOfTheseHint: '다른 방법으로 물어볼게요',
-  wordingTitle: '같은 뜻의 말이 여러 개 있어요. 어느 말이 가장 가까운가요?',
+  wordingTitle: '뜻은 같은 말이에요. 평소에 쓰는 말을 골라 보세요.',
+  wordingGuide: '어느 것을 골라도 틀리지 않아요. 입에 붙는 말이면 돼요.',
   wordingSameHint: '{감정과} 같은 뜻이에요',
+
+  /* 비슷한 감정 구별하기 (data/emotions.js의 compareSets) */
+  compareTitle: '비슷한 감정과 견주어 볼게요. 그때 일과 가장 맞는 문장을 골라 보세요.',
+  compareLead: '고른 감정: {감정}',
+
+  /* 단어로 찾기 */
+  searchButton: '🔍 단어로 찾기',
+  searchTitle: '떠오르는 감정 단어를 적어 보세요',
+  searchGuide: '예) 부끄러웠다, 미안함, 놀람, 서운해요',
+  searchPlaceholder: '감정 단어 적기',
+  searchSuggest: '자주 찾는 감정',
+  searchResults: '찾은 단어 {글}개',
+  searchNone: '맞는 단어를 못 찾았어요. 다른 말로 적거나, 이전 화면에서 쪽을 골라 찾아보세요.',
+  searchSame: '{감정과} 같은 뜻',
 
   /* ④ 강도 */
   intensityTitle: '그 감정은 얼마나 컸나요?',
@@ -67,15 +82,15 @@ window.MAEUM_DATA.text = {
   dexButton: '감정 도감 보기',
 
   /* 한 줄 정리 문장 */
-  summaryUnmet: '{원인} {감정을} {강도} 느꼈고, 마음 깊은 곳에서는 {바람이} 필요했어요.',
-  summaryMet: '{원인} {감정을} {강도} 느꼈어요. {바람이} 채워졌기 때문이에요.',
-  summaryNoNeed: '{원인} {감정을} {강도} 느꼈어요. 그 밑에 있는 바람은 아직 찾는 중이에요.',
+  summaryUnmet: '{원인} {감정을} {강도} 느꼈고, 마음 깊은 곳에서는 {욕구가} 필요했어요.',
+  summaryMet: '{원인} {감정을} {강도} 느꼈어요. {욕구가} 채워졌기 때문이에요.',
+  summaryNoNeed: '{원인} {감정을} {강도} 느꼈어요. 그 밑에 있는 욕구는 아직 찾는 중이에요.',
 
-  /* 이름 붙이기 어려운 감정·바람 */
+  /* 이름 붙이기 어려운 감정·욕구 */
   unnamedTitle: '지금은 이름 붙이기 어려운 감정이에요',
   unnamedBody: '괜찮아요. 모든 감정에 바로 이름이 붙지는 않아요. 오늘 마음은 "지금은 이름 붙이기 어려운 감정"으로 저장해 둘게요. 시간이 지나면 이름이 떠오를 수도 있어요.',
-  unnamedNeedTitle: '바람도 천천히 찾아도 돼요',
-  unnamedNeedBody: '무엇이 필요했는지 바로 떠오르지 않을 때도 있어요. 오늘은 "이름 붙이기 어려운 바람"으로 남겨 둘게요.',
+  unnamedNeedTitle: '욕구도 천천히 찾아도 돼요',
+  unnamedNeedBody: '무엇이 필요했는지 바로 떠오르지 않을 때도 있어요. 오늘은 "이름 붙이기 어려운 욕구"으로 남겨 둘게요.',
   continueButton: '계속하기',
 
   /* 위로 문장 (홈 화면 아래쪽) */
@@ -123,7 +138,7 @@ window.MAEUM_DATA.causes = [
 
 /*
   "이 중엔 없어요"(5번)를 누를 때마다 차례대로 바뀌는 질문 방법
-  1번째: 몸 감각 → 2번째: 하고 싶었던 행동 → 3번째: 반대로(바람부터) → 4번째: 비슷한 옛 경험
+  1번째: 몸 감각 → 2번째: 하고 싶었던 행동 → 3번째: 반대로(욕구부터) → 4번째: 비슷한 옛 경험
   그다음에도 5번을 누르면 "지금은 이름 붙이기 어려운 감정"으로 저장돼요.
   emotions 안의 이름표는 emotions.js의 id예요.
 */
@@ -156,7 +171,7 @@ window.MAEUM_DATA.approaches = [
     key: 'reverse',
     intro: '감정 이름은 잠시 내려놓을게요. 거꾸로 가 볼게요.',
     question: '그때 가장 바랐던 것은 무엇이었나요?',
-    wordsQuestion: '그 바람을 떠올리면, 그때 마음은 이 중 어디에 가까웠나요?',
+    wordsQuestion: '그 욕구를 떠올리면, 그때 마음은 이 중 어디에 가까웠나요?',
     options: [
       { label: '누가 내 마음을 알아주길 바랐어요', need: 'con2', emotions: ['sad01', 'sad02', 'sadH1', 'ang09'] },
       { label: '공평하게, 존중받으며 대해지길 바랐어요', need: 'res2', emotions: ['ang05', 'ang11', 'angH4', 'ang07'] },
@@ -179,7 +194,7 @@ window.MAEUM_DATA.approaches = [
 ];
 
 /*
-  ⑥ 바람(욕구) 찾기 — 5번을 누를 때마다 다음 질문으로 바뀌어요.
+  ⑥ 욕구 찾기 — 5번을 누를 때마다 다음 질문으로 바뀌어요.
   question     = 기쁨 쪽이 아닐 때 질문
   questionJoy  = 기쁨 쪽일 때 질문
   1번째 질문의 보기는 아래 needsByCause(감정 쪽 × 원인)에서 골라요.
@@ -188,7 +203,7 @@ window.MAEUM_DATA.approaches = [
 window.MAEUM_DATA.needRounds = [
   {
     question: '그 순간 무엇이 있었다면 괜찮았을까요?',
-    questionJoy: '그 기쁨은 어떤 바람이 채워져서 생겼을까요?'
+    questionJoy: '그 기쁨은 어떤 욕구가 채워져서 생겼을까요?'
   },
   {
     question: '그때 다른 사람이 어떻게 해 줬다면 마음이 달랐을까요?',
@@ -207,7 +222,7 @@ window.MAEUM_DATA.needRounds = [
   }
 ];
 
-/* 첫 번째 바람 질문의 보기: 감정 쪽 × 원인 (각 4개) */
+/* 첫 번째 욕구 질문의 보기: 감정 쪽 × 원인 (각 4개) */
 window.MAEUM_DATA.needsByCause = {
   joy: {
     word: ['con2', 'grow3', 'con4', 'mean5'],
