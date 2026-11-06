@@ -85,7 +85,7 @@ function checkData() {
     (e.same || []).forEach((x) => { ok(!emo[x.id], `감정 id 중복: ${x.id}`); emo[x.id] = { ...x, desc: e.desc, hidden: isHidden, parent: e.id }; total++; });
   }
   D.families.forEach((f) => {
-    ok(f.groups.length >= 4, `${f.id}: 세부 묶음이 4개 이상이어야 함 (지금 ${f.groups.length}개)`);
+    ok(f.groups.length >= 2, `${f.id}: 세부 묶음이 2개 이상이어야 함 (지금 ${f.groups.length}개)`);
     ok(new Set(f.groups.map((g) => g.label)).size === f.groups.length, `${f.id}: 묶음 이름이 서로 겹치지 않음`);
     f.groups.forEach((g) => {
       ok(g.label && g.hint, `${f.id}/${g.label}: 묶음 label/hint 모두 있어야 함`);
@@ -96,20 +96,22 @@ function checkData() {
     });
     f.hidden.forEach((e) => { ok(!emo[e.id], `감정 id 중복: ${e.id}`); emo[e.id] = { ...e, hidden: true }; total++; hidden++; checkSame(e); addSame(e, true); });
   });
-  ok(D.families.length === 4, '큰 감정 쪽 4개');
+  ok(D.families.length === 7, `큰 감정 쪽 7개 (지금 ${D.families.length}개)`);
+  ok(JSON.stringify(D.families.map((f) => f.id)) === JSON.stringify(['joy', 'sad', 'anger', 'fear', 'shame', 'surprise', 'disgust']), '쪽 id와 순서');
+  D.families.forEach((f) => ok(f.label && f.hint && f.emoji && /^#[0-9A-Fa-f]{6}$/.test(f.color), `${f.id}: label/hint/emoji/color`));
+  ok(new Set(D.families.map((f) => f.color)).size === D.families.length, '쪽 색이 서로 다름');
   ok(total >= 500, `감정 단어 500개 이상 (지금 ${total}개)`);
   // 원자료 단어가 모두 게임 단어로 들어갔는지
   const wordSet = new Set(Object.values(emo).map((e) => e.word));
   ok(SOURCE_MAP.length + EXCLUDED_EXPLETIVES === 604, `원자료 단어 수: 대응표 ${SOURCE_MAP.length} + 욕설 ${EXCLUDED_EXPLETIVES} = 604 (무드 미터 100, 부록 504)`);
   SOURCE_MAP.forEach((m) => ok(wordSet.has(m.game), `원자료 "${m.src}"(${m.origin})의 게임 단어 "${m.game}"가 있음`));
-  // 처음 만든 id가 그대로 있고, 같은 쪽·같은 종류(일반/숨은)에 있는지
+  // 처음 만든 id가 그대로 있고, 같은 종류(일반/숨은)에 있는지 (쪽은 옮겨도 됨: 지난 기록의 쪽 값은 앱이 다시 계산함)
+  const inGroups = new Set(D.families.flatMap((f) => f.groups.flatMap((g) => g.emotions.map((e) => e.id))));
+  const inHidden = new Set(D.families.flatMap((f) => f.hidden.map((e) => e.id)));
   Object.entries(ORIGINAL_IDS).forEach(([fam, c]) => {
     const pre = c.prefix || fam;
-    const famObj = D.families.find((f) => f.id === fam);
-    const inGroups = new Set(famObj.groups.flatMap((g) => g.emotions.map((e) => e.id)));
-    const inHidden = new Set(famObj.hidden.map((e) => e.id));
-    for (let k = 1; k <= c.groups; k++) { const id = pre + String(k).padStart(2, '0'); ok(inGroups.has(id), `처음 id ${id}가 ${fam} 묶음에 그대로 있음`); }
-    for (let k = 1; k <= c.hidden; k++) { const id = pre + 'H' + k; ok(inHidden.has(id), `처음 id ${id}가 ${fam} 숨은 감정에 그대로 있음`); }
+    for (let k = 1; k <= c.groups; k++) { const id = pre + String(k).padStart(2, '0'); ok(inGroups.has(id), `처음 id ${id}가 묶음에 그대로 있음`); }
+    for (let k = 1; k <= c.hidden; k++) { const id = pre + 'H' + k; ok(inHidden.has(id), `처음 id ${id}가 숨은 감정에 그대로 있음`); }
   });
   // 비슷한 단어가 같은 화면에 함께 나오지 않는지
   const screens = [];
@@ -124,7 +126,28 @@ function checkData() {
   ok(new Set(words).size === words.length, '감정 단어가 서로 겹치지 않음');
   const need = {};
   D.needs.forEach((n) => { ok(!need[n.id], `욕구 id 중복: ${n.id}`); need[n.id] = n; ok(n.word && n.text && n.tip, `욕구 ${n.id}: word/text/tip 모두 있어야 함`); });
-  ok(D.needs.length >= 40, `욕구 단어 40개 이상 (지금 ${D.needs.length}개)`);
+  ok(D.needs.length >= 52, `욕구 단어 52개 이상 (지금 ${D.needs.length}개)`);
+  ['con1', 'con2', 'con3', 'con4', 'con5', 'con6', 'res1', 'res2', 'res3', 'res4', 'res5', 'res6', 'saf1', 'saf2', 'saf3', 'saf4', 'saf5', 'saf6',
+    'rest1', 'rest2', 'rest3', 'rest4', 'rest5', 'rest6', 'grow1', 'grow2', 'grow3', 'grow4', 'grow5', 'grow6', 'free1', 'free2', 'free3', 'free4', 'free5', 'free6',
+    'mean1', 'mean2', 'mean3', 'mean4', 'mean5', 'mean6', 'clar1', 'clar2', 'clar3', 'clar4', 'clar5', 'clar6'].forEach((id) => ok(!!need[id], `처음 욕구 id ${id}가 그대로 있음`));
+  // 욕구 쪽: 모든 욕구가 한 쪽에 한 번씩
+  const inNeedGroups = D.needGroups.flatMap((g) => g.needs);
+  ok(D.needGroups.length === 8 && D.needGroups.every((g) => g.label && g.hint && g.needs.length >= 4), '욕구 쪽 8개, 쪽마다 label/hint, 욕구 4개 이상');
+  ok(inNeedGroups.length === D.needs.length && new Set(inNeedGroups).size === D.needs.length && inNeedGroups.every((id) => need[id]), `모든 욕구가 욕구 쪽에 한 번씩 들어감 (${inNeedGroups.length} / ${D.needs.length})`);
+  // 감정별 첫 욕구 보기
+  Object.entries(D.needsByEmotion).forEach(([eid, list]) => {
+    ok(!!emo[eid] && !emo[eid].parent, `needsByEmotion: ${eid}는 대표 감정 id`);
+    ok(list.length === 4 && new Set(list).size === 4 && list.every((id) => need[id]), `needsByEmotion.${eid}: 서로 다른 욕구 4개`);
+  });
+  (D.compareSets || []).forEach((cs) => cs.ids.forEach((id) => ok(!!D.needsByEmotion[id], `구별 질문 감정 ${id}에 감정별 욕구가 있음`)));
+  // 비슷한 욕구 구별하기
+  const needAsks = new Set();
+  D.needCompareSets.forEach((cs) => {
+    ok(cs.ids.length === 4 && new Set(cs.ids).size === 4, `욕구 구별 "${cs.name}": 서로 다른 욕구 4개`);
+    cs.ids.forEach((id) => { ok(!!(need[id] && need[id].ask), `욕구 구별 "${cs.name}": ${id}에 ask`); if (need[id]) needAsks.add(need[id].ask); });
+  });
+  ok(needAsks.size === D.needs.filter((n) => n.ask).length, '욕구 구별 문장이 서로 다르고 모두 쓰임');
+  ok(D.needSearchSuggest.length >= 4 && D.needSearchSuggest.every((id) => need[id]), '욕구 찾기 추천 id가 모두 있음');
   ok(new Set(D.needs.map((n) => n.word)).size === D.needs.length, '욕구 단어가 서로 겹치지 않음');
   // 접근 방법이 가리키는 감정이 실제로 있는지
   ok(D.approaches.length === 4, '5번 접근 방법 4가지');
@@ -145,8 +168,8 @@ function checkData() {
       (m[c.id] || []).forEach((id) => ok(!!need[id], `needsByCause.${fam}.${c.id}: 없는 욕구 id ${id}`));
     });
   });
-  D.needRounds.slice(1).forEach((r, i) => r.pool.forEach((id) => ok(!!need[id], `needRounds[${i + 1}]: 없는 욕구 id ${id}`)));
-  ok(new Set(D.needRounds.map((r) => r.question)).size === D.needRounds.length, '욕구 질문이 서로 다름');
+  ok(D.needRounds[0].question && D.needRounds[0].questionJoy, '첫 욕구 질문 문장');
+  ok(D.families.every((f) => D.needsByCause[f.id]), '모든 감정 쪽에 needsByCause가 있음');
   // 비슷한 감정 구별하기: 줄마다 감정 4개, 모두 일반 감정이고 구별 질문(ask)이 있음
   ok(Array.isArray(D.compareSets) && D.compareSets.length >= 8, `구별 질문 줄 8개 이상 (지금 ${D.compareSets && D.compareSets.length}개)`);
   const asks = new Set();
@@ -325,16 +348,21 @@ async function runForWidth(browser, base, width, D) {
 
   /* 2-1. 감정 묶음 4개 각각 끝까지 */
   const familyIds = ['joy', 'anger', 'sad', 'fear'];
-  for (let i = 0; i < 4; i++) {
-    const fi = i + 1; // 1~4번
+  for (let i = 0; i < D.families.length; i++) {
+    const fi = i + 1; // 1~7번
     const fam = D.families[i];
-    const gi = (i % 4) + 1;
+    const gi = (i % fam.groups.length) + 1;
     const wi = ((i + 2) % 4) + 1;
     const entry = fam.groups[gi - 1].emotions[wi - 1];
     const expectWord = entry.same && entry.same.length ? entry.same[0].word : entry.word;
     await newGame(page, h, `테스트 상황 ${fi}: 친구가 약속에 늦게 와서 한참 기다렸다.`);
     await h.expect('family', `${fam.label} 큰 감정`);
-    if (i === 0) await h.snap('family');
+    if (i === 0) {
+      await h.snap('family');
+      const tiles = await page.$$eval('#app .opts-grid .opt', (els) => els.map((e) => ({ id: e.getAttribute('data-id'), five: e.classList.contains('opt-five') })));
+      ok(tiles.length === D.families.length + 1, `[${width}px] 첫 화면 칸 ${D.families.length + 1}개 (쪽 ${D.families.length} + 잘 모르겠어요)`);
+      ok(tiles.filter((t) => t.five).map((t) => t.id).join() === 'not-sure', `[${width}px] 첫 화면에서 "이 중엔 없어요" 모양은 "잘 모르겠어요" 칸에만`);
+    }
     await h.opt(fi);
     await h.expect('group', `${fam.label} 묶음`);
     await h.snap(`group-${fam.id}`);
@@ -363,19 +391,23 @@ async function runForWidth(browser, base, width, D) {
     }
     await h.expect('intensity', `${fam.label} 강도`);
     if (i === 0) await h.snap('intensity');
-    await page.click(`[data-score="${6 + i}"]`);
+    await page.click(`[data-score="${3 + i}"]`);
     await h.expect('cause', `${fam.label} 원인`);
     if (i === 0) await h.snap('cause');
-    await h.opt(fi); // 원인 1~4
+    await h.opt((i % 4) + 1); // 원인 1~4
     await h.expect('need', `${fam.label} 욕구`);
     const nq = await h.question();
     ok(nq === (fam.id === 'joy' ? D.needRounds[0].questionJoy : D.needRounds[0].question), `[${width}px ${fam.label}] 욕구 질문 문장`);
+    const nl = await optLabels(page);
+    const expectNeeds = (D.needsByEmotion[entry.id] || D.needsByCause[fam.id][D.causes[i % 4].id]).map((id) => D.needs.find((n) => n.id === id).text);
+    ok(nl.join('|') === expectNeeds.join('|'), `[${width}px ${fam.label}] 첫 욕구 보기 (${entry.word}): ${nl.join(' / ')}`);
     await h.snap(`need-${fam.id}`);
     await h.opt(2);
+    await passNeedCompare(page, h);
     await h.expect('result', `${fam.label} 결과 카드`);
     const emoText = await page.textContent('[data-testid="result-emotion"]');
     ok(emoText.includes(expectWord), `[${width}px ${fam.label}] 결과 카드 감정 "${expectWord}" (실제: ${emoText.trim()})`);
-    ok((await page.textContent('[data-testid="result-intensity"]')).includes(`${6 + i} / 10`), `[${width}px ${fam.label}] 결과 강도`);
+    ok((await page.textContent('[data-testid="result-intensity"]')).includes(`${3 + i} / 10`), `[${width}px ${fam.label}] 결과 강도`);
     const summary = await page.textContent('[data-testid="result-summary"]');
     ok(summary.length > 10 && !/[{}]/.test(summary), `[${width}px ${fam.label}] 한 줄 정리 완성: ${summary}`);
     ok(summary.includes(josaCheck(expectWord)), `[${width}px ${fam.label}] 조사(을/를) 맞춤: ${summary}`);
@@ -386,7 +418,7 @@ async function runForWidth(browser, base, width, D) {
     await page.click('[data-testid="home"]');
     await h.expect('home', `${fam.label} 후 처음 화면`);
   }
-  ok((await page.textContent('[data-testid="stat-dex"]')).includes(`4 / ${countWords(D)}`), `[${width}px] 도감 4개 발견 표시`);
+  ok((await page.textContent('[data-testid="stat-dex"]')).includes(`${D.families.length} / ${countWords(D)}`), `[${width}px] 도감 ${D.families.length}개 발견 표시`);
   ok((await page.textContent('[data-testid="stat-streak"]')).includes('1일'), `[${width}px] 연속 기록 1일`);
 
   /* 2-2. 5번을 계속 누르면 접근이 바뀜 → 이름 붙이기 어려운 감정 */
@@ -395,7 +427,7 @@ async function runForWidth(browser, base, width, D) {
   const qs = [await h.question()];
   const order = ['body', 'action', 'reverse', 'past'];
   for (let k = 0; k < 4; k++) {
-    await h.opt(5);
+    if (k === 0) await page.click('#app .opt[data-id="not-sure"]'); else await h.opt(5);
     await h.expect('approach', `5번 ${k + 1}회`);
     const ap = await page.getAttribute('#app > section', 'data-approach');
     ok(ap === order[k], `[${width}px] 5번 ${k + 1}회째 접근은 ${order[k]} (실제 ${ap})`);
@@ -412,6 +444,7 @@ async function runForWidth(browser, base, width, D) {
   await h.opt(2);
   await h.expect('need', '이름 없는 감정 욕구');
   await h.opt(1);
+  await passNeedCompare(page, h);
   await h.expect('result', '이름 없는 감정 결과');
   ok((await page.textContent('[data-testid="result-emotion"]')).includes('이름 붙이기 어려운 감정'), `[${width}px] 이름 붙이기 어려운 감정으로 저장`);
   await h.snap('result-unnamed');
@@ -430,21 +463,36 @@ async function runForWidth(browser, base, width, D) {
   await h.snap('words-from-body');
   await h.opt(1); await h.expect('intensity', '숨은 감정: 강도');
   await page.click('[data-score="8"]');
-  await h.opt(1); await h.expect('need', '욕구 1회차');
-  const needQs = [await h.question()];
-  const needOpts = [await optLabels(page)];
-  for (let r = 1; r <= 3; r++) {
-    await h.opt(5);
-    await h.expect('need', `욕구 5번 ${r}회`);
-    needQs.push(await h.question());
-    needOpts.push(await optLabels(page));
-    await h.snap(`need-round${r + 1}`);
-  }
-  ok(new Set(needQs).size === 4, `[${width}px] 욕구 질문 4개가 모두 다름`);
-  const flat = needOpts.flat();
-  ok(new Set(flat).size === flat.length, `[${width}px] 욕구 보기가 회차마다 겹치지 않음`);
+  await h.opt(1); await h.expect('need', '욕구 첫 화면');
+  ok((await page.textContent('#app .opt[data-num="5"] .opt-label')).trim() === D.text.needMore, `[${width}px] 욕구 첫 화면 5번은 "${D.text.needMore}"`);
   await h.opt(5);
-  await h.expect('needUnnamed', '욕구 5번 4회: 이름 붙이기 어려운 바람');
+  // 욕구 쪽 고르기: 한 장에 4쪽, 5번으로 다음 장
+  const ngPages = Math.ceil(D.needGroups.length / 4);
+  for (let pg = 0; pg < ngPages; pg++) {
+    await h.expect('needGroup', `욕구 쪽 ${pg + 1}장`);
+    const labels = await optLabels(page);
+    ok(labels.join('|') === D.needGroups.slice(pg * 4, pg * 4 + 4).map((g) => (g.emoji ? g.emoji + ' ' : '') + g.label).join('|'), `[${width}px] 욕구 쪽 ${pg + 1}장 보기: ${labels.join(', ')}`);
+    await h.snap(`need-group-p${pg + 1}`);
+    if (pg < ngPages - 1) await h.opt(5);
+  }
+  // 마지막 장의 1번 쪽 → 그 쪽 욕구 4개씩
+  const lastG = D.needGroups[(ngPages - 1) * 4];
+  await h.opt(1);
+  await h.expect('needWords', '욕구 쪽 안의 욕구');
+  const nwPages = Math.ceil(lastG.needs.length / 4);
+  for (let pg = 0; pg < nwPages; pg++) {
+    await h.expect('needWords', `욕구 ${pg + 1}장`);
+    const labels = await optLabels(page);
+    ok(labels.join('|') === lastG.needs.slice(pg * 4, pg * 4 + 4).map((id) => D.needs.find((n) => n.id === id).text).join('|'), `[${width}px] "${lastG.label}" 욕구 ${pg + 1}장`);
+    await h.snap(`need-words-p${pg + 1}`);
+    const five = (await page.textContent('#app .opt[data-num="5"] .opt-label')).trim();
+    ok(five === (pg < nwPages - 1 ? D.text.needWordsMore : D.text.needOtherGroup), `[${width}px] 욕구 ${pg + 1}장 5번: ${five}`);
+    await h.opt(5);
+  }
+  // 마지막 장 5번 → 욕구 쪽 1장으로 돌아옴 → 끝 장 5번 → 이름 붙이기 어려운 욕구
+  await h.expect('needGroup', '다른 욕구 쪽 보기');
+  for (let pg = 0; pg < ngPages; pg++) await h.opt(5);
+  await h.expect('needUnnamed', '욕구 쪽 마지막 장 5번: 이름 붙이기 어려운 욕구');
   await h.snap('need-unnamed');
   await page.click('[data-testid="continue"]');
   await h.expect('result', '숨은 감정 결과');
@@ -456,7 +504,7 @@ async function runForWidth(browser, base, width, D) {
 
   /* 2-4. 3회째(반대로 묻기) → 욕구를 먼저 고르면 욕구 단계를 건너뜀, 원인 "다른 것" 직접 입력 */
   await newGame(page, h, '모둠 과제를 혼자 다 했는데 발표 점수는 똑같이 받았다.');
-  await h.opt(5); await h.opt(5); await h.opt(5);
+  await page.click('#app .opt[data-id="not-sure"]'); await h.opt(5); await h.opt(5);
   await h.expect('approach', '반대로 묻기');
   ok((await page.getAttribute('#app > section', 'data-approach')) === 'reverse', `[${width}px] 3회째는 반대로 묻기`);
   await h.opt(2); await h.expect('words', '반대로 묻기 후보');
@@ -500,6 +548,7 @@ async function runForWidth(browser, base, width, D) {
     await h.opt(1);
     await h.expect('need', '구별: 욕구');
     await h.opt(1);
+    await passNeedCompare(page, h);
     await h.expect('result', '구별: 결과 카드');
     ok((await page.textContent('[data-testid="result-emotion"]')).includes('죄책감'), `[${width}px] 결과 카드 "죄책감"`);
     await page.click('[data-testid="home"]');
@@ -520,10 +569,14 @@ async function runForWidth(browser, base, width, D) {
   await passToIntensity(page, h);
   await page.click('[data-score="4"]');
   await h.opt(3); await h.opt(1);
+  await passNeedCompare(page, h);
   await h.expect('result', '안 적고 시작: 결과 카드');
   ok(!(await page.$('.card-situation')), `[${width}px] 안 적으면 결과 카드에 "있었던 일" 줄이 없음`);
   ok(!/[{}]/.test(await page.textContent('[data-testid="result-summary"]')), `[${width}px] 안 적어도 한 줄 정리 완성`);
   await page.click('[data-testid="home"]');
+
+  /* 2-4e. 욕구 고르기: 단어로 찾기, 비슷한 욕구 구별, 넘어가기 */
+  await checkNeeds(page, h, width, D);
 
   /* 2-5. 이전 버튼 */
   await newGame(page, h, '이전 버튼 점검');
@@ -535,6 +588,7 @@ async function runForWidth(browser, base, width, D) {
   await h.expect('home', '그만하기 → 처음 화면');
 
   /* 2-6. 상담 전화 안내 화면은 없음: 어떤 글을 적어도 게임이 그대로 진행되고, 그만두면 기록이 늘지 않음 */
+  const before26 = await page.evaluate(() => window.__maeum.records().length);
   for (const t of ['너무 힘들어서 죽고 싶다', '유서 깊은 절에 다녀왔다']) {
     await newGame(page, h, t);
     await h.expect('family', `"${t}"을 적어도 그대로 진행`);
@@ -544,10 +598,11 @@ async function runForWidth(browser, base, width, D) {
   ok(!(await page.$('script[src="data/safety.js"]')), `[${width}px] 위험한 말 목록 파일을 불러오지 않음`);
   {
     const recCount = await page.evaluate(() => window.__maeum.records().length);
-    ok(recCount === 10, `[${width}px] 그만둔 게임은 기록에 저장되지 않음 (기록 ${recCount}개)`);
+    ok(recCount === before26, `[${width}px] 그만둔 게임은 기록에 저장되지 않음 (기록 ${recCount}개)`);
   }
 
   /* 2-7. 연속 기록·주간 보고서·도감·지난 기록 */
+  const base27 = await page.evaluate(() => window.__maeum.records().length);
   await page.evaluate(() => {
     const key = 'maeum-chatgi-v1';
     const d = JSON.parse(localStorage.getItem(key));
@@ -556,28 +611,33 @@ async function runForWidth(browser, base, width, D) {
       const p = (n) => (n < 10 ? '0' : '') + n;
       return { id: 'x' + daysAgo + emotionId, ts: t.toISOString(), date: t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate()), situation: '지난 기록 ' + daysAgo, family, emotionId, emotionWord, hidden: false, intensity, cause: 'word', causeText: '', needId, needWord, summary: '요약', tip: '실천', path: 'normal', five: 0 };
     };
-    d.records.unshift(mk(1, 'sad01', '서운함', 'sad', 'con2', '알아줌', 6), mk(2, 'sad01', '서운함', 'sad', 'con2', '알아줌', 4), mk(9, 'fear01', '걱정', 'fear', 'saf2', '미리 알기', 5));
+    d.records.unshift(mk(1, 'sad01', '서운함', 'sad', 'con2', '알아줌', 6), mk(2, 'sad01', '서운함', 'sad', 'con2', '알아줌', 4), mk(9, 'fear01', '걱정', 'fear', 'saf2', '미리 알기', 5), mk(10, 'fear13', '창피함', 'fear', 'con2', '알아줌', 5));
     localStorage.setItem(key, JSON.stringify(d));
   });
   await page.reload();
   await h.expect('home', '기록 추가 후 처음 화면');
+  const all27 = base27 + 4;
+  const dexFound = await page.evaluate((ids) => new Set(window.__maeum.records().map((r) => r.emotionId).filter((id) => ids.includes(id))).size, allEmotionIds(D));
+  ok((await page.evaluate(() => window.__maeum.found())) === dexFound, `[${width}px] 도감 수 = 기록의 서로 다른 감정 수 (${dexFound})`);
+  ok((await page.evaluate(() => window.__maeum.records().find((r) => r.emotionId === 'fear13').family)) === 'shame', `[${width}px] 옛 기록(창피함, 불안·두려움 쪽)의 쪽 값이 부끄러움·미안함 쪽으로 맞춰짐`);
   ok((await page.textContent('[data-testid="stat-streak"]')).includes('3일'), `[${width}px] 연속 기록 3일 (오늘·어제·그제)`);
   await page.click('[data-testid="menu-report"]');
   await h.expect('report', '주간 보고서');
-  ok((await page.textContent('[data-testid="report-count"]')).includes('12개'), `[${width}px] 이번 주 기록 12개`);
+  ok((await page.textContent('[data-testid="report-count"]')).includes(`${all27 - 2}개`), `[${width}px] 이번 주 기록 ${all27 - 2}개`);
   const topEmotion = await page.textContent('[data-testid="bars-emotion"] .bar-row >> nth=0');
   ok(topEmotion.includes('서운함') && topEmotion.includes('2번'), `[${width}px] 가장 자주 나온 감정 막대 "서운함 2번" (실제: ${topEmotion.trim()})`);
   ok((await page.$$('[data-testid="bars-need"] .bar-row')).length >= 3, `[${width}px] 욕구 막대그래프`);
   ok((await page.$$('[data-testid="bars-family"] .bar-row')).length >= 4, `[${width}px] 감정 쪽 막대그래프`);
   await h.snap('report');
   await page.click('.week-nav button >> nth=0');
-  ok((await page.textContent('[data-testid="report-count"]')).includes('1개'), `[${width}px] 지난주 보고서 기록 1개`);
+  ok((await page.textContent('[data-testid="report-count"]')).includes('2개'), `[${width}px] 지난주 보고서 기록 2개 (9일 전 걱정, 10일 전 창피함)`);
   await page.click('.topbar .top-btn');
   await h.expect('home', '보고서 → 처음 화면');
   await page.click('[data-testid="menu-dex"]');
   await h.expect('dex', '감정 도감');
   const dexTotal = await page.textContent('[data-testid="dex-total"]');
-  ok(dexTotal.includes(`${countWords(D)}개 중 ${DEX_FOUND}개 발견`), `[${width}px] 도감 "${countWords(D)}개 중 ${DEX_FOUND}개 발견" (실제: ${dexTotal})`);
+  ok(dexTotal.includes(`${countWords(D)}개 중 ${dexFound}개 발견`), `[${width}px] 도감 "${countWords(D)}개 중 ${dexFound}개 발견" (실제: ${dexTotal})`);
+  ok((await page.$$('.dex-family')).length === D.families.length, `[${width}px] 도감에 쪽 ${D.families.length}개`);
   await h.snap('dex');
   // 도감 단어를 누르면 설명·처음 찾은 날·찾은 횟수가 나옴
   await page.click('.dex-chip[data-id="sad01"]');
@@ -599,7 +659,8 @@ async function runForWidth(browser, base, width, D) {
   await page.click('.topbar .top-btn');
   await page.click('[data-testid="menu-records"]');
   await h.expect('records', '지난 기록');
-  ok((await page.$$('.rec')).length === 13, `[${width}px] 지난 기록 13개 표시`);
+  ok((await page.$$('.rec')).length === all27, `[${width}px] 지난 기록 ${all27}개 표시`);
+  ok((await page.$$eval('.rec', (els) => els.some((e) => e.textContent.includes('🙈 창피함')))), `[${width}px] 옛 창피함 기록이 부끄러움·미안함 쪽 표시로 나옴`);
   await h.snap('records');
   await page.click('.topbar .top-btn');
 
@@ -611,7 +672,7 @@ async function runForWidth(browser, base, width, D) {
   const backupPath = path.join(SHOTS, `backup-${width}.json`);
   await download.saveAs(backupPath);
   const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
-  ok(backup.app === 'maeum-chatgi' && backup.records.length === 13, `[${width}px] 내보낸 파일에 기록 13개 (실제 ${backup.records && backup.records.length})`);
+  ok(backup.app === 'maeum-chatgi' && backup.records.length === all27, `[${width}px] 내보낸 파일에 기록 ${all27}개 (실제 ${backup.records && backup.records.length})`);
   ok(/^maeum-chatgi-backup-\d{4}-\d{2}-\d{2}\.json$/.test(download.suggestedFilename()), `[${width}px] 파일 이름 ${download.suggestedFilename()}`);
   // 같은 파일을 다시 불러오면 모두 건너뜀
   await page.setInputFiles('[data-testid="import-file"]', backupPath);
@@ -635,7 +696,7 @@ async function runForWidth(browser, base, width, D) {
   await h.snap('delete-confirm');
   await page.click('[data-testid="cancel-delete"]');
   await h.expect('home', '삭제 취소');
-  ok((await page.evaluate(() => window.__maeum.records().length)) === 13, `[${width}px] 취소하면 기록 그대로`);
+  ok((await page.evaluate(() => window.__maeum.records().length)) === all27, `[${width}px] 취소하면 기록 그대로`);
   await page.click('[data-testid="delete-all"]');
   await page.click('[data-testid="confirm-delete"]');
   await h.expect('home', '삭제 후 처음 화면');
@@ -653,16 +714,16 @@ async function runForWidth(browser, base, width, D) {
   ok(await page.isDisabled('[data-testid="export-download"]'), `[${width}px] 기록이 없으면 저장 버튼이 꺼짐`);
   await page.setInputFiles('[data-testid="import-file"]', mixedPath);
   await h.expect('importConfirm', '지운 뒤 불러오기');
-  ok((await page.textContent('[data-testid="import-summary"]')).includes('새 기록은 13개'), `[${width}px] 새 기록 13개`);
+  ok((await page.textContent('[data-testid="import-summary"]')).includes(`새 기록은 ${all27}개`), `[${width}px] 새 기록 ${all27}개`);
   ok((await page.textContent('#app')).includes('망가진 기록 1개'), `[${width}px] 망가진 기록은 빼고 알려 줌`);
   await h.snap('import-confirm');
   await page.click('[data-testid="import-confirm"]');
   await h.expect('home', '불러온 뒤 처음 화면');
-  ok((await page.textContent('[data-testid="stat-count"]')).includes('13개'), `[${width}px] 불러온 뒤 기록 13개`);
-  ok((await page.textContent('[data-testid="stat-dex"]')).includes(`${DEX_FOUND} /`), `[${width}px] 불러온 뒤 도감 ${DEX_FOUND}개`);
+  ok((await page.textContent('[data-testid="stat-count"]')).includes(`${all27}개`), `[${width}px] 불러온 뒤 기록 ${all27}개`);
+  ok((await page.textContent('[data-testid="stat-dex"]')).includes(`${dexFound} /`), `[${width}px] 불러온 뒤 도감 ${dexFound}개`);
   ok((await page.textContent('[data-testid="stat-streak"]')).includes('3일'), `[${width}px] 불러온 뒤 연속 기록 3일`);
   await page.reload();
-  ok((await page.textContent('[data-testid="stat-count"]')).includes('13개'), `[${width}px] 새로 열어도 불러온 기록이 남아 있음`);
+  ok((await page.textContent('[data-testid="stat-count"]')).includes(`${all27}개`), `[${width}px] 새로 열어도 불러온 기록이 남아 있음`);
   // 삭제 화면에서 먼저 저장하기 안내
   await page.click('[data-testid="delete-all"]');
   ok(await page.isVisible('[data-testid="delete-export"]'), `[${width}px] 삭제 전에 파일로 저장하기 안내`);
@@ -761,6 +822,7 @@ async function checkSearch(page, h, width, D) {
   await h.opt(1);
   await h.expect('need', '단어로 찾기 → 욕구');
   await h.opt(1);
+  await passNeedCompare(page, h);
   await h.expect('result', '단어로 찾기 → 결과 카드');
   ok((await page.textContent('[data-testid="result-emotion"]')).includes('부끄러움'), `[${width}px] 찾은 단어 "부끄러움"이 결과 카드에 나옴`);
   const rec = await page.evaluate(() => { const r = window.__maeum.records(); return r[r.length - 1]; });
@@ -794,8 +856,77 @@ function compareSet(D, id) {
   for (const cs of D.compareSets || []) if (cs.ids.includes(id)) return [id, ...cs.ids.filter((x) => x !== id)];
   return null;
 }
-/* 2-7에서 도감에 든 서로 다른 단어 수: 4쪽 4개 + 숨은 1 + 반대로 1 + 찾기 1 + 구별 1 + 안 적고 1 + 이름 없음 제외 + 지난 기록 2(서운함·걱정) */
-const DEX_FOUND = 11;
+function allEmotionIds(D) {
+  const out = [];
+  D.families.forEach((f) => {
+    f.groups.forEach((g) => g.emotions.forEach((e) => { out.push(e.id); (e.same || []).forEach((x) => out.push(x.id)); }));
+    f.hidden.forEach((e) => { out.push(e.id); (e.same || []).forEach((x) => out.push(x.id)); });
+  });
+  return out;
+}
+/* 욕구를 고른 뒤 비슷한 욕구 구별 화면이 나오면 1번(고른 욕구)을 골라 넘어감 */
+async function passNeedCompare(page, h) {
+  if ((await h.screen('result')) === 'needCompare') await h.opt(1);
+}
+const needById = (D, id) => D.needs.find((n) => n.id === id);
+
+/* 욕구 고르기: 단어로 찾기 → 결과 카드, 비슷한 욕구 구별로 다른 욕구 고르기, 넘어가기 */
+async function checkNeeds(page, h, width, D) {
+  const toNeed = async (sit, wi) => {
+    await newGame(page, h, sit);
+    await h.opt(1); await h.opt(4); await h.opt(wi); // 기쁨 / 편안하고 마음이 놓여요 / 2~4번 단어 (같은 감정이 겹치지 않게)
+    await passToIntensity(page, h);
+    await page.click('[data-score="5"]');
+    await h.opt(5); // 원인: 다른 것 (글 없이)
+    await page.click('[data-testid="next"]');
+    await h.expect('need', '욕구 첫 화면');
+  };
+  // ① 욕구 단어로 찾기
+  await toNeed('욕구 찾기 점검', 2);
+  await page.click('[data-testid="need-search-open"]');
+  await h.expect('needSearch', '욕구 단어로 찾기');
+  const sugg = await page.$$eval('.search-item', (els) => els.map((e) => e.getAttribute('data-id')));
+  ok(sugg.join('|') === D.needSearchSuggest.join('|'), `[${width}px] 욕구 찾기: 빈칸이면 핵심 욕구 추천`);
+  const fsz = await page.$eval('[data-testid="search-input"]', (e) => parseFloat(getComputedStyle(e).fontSize));
+  ok(fsz >= 16, `[${width}px] 욕구 찾기 입력칸 글자 ${fsz}px`);
+  const cases = [['인정받고 싶었다', '노력 인정'], ['위로받고 싶었어요', '위로'], ['사과', '진심 어린 사과'], ['존중받고 싶다', '존중'], ['안전하고 싶었다', '안전함'], ['혼자', '혼자만의 시간']];
+  for (const [q, w] of cases) {
+    await page.fill('[data-testid="search-input"]', q);
+    const first = (await page.textContent('.search-item >> nth=0 >> .opt-label', { timeout: 2000 }).catch(() => '')).trim();
+    ok(first === w, `[${width}px] 욕구 찾기 "${q}" → 첫 결과 "${w}" (실제 ${first})`);
+  }
+  await page.fill('[data-testid="search-input"]', '인정받고 싶었다');
+  await h.snap('need-search');
+  await page.click('.search-item >> nth=0');
+  await h.expect('result', '욕구 찾기 → 결과 카드 (구별 화면 건너뜀)');
+  ok((await page.textContent('[data-testid="result-need"]')).includes('노력 인정'), `[${width}px] 찾은 욕구 "노력 인정"이 결과 카드에 나옴`);
+  await page.click('[data-testid="home"]');
+  // ② 비슷한 욕구 구별: 욕구 쪽 → 이어짐 → 들어 줌 → 구별 화면에서 위로를 고름
+  await toNeed('욕구 구별 점검', 3);
+  await h.opt(5);
+  await h.expect('needGroup', '욕구 쪽');
+  const gi = D.needGroups.findIndex((g) => g.needs.includes('con1'));
+  await h.opt(gi + 1);
+  await h.expect('needWords', '이어짐 욕구');
+  await h.opt(D.needGroups[gi].needs.indexOf('con1') + 1);
+  await h.expect('needCompare', '비슷한 욕구 구별');
+  const set = D.needCompareSets.find((c) => c.ids.includes('con1')).ids;
+  const order = ['con1', ...set.filter((x) => x !== 'con1')];
+  const labels = await optLabels(page);
+  ok(labels.join('|') === order.map((id) => needById(D, id).ask).join('|'), `[${width}px] 욕구 구별 문장: ${labels.join(' / ')}`);
+  await h.snap('need-compare');
+  await h.opt(order.indexOf('con6') + 1);
+  await h.expect('result', '욕구 구별 → 결과 카드');
+  ok((await page.textContent('[data-testid="result-need"]')).includes('위로'), `[${width}px] 구별 문장으로 고른 "위로"가 결과 카드에 나옴`);
+  ok((await page.textContent('[data-testid="result-summary"]')).includes(needById(D, 'con6').text.slice(0, 6)), `[${width}px] 한 줄 정리에 고른 욕구 문장`);
+  await page.click('[data-testid="home"]');
+  // ③ 지금은 넘어가기
+  await toNeed('욕구 넘어가기 점검', 4);
+  await page.click('[data-testid="need-skip"]');
+  await h.expect('result', '욕구 넘어가기 → 결과 카드');
+  ok((await page.textContent('[data-testid="result-need"]')).includes('이름 붙이기 어려운 욕구'), `[${width}px] 넘어가면 "이름 붙이기 어려운 욕구"로 저장`);
+  await page.click('[data-testid="home"]');
+}
 
 function countWords(D) {
   const n = (e) => 1 + (e.same || []).length;

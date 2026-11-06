@@ -68,6 +68,26 @@ window.MAEUM_DATA.text = {
   causeOtherGuide: '안 적고 넘어가도 괜찮아요.',
   causeOtherPlaceholder: '예) 갑자기 비가 와서',
 
+  /* 욕구 고르기 */
+  needMore: '다른 욕구 찾기',
+  needMoreHint: '욕구 쪽을 골라 더 찾아볼게요',
+  needSkip: '지금은 넘어가기',
+  needGroupTitle: '어느 쪽 욕구에 가까웠나요?',
+  needGroupMore: '다른 욕구 쪽 더 보기',
+  needGroupMoreHint: '욕구 쪽이 더 있어요',
+  needWordsTitle: '이 중 가장 가까운 욕구를 골라 보세요.',
+  needWordsMore: '이 쪽 욕구 더 보기',
+  needWordsMoreHint: '같은 쪽 욕구가 더 있어요',
+  needOtherGroup: '다른 욕구 쪽 보기',
+  needOtherGroupHint: '욕구 쪽 고르기로 돌아가요',
+  needCompareTitle: '비슷한 욕구와 견주어 볼게요. 그때 바랐던 것과 가장 맞는 문장을 골라 보세요.',
+  needCompareLead: '고른 욕구: {욕구}',
+  needSearchButton: '🔍 욕구 단어로 찾기',
+  needSearchTitle: '바랐던 것을 단어로 적어 보세요',
+  needSearchGuide: '예) 인정받고 싶었다, 위로, 쉬고 싶었다, 사과',
+  needSearchPlaceholder: '욕구 단어 적기',
+  needSearchSuggest: '자주 찾는 욕구',
+
   /* 결과 카드 */
   resultTitle: '오늘의 마음 카드',
   resultEmotion: '찾은 감정',
@@ -114,7 +134,7 @@ window.MAEUM_DATA.intro = [
   {
     icon: '🔍',
     title: '딱 맞는 게 없으면 5번',
-    body: '보기 중에 맞는 것이 없으면 5번 "이 중엔 없어요"를 누르세요. 몸의 느낌, 하고 싶었던 행동처럼 다른 방법으로 다시 물어봐요. 정답은 없어요.'
+    body: '보기 중에 맞는 것이 없으면 5번 "이 중엔 없어요"를 누르세요. 처음 감정 쪽 화면에서는 "잘 모르겠어요"를 누르면 돼요. 몸의 느낌, 하고 싶었던 행동처럼 다른 방법으로 다시 물어봐요. 정답은 없어요.'
   },
   {
     icon: '📖',
@@ -193,31 +213,17 @@ window.MAEUM_DATA.approaches = [
 ];
 
 /*
-  ⑥ 욕구 찾기 — 5번을 누를 때마다 다음 질문으로 바뀌어요.
+  ⑥ 욕구 찾기
+  - 첫 욕구 화면: 고른 감정에 맞는 욕구 4개 (data/needs.js의 needsByEmotion, 없으면 아래 needsByCause)
+  - 5번 "다른 욕구 찾기" → 욕구 쪽 고르기 (data/needs.js의 needGroups, 한 장에 4쪽)
+    → 쪽 안의 욕구 4개씩 → 마지막 장의 5번은 "이름 붙이기 어려운 욕구"
   question     = 기쁨 쪽이 아닐 때 질문
   questionJoy  = 기쁨 쪽일 때 질문
-  1번째 질문의 보기는 아래 needsByCause(감정 쪽 × 원인)에서 골라요.
-  2~4번째 질문의 보기는 pool 목록에서 아직 안 나온 것 4개를 차례로 보여 줘요.
 */
 window.MAEUM_DATA.needRounds = [
   {
     question: '그 순간 무엇이 있었다면 괜찮았을까요?',
     questionJoy: '그 기쁨은 어떤 욕구가 채워져서 생겼을까요?'
-  },
-  {
-    question: '그때 다른 사람이 어떻게 해 줬다면 마음이 달랐을까요?',
-    questionJoy: '그 기쁨에는 누가 어떤 마음을 보태 주었나요?',
-    pool: ['con1', 'con2', 'con3', 'con4', 'con5', 'con6', 'res1', 'res2', 'res3', 'res4', 'res5', 'mean2', 'mean4', 'mean5', 'grow5', 'clar1']
-  },
-  {
-    question: '그때 나 자신에게는 무엇이 더 필요했을까요?',
-    questionJoy: '그 순간 나에게 무엇이 채워졌나요?',
-    pool: ['rest1', 'rest2', 'rest3', 'rest4', 'rest5', 'rest6', 'free1', 'free2', 'free3', 'free4', 'grow1', 'grow2', 'grow4', 'clar5', 'clar6', 'mean6']
-  },
-  {
-    question: '앞으로 비슷한 일이 생긴다면, 무엇이 지켜지면 좋겠어요?',
-    questionJoy: '이런 좋은 순간이 또 오려면 무엇이 지켜지면 좋을까요?',
-    pool: ['saf1', 'saf2', 'saf3', 'saf4', 'saf5', 'saf6', 'res6', 'free5', 'free6', 'grow6', 'mean1', 'mean3', 'clar2', 'clar3', 'clar4', 'res5']
   }
 ];
 
@@ -250,6 +256,27 @@ window.MAEUM_DATA.needsByCause = {
     result: ['grow4', 'saf2', 'grow5', 'clar2'],
     expect: ['saf5', 'free2', 'grow4', 'saf2'],
     other: ['saf6', 'saf3', 'rest5', 'clar5']
+  },
+  shame: {
+    word: ['con7', 'res1', 'grow4', 'con2'],
+    attitude: ['con7', 'res1', 'con4', 'grow4'],
+    result: ['grow4', 'grow3', 'con7', 'mean7'],
+    expect: ['grow4', 'free2', 'con7', 'saf2'],
+    other: ['con7', 'grow4', 'rest3', 'clar6']
+  },
+  surprise: {
+    word: ['clar1', 'saf2', 'clar3', 'saf5'],
+    attitude: ['clar1', 'clar4', 'saf2', 'res7'],
+    result: ['saf2', 'clar1', 'grow4', 'saf5'],
+    expect: ['saf2', 'clar2', 'saf5', 'clar1'],
+    other: ['saf2', 'clar5', 'saf6', 'clar1']
+  },
+  disgust: {
+    word: ['res1', 'res6', 'res7', 'free5'],
+    attitude: ['res6', 'res1', 'res7', 'free5'],
+    result: ['res2', 'res7', 'clar1', 'saf7'],
+    expect: ['res7', 'res5', 'res2', 'clar3'],
+    other: ['saf7', 'res6', 'rest5', 'saf6']
   },
   unknown: {
     word: ['con1', 'clar4', 'res1', 'con2'],
