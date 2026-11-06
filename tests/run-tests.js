@@ -317,8 +317,10 @@ async function runForWidth(browser, base, width, D) {
     await p2.close();
   }
   await h.expect('home', '처음 화면');
-  const disclaimer = await page.textContent('[data-testid="disclaimer"]');
-  ok(disclaimer.includes('상담·치료를 대신하지 않습니다'), `[${width}px] 첫 화면 안내 문구`);
+  {
+    const homeText = await page.textContent('#app');
+    ok(!/109|1577-0199|자살|상담·치료/.test(homeText), `[${width}px] 첫 화면에 상담 전화·안내 문구가 없음`);
+  }
   await h.snap('home');
 
   /* 2-1. 감정 묶음 4개 각각 끝까지 */
@@ -532,37 +534,18 @@ async function runForWidth(browser, base, width, D) {
   await page.click('.topbar .top-btn >> nth=1');
   await h.expect('home', '그만하기 → 처음 화면');
 
-  /* 2-6. 위험 표현 → 안내 화면 */
-  for (const t of ['너무 힘들어서 죽고 싶다', '자 해 하고 싶은 생각이 들었다', '그냥 사라지고 싶어요', '살기 싫다']) {
+  /* 2-6. 상담 전화 안내 화면은 없음: 어떤 글을 적어도 게임이 그대로 진행되고, 그만두면 기록이 늘지 않음 */
+  for (const t of ['너무 힘들어서 죽고 싶다', '유서 깊은 절에 다녀왔다']) {
     await newGame(page, h, t);
-    const ok1 = await h.expect('crisis', `위험 표현 "${t}"`);
-    if (ok1) {
-      const body = await page.textContent('#app');
-      ok(body.includes('109') && body.includes('1577-0199'), `[${width}px] 안내 화면에 109·1577-0199 표시 ("${t}")`);
-      ok((await page.getAttribute('[data-testid="phone-109"]', 'href')) === 'tel:109', `[${width}px] 109 전화 연결 링크`);
-      ok((await page.getAttribute('[data-testid="phone-1577-0199"]', 'href')) === 'tel:15770199', `[${width}px] 1577-0199 전화 연결 링크`);
-      ok((await page.$$('#app .opt')).length === 0 && (await page.$$('.topbar')).length === 0, `[${width}px] 안내 화면에서는 게임이 멈춤`);
-      await h.snap('crisis');
-      await page.click('[data-testid="home"]');
-      await h.expect('home', '안내 화면 → 처음 화면');
-    }
-  }
-  const recCount = await page.evaluate(() => window.__maeum.records().length);
-  ok(recCount === 10, `[${width}px] 위험 표현은 기록에 저장되지 않음 (기록 ${recCount}개)`);
-  for (const t of ['배고파 죽겠다 진짜', '유서 깊은 절에 다녀왔다']) {
-    await newGame(page, h, t);
-    await h.expect('family', `일상 표현 "${t}"은 그대로 진행`);
+    await h.expect('family', `"${t}"을 적어도 그대로 진행`);
+    ok(!/109|1577-0199/.test(await page.textContent('#app')), `[${width}px] 상담 전화 번호가 나오지 않음`);
     await page.click('.topbar .top-btn >> nth=1');
   }
-  await newGame(page, h, '원인 칸 위험 표현 점검');
-  await h.opt(1); await h.opt(1); await h.opt(1);
-  await passToIntensity(page, h);
-  await page.click('[data-score="5"]');
-  await h.opt(5);
-  await page.fill('#cause-text', '죽고 싶어서');
-  await page.click('[data-testid="next"]');
-  await h.expect('crisis', '원인 칸 위험 표현');
-  await page.click('[data-testid="home"]');
+  ok(!(await page.$('script[src="data/safety.js"]')), `[${width}px] 위험한 말 목록 파일을 불러오지 않음`);
+  {
+    const recCount = await page.evaluate(() => window.__maeum.records().length);
+    ok(recCount === 10, `[${width}px] 그만둔 게임은 기록에 저장되지 않음 (기록 ${recCount}개)`);
+  }
 
   /* 2-7. 연속 기록·주간 보고서·도감·지난 기록 */
   await page.evaluate(() => {

@@ -15,7 +15,6 @@
     if (!D.families) missing.push('data/emotions.js');
     if (!D.needs) missing.push('data/needs.js');
     if (!D.text || !D.causes || !D.approaches || !D.needRounds || !D.needsByCause) missing.push('data/questions.js');
-    if (!D.safety) missing.push('data/safety.js');
     return missing;
   }
 
@@ -189,13 +188,6 @@
     var n = 0;
     while (days[dateKey(d)]) { n++; d = addDays(d, -1); }
     return n;
-  }
-
-  /* ───────── 위험 표현 찾기 ───────── */
-  function isRisky(text) {
-    var s = String(text || '').replace(/[\s.,!?~…·'"“”‘’()\-_]/g, '');
-    (D.safety.exceptions || []).forEach(function (x) { s = s.split(x).join(''); });
-    return (D.safety.keywords || []).some(function (k) { return k && s.indexOf(k) !== -1; });
   }
 
   /* ───────── 화면 이동 ───────── */
@@ -428,7 +420,6 @@
         el('h1', { class: 'app-title', tabindex: '-1' }, T.appTitle),
         el('p', { class: 'app-sub' }, T.appSubtitle)
       ),
-      el('p', { class: 'notice', role: 'note', 'data-testid': 'disclaimer' }, T.disclaimer),
       el('button', { class: 'btn btn-primary btn-big', type: 'button', onclick: startGame, 'data-testid': 'start' }, T.startButton),
       el('p', { class: 'encourage' }, T.homeEncourage),
       el('div', { class: 'stats' },
@@ -533,7 +524,6 @@
     ta.addEventListener('input', function () { count.textContent = ta.value.length + ' / 200'; label(); });
     function next() {
       var v = ta.value.trim();
-      if (v && isRisky(v)) { stack = []; draft = null; current = { screen: 'crisis', params: {} }; render(); return; }
       draft.situation = v;
       go('family', {});
     }
@@ -811,7 +801,6 @@
     input.value = draft.causeText || '';
     function next() {
       var v = input.value.trim();
-      if (v && isRisky(v)) { stack = []; draft = null; current = { screen: 'crisis', params: {} }; render(); return; }
       draft.cause = 'other'; draft.causeText = v;
       afterCause();
     }
@@ -905,27 +894,6 @@
       el('p', { class: 'streak-line', 'data-testid': 'result-streak' }, '🔥 연속 기록 ' + streak() + '일 · 📖 도감 ' + found + ' / ' + ALL_WORDS.length),
       el('button', { class: 'btn btn-primary btn-big', type: 'button', onclick: goHome, 'data-testid': 'home' }, T.homeButton),
       el('button', { class: 'btn btn-secondary', type: 'button', onclick: function () { go('dex', {}); }, 'data-testid': 'to-dex' }, T.dexButton)
-    );
-  };
-
-  screens.crisis = function () {
-    var S = D.safety;
-    return screen('crisis', null,
-      el('div', { class: 'crisis' },
-        el('div', { class: 'soft-icon', 'aria-hidden': 'true' }, '🤝'),
-        el('h1', { class: 'title', tabindex: '-1' }, S.title),
-        el('p', { class: 'body-text' }, S.body),
-        el('div', { class: 'phones' }, S.phones.map(function (ph) {
-          return el('a', { class: 'phone', href: 'tel:' + ph.number.replace(/[^0-9]/g, ''), 'data-testid': 'phone-' + ph.number },
-            el('span', { class: 'phone-name' }, '📞 ' + ph.name),
-            el('span', { class: 'phone-number' }, ph.number),
-            ph.note ? el('span', { class: 'phone-note' }, ph.note + ' · 눌러서 전화하기') : null
-          );
-        })),
-        el('p', { class: 'emergency' }, S.emergency),
-        el('p', { class: 'notice' }, S.notice)
-      ),
-      el('button', { class: 'btn btn-secondary btn-big', type: 'button', onclick: goHome, 'data-testid': 'home' }, S.homeButton)
     );
   };
 
@@ -1305,7 +1273,7 @@
 
   /* 테스트에서 쓰는 창구 (화면 동작에는 영향 없음) */
   window.__maeum = {
-    isRisky: isRisky, josa: josa, fill: fill, streak: streak,
+    josa: josa, fill: fill, streak: streak,
     totalWords: function () { return ALL_WORDS.length; },
     totalNeeds: function () { return D.needs.length; },
     records: function () { return records(); },

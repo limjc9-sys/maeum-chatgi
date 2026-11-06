@@ -15,7 +15,6 @@ window.MAEUM_DATA = window.MAEUM_DATA || {};
 window.MAEUM_DATA.text = {
   appTitle: '내 마음 찾기',
   appSubtitle: '오늘 있었던 일 속에서 내 감정의 이름을 찾아보는 게임',
-  disclaimer: '이 게임은 자기 감정을 이해하도록 돕는 도구이며 상담·치료를 대신하지 않습니다.',
   privacy: '기록은 이 휴대폰 안에만 저장돼요. 어디로도 보내지 않아요.',
   startButton: '시작하기',
 

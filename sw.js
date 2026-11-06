@@ -14,7 +14,6 @@ var FILES = [
   './data/emotions.js',
   './data/needs.js',
   './data/questions.js',
-  './data/safety.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

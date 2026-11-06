@@ -180,11 +180,6 @@ input[type="search"]::-webkit-search-cancel-button { width: 20px; height: 20px; 
 .hero-icon { font-size: 56px; line-height: 1.2; }
 .app-title { font-size: 30px; font-weight: 900; letter-spacing: -0.5px; }
 .app-sub { font-size: 17px; color: var(--ink-soft); margin-top: 6px; }
-.notice {
-  font-size: 16px; line-height: 1.5;
-  background: #FFF3C9; border: 1px solid #F0D98A;
-  border-radius: 14px; padding: 12px 14px;
-}
 .encourage { font-size: 16px; color: var(--ink-soft); text-align: center; }
 .privacy { font-size: 16px; color: var(--ink-soft); text-align: center; }
 
@@ -277,20 +272,6 @@ input[type="search"]::-webkit-search-cancel-button { width: 20px; height: 20px; 
 .meter-cell.on { background: var(--accent); }
 
 /* ───── 위기 안내 ───── */
-.crisis { display: flex; flex-direction: column; gap: 14px; padding-top: 24px; text-align: center; }
-.phones { display: flex; flex-direction: column; gap: 12px; }
-.phone {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  background: var(--surface); border: 3px solid var(--brand);
-  border-radius: var(--radius); padding: 14px 12px;
-  text-decoration: none; color: var(--ink);
-  min-height: 64px;
-}
-.phone:active { background: var(--brand-soft); }
-.phone-name { font-size: 18px; font-weight: 700; }
-.phone-number { font-size: 32px; font-weight: 900; color: var(--brand-dark); letter-spacing: 1px; }
-.phone-note { font-size: 16px; color: var(--ink-soft); }
-.emergency { font-size: 17px; font-weight: 700; color: var(--danger); }
 
 /* ───── 도감 ───── */
 .dex-total { font-size: 22px; font-weight: 800; }
