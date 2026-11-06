@@ -55,8 +55,16 @@ const KEEP_APART = [
   ['fear01', 'fear02'], ['fear01', 'fear03'], ['fear01', 'fear04'], ['fear02', 'fear03'], ['fear02', 'fear04'], ['fear03', 'fear04'],
   ['fear05', 'fear06'], ['fear05', 'fear07'], ['fear06', 'fear07'], ['fear10', 'fear11'], ['fear15', 'fear16'], ['fear09', 'fear12'],
   ['fear01', 'fear31'], ['fear14', 'fear29'], ['fear26', 'fearH2'], ['fear26', 'fearH1'], ['fear24', 'fearH2'],
-  ['fear28', 'sad25']
+  ['fear28', 'sad25'],
+  ['joy17', 'joy33'], ['joy05', 'joy41'], ['joy07', 'joy42'], ['joy08', 'joy42'], ['joy01', 'joy35'], ['joy36', 'joyH3'],
+  ['sad13', 'sad53'], ['sad29', 'sad50'], ['sad52', 'angH6'], ['sad28', 'sad52'], ['sad31', 'sad37'], ['sad15', 'sad51'],
+  ['ang01', 'ang39'], ['ang19', 'ang29'], ['ang32', 'ang33'], ['ang23', 'ang34'], ['ang38', 'sad51'], ['ang37', 'angH2'],
+  ['fear05', 'fear42'], ['fear02', 'fear41'], ['fear24', 'fear33'], ['fear24', 'fear34'], ['fear26', 'fear38'], ['fear38', 'fearH1'],
+  ['fear39', 'fearH2'], ['fear35', 'ang17']
 ];
+/* 원자료(무드 미터, 손선주 외 2012 부록) 단어 → 게임 단어 대응표. 욕설·비하어 26개는 저장소에 적지 않고 개수만 확인 */
+const SOURCE_MAP = JSON.parse(fs.readFileSync(path.join(__dirname, 'source-word-map.json'), 'utf8'));
+const EXCLUDED_EXPLETIVES = 26;
 function checkData() {
   console.log('■ 데이터 파일 점검');
   const ctx = { window: {} };
@@ -67,6 +75,15 @@ function checkData() {
   const D = ctx.window.MAEUM_DATA;
   const emo = {};
   let total = 0, hidden = 0;
+  // 같은 뜻 다른 말: 0~3개, id는 원래 id + a·b·c
+  function checkSame(e) {
+    const same = e.same || [];
+    ok(same.length <= 3, `${e.id}: 같은 뜻 다른 말은 3개까지 (지금 ${same.length}개)`);
+    same.forEach((x) => ok(x.word && /^[a-z]+H?\d+[a-c]$/.test(x.id) && x.id.slice(0, -1) === e.id, `${e.id}: 같은 뜻 다른 말 id/word 확인 (${x.id})`));
+  }
+  function addSame(e, isHidden) {
+    (e.same || []).forEach((x) => { ok(!emo[x.id], `감정 id 중복: ${x.id}`); emo[x.id] = { ...x, desc: e.desc, hidden: isHidden, parent: e.id }; total++; });
+  }
   D.families.forEach((f) => {
     ok(f.groups.length >= 4, `${f.id}: 세부 묶음이 4개 이상이어야 함 (지금 ${f.groups.length}개)`);
     ok(new Set(f.groups.map((g) => g.label)).size === f.groups.length, `${f.id}: 묶음 이름이 서로 겹치지 않음`);
@@ -74,12 +91,17 @@ function checkData() {
       ok(g.label && g.hint, `${f.id}/${g.label}: 묶음 label/hint 모두 있어야 함`);
       ok(g.emotions.length === 4, `${f.id}/${g.label}: 감정이 4개여야 함`);
       g.emotions.forEach((e) => ok(e.word && e.desc, `${e.id}: word/desc 모두 있어야 함`));
-      g.emotions.forEach((e) => { ok(!emo[e.id], `감정 id 중복: ${e.id}`); emo[e.id] = { ...e, hidden: false }; total++; });
+      g.emotions.forEach((e) => checkSame(e));
+      g.emotions.forEach((e) => { ok(!emo[e.id], `감정 id 중복: ${e.id}`); emo[e.id] = { ...e, hidden: false }; total++; addSame(e, false); });
     });
-    f.hidden.forEach((e) => { ok(!emo[e.id], `감정 id 중복: ${e.id}`); emo[e.id] = { ...e, hidden: true }; total++; hidden++; });
+    f.hidden.forEach((e) => { ok(!emo[e.id], `감정 id 중복: ${e.id}`); emo[e.id] = { ...e, hidden: true }; total++; hidden++; checkSame(e); addSame(e, true); });
   });
   ok(D.families.length === 4, '큰 감정 쪽 4개');
-  ok(total >= 140, `감정 단어 140개 이상 (지금 ${total}개)`);
+  ok(total >= 500, `감정 단어 500개 이상 (지금 ${total}개)`);
+  // 원자료 단어가 모두 게임 단어로 들어갔는지
+  const wordSet = new Set(Object.values(emo).map((e) => e.word));
+  ok(SOURCE_MAP.length + EXCLUDED_EXPLETIVES === 604, `원자료 단어 수: 대응표 ${SOURCE_MAP.length} + 욕설 ${EXCLUDED_EXPLETIVES} = 604 (무드 미터 100, 부록 504)`);
+  SOURCE_MAP.forEach((m) => ok(wordSet.has(m.game), `원자료 "${m.src}"(${m.origin})의 게임 단어 "${m.game}"가 있음`));
   // 처음 만든 id가 그대로 있고, 같은 쪽·같은 종류(일반/숨은)에 있는지
   Object.entries(ORIGINAL_IDS).forEach(([fam, c]) => {
     const pre = c.prefix || fam;
@@ -289,7 +311,8 @@ async function runForWidth(browser, base, width, D) {
     const fam = D.families[i];
     const gi = (i % 4) + 1;
     const wi = ((i + 2) % 4) + 1;
-    const expectWord = fam.groups[gi - 1].emotions[wi - 1].word;
+    const entry = fam.groups[gi - 1].emotions[wi - 1];
+    const expectWord = entry.same && entry.same.length ? entry.same[0].word : entry.word;
     await newGame(page, h, `테스트 상황 ${fi}: 친구가 약속에 늦게 와서 한참 기다렸다.`);
     await h.expect('family', `${fam.label} 큰 감정`);
     if (i === 0) await h.snap('family');
@@ -300,6 +323,15 @@ async function runForWidth(browser, base, width, D) {
     await h.expect('words', `${fam.label} 세부 감정`);
     await h.snap(`words-${fam.id}`);
     await h.opt(wi);
+    if (entry.same && entry.same.length) {
+      // 같은 뜻 다른 말 고르기: 원래 단어 + 같은 뜻 단어가 차례대로 나오고, 5번은 "이 중엔 없어요"
+      await h.expect('wording', `${fam.label} 같은 뜻 다른 말`);
+      const wl = await optLabels(page);
+      ok(wl.join('|') === [entry.word, ...entry.same.map((x) => x.word)].join('|'), `[${width}px ${fam.label}] 같은 뜻 다른 말 보기: ${wl.join(', ')}`);
+      ok((await page.textContent('#app .opt[data-num="5"] .opt-label')).trim() === D.text.noneOfThese, `[${width}px ${fam.label}] 같은 뜻 화면 5번`);
+      await h.snap(`wording-${fam.id}`);
+      await h.opt(2);
+    }
     await h.expect('intensity', `${fam.label} 강도`);
     if (i === 0) await h.snap('intensity');
     await page.click(`[data-score="${6 + i}"]`);
@@ -399,6 +431,8 @@ async function runForWidth(browser, base, width, D) {
   await h.expect('approach', '반대로 묻기');
   ok((await page.getAttribute('#app > section', 'data-approach')) === 'reverse', `[${width}px] 3회째는 반대로 묻기`);
   await h.opt(2); await h.expect('words', '반대로 묻기 후보');
+  await h.opt(1); await h.expect('wording', '반대로 묻기: 같은 뜻 다른 말');
+  ok((await page.getAttribute('#app > section', 'data-parent')) === 'ang05', `[${width}px] 반대로 묻기 → "억울함"의 같은 뜻 다른 말 화면`);
   await h.opt(1); await h.expect('intensity', '반대로 묻기 강도');
   await page.click('[data-score="9"]');
   await h.opt(5); await h.expect('causeOther', '원인 직접 입력');
@@ -443,6 +477,7 @@ async function runForWidth(browser, base, width, D) {
   }
   await newGame(page, h, '원인 칸 위험 표현 점검');
   await h.opt(1); await h.opt(1); await h.opt(1);
+  if ((await h.screen('intensity')) === 'wording') await h.opt(1);
   await page.click('[data-score="5"]');
   await h.opt(5);
   await page.fill('#cause-text', '죽고 싶어서');
@@ -637,7 +672,8 @@ async function checkGroupPages(page, h, width, D) {
 }
 
 function countWords(D) {
-  return D.families.reduce((a, f) => a + f.groups.length * 4 + f.hidden.length, 0);
+  const n = (e) => 1 + (e.same || []).length;
+  return D.families.reduce((a, f) => a + f.groups.reduce((b, g) => b + g.emotions.reduce((c, e) => c + n(e), 0), 0) + f.hidden.reduce((c, e) => c + n(e), 0), 0);
 }
 function josaCheck(word) {
   const c = word.charCodeAt(word.length - 1);

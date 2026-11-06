@@ -33,21 +33,26 @@
   var T = D.text;
 
   /* ───────── 찾아보기용 목록 ───────── */
-  var EMO = {};          // id → { id, word, desc, family, hidden }
+  var EMO = {};          // id → { id, word, desc, family, hidden, parent, same }
   var FAMILY = {};       // id → family
-  var ALL_WORDS = [];    // 도감에 들어가는 감정 전체
+  var ALL_WORDS = [];    // 도감에 들어가는 감정 전체 (같은 뜻 다른 말 포함)
+  function addEmotion(e, f, hidden) {
+    var main = { id: e.id, word: e.word, desc: e.desc, family: f.id, hidden: hidden, parent: null, same: [] };
+    EMO[e.id] = main;
+    ALL_WORDS.push(main);
+    (e.same || []).forEach(function (x) {
+      if (!x || !x.id || !x.word) return;
+      EMO[x.id] = { id: x.id, word: x.word, desc: x.desc || e.desc, family: f.id, hidden: hidden, parent: e.id, same: [] };
+      main.same.push(x.id);
+      ALL_WORDS.push(EMO[x.id]);
+    });
+  }
   D.families.forEach(function (f) {
     FAMILY[f.id] = f;
     f.groups.forEach(function (g) {
-      g.emotions.forEach(function (e) {
-        EMO[e.id] = { id: e.id, word: e.word, desc: e.desc, family: f.id, hidden: false };
-        ALL_WORDS.push(EMO[e.id]);
-      });
+      g.emotions.forEach(function (e) { addEmotion(e, f, false); });
     });
-    (f.hidden || []).forEach(function (e) {
-      EMO[e.id] = { id: e.id, word: e.word, desc: e.desc, family: f.id, hidden: true };
-      ALL_WORDS.push(EMO[e.id]);
-    });
+    (f.hidden || []).forEach(function (e) { addEmotion(e, f, true); });
   });
   var UNNAMED = D.unnamedEmotion || { id: 'unnamed', word: '이름 붙이기 어려운 감정', desc: '' };
   EMO[UNNAMED.id] = { id: UNNAMED.id, word: UNNAMED.word, desc: UNNAMED.desc, family: 'unknown', hidden: false };
@@ -231,7 +236,7 @@
 
   /* ───────── 공통 화면 조각 ───────── */
   var STEP_OF = {
-    situation: 1, family: 2, group: 2, words: 2, approach: 2, unnamed: 2,
+    situation: 1, family: 2, group: 2, words: 2, wording: 2, approach: 2, unnamed: 2,
     intensity: 3, cause: 4, causeOther: 4, need: 5, needUnnamed: 5, result: 6
   };
 
@@ -312,7 +317,12 @@
     }
   }
 
-  function pickEmotion(id, path) {
+  function pickEmotion(id, path, exact) {
+    /* 같은 뜻 다른 말이 있으면 어느 말이 가장 가까운지 한 번 더 물어요 */
+    if (!exact && EMO[id] && EMO[id].same && EMO[id].same.length) {
+      go('wording', { id: id, path: path || null });
+      return;
+    }
     draft.emotionId = id;
     if (path) draft.path = path;
     go('intensity', {});
@@ -572,6 +582,20 @@
     return screen('words', null, topBar(), progress(), heading(question, small), el('div', { class: 'opts' }, opts));
   };
 
+  screens.wording = function (p) {
+    var e = EMO[p.id];
+    var ids = [e.id].concat(e.same).slice(0, 4);
+    var opts = ids.map(function (id, i) {
+      var w = EMO[id];
+      var hint = id === e.id ? e.desc : fill(T.wordingSameHint || '{감정과} 같은 뜻이에요', { '감정': e.word });
+      return option(i + 1, w.word, hint, function () { pickEmotion(id, p.path, true); }, { color: FAMILY[e.family].color, id: id });
+    });
+    opts.push(fiveOption());
+    return screen('wording', { 'data-parent': e.id }, topBar(), progress(),
+      heading(T.wordingTitle || '같은 뜻의 말이 여러 개 있어요. 어느 말이 가장 가까운가요?', FAMILY[e.family].emoji + ' ' + e.word),
+      el('div', { class: 'opts' }, opts));
+  };
+
   screens.approach = function (p) {
     var ap = D.approaches[p.index];
     var opts = ap.options.slice(0, 4).map(function (o, i) {
@@ -785,6 +809,16 @@
     );
   };
 
+  /* 같은 뜻 다른 말 안내 (찾은 단어만 보여 줘요) */
+  function sameNote(w) {
+    var head = w.parent ? EMO[w.parent] : w;
+    var others = [head.id].concat(head.same).filter(function (id) { return id !== w.id; });
+    if (!others.length) return null;
+    var found = foundSet();
+    var names = others.map(function (id) { return found[id] ? EMO[id].word : '？？？'; });
+    return el('p', { class: 'guide', 'data-testid': 'dex-detail-same' }, '같은 뜻 다른 말: ' + names.join(', '));
+  }
+
   /* 도감 단어를 누르면 나오는 설명 창 */
   function openDexDetail(w, f) {
     closeDexDetail();
@@ -796,6 +830,7 @@
       var last = recs.reduce(function (a, r) { return r.ts > a.ts ? r : a; });
       body = [
         el('p', { class: 'sheet-desc', 'data-testid': 'dex-detail-desc' }, w.desc),
+        sameNote(w),
         el('dl', { class: 'sheet-facts' },
           el('div', null, el('dt', null, '처음 찾은 날'), el('dd', { 'data-testid': 'dex-detail-first' }, longDate(first.ts))),
           el('div', null, el('dt', null, '찾은 횟수'), el('dd', { 'data-testid': 'dex-detail-count' }, recs.length + '번')),

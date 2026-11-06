@@ -41,6 +41,8 @@ window.MAEUM_DATA.text = {
   wordsTitle: '이 중 가장 가까운 감정을 골라 보세요.',
   noneOfThese: '이 중엔 없어요',
   noneOfTheseHint: '다른 방법으로 물어볼게요',
+  wordingTitle: '같은 뜻의 말이 여러 개 있어요. 어느 말이 가장 가까운가요?',
+  wordingSameHint: '{감정과} 같은 뜻이에요',
 
   /* ④ 강도 */
   intensityTitle: '그 감정은 얼마나 컸나요?',
