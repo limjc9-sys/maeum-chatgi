@@ -128,6 +128,11 @@ function checkData() {
   ok(D.quadrants.every((q) => !/나쁘/.test(q.label)) && D.quadrants.filter((q) => /안 좋고/.test(q.label)).length === 2, '[규칙 7] 기분 4칸 이름: "기분이 나쁘고" 대신 "기분이 안 좋고"');
   ok(!/작은 실천 제안|무엇을 말해 주나요/.test(JSON.stringify(D.text) + JSON.stringify(D.guide)), '[규칙 6] 마음 카드에 작은 실천 제안·"무엇을 말해 주나요" 없음');
   ok(D.guide.sections.some((x) => /이전/.test(x.title) && /그대로 남아/.test(x.body)), '[규칙 6] 사용 방법에 이전 단계로 돌아가기 설명');
+  ok(!/보너스 별|★/.test(JSON.stringify(D.text) + JSON.stringify(D.guide)), '[규칙 10] 보너스별(★) 문구 없음');
+  const mains = D.quadrants.flatMap((q) => q.categories.flatMap((c) => c.emotions.map((e) => ({ e, c }))));
+  ok(Object.keys(D.antonyms.byWord).every((id) => mains.some((m) => m.e.id === id)), '[규칙 10] 반대말 낱말 id가 모두 있음');
+  ok(mains.every((m) => (D.antonyms.byWord[m.e.id] || D.antonyms.byCategory[m.c.id] || []).every((w) => w && w !== m.e.word)), '[규칙 10] 반대말이 자기 자신이 아님');
+  ok(mains.filter((m) => (D.antonyms.byWord[m.e.id] || D.antonyms.byCategory[m.c.id] || []).length === 0).length <= 3, '[규칙 10] 반대말이 없는 낱말은 두 마음이 섞인 말 3개뿐');
   D.thoughtWords.forEach((t) => ok(t.word && t.feelings.length && t.feelings.every((id) => emo[id]) && t.needs.length && t.needs.every((id) => need[id]), `생각이 섞인 말 "${t.word}": 느낌·욕구 id 확인`));
   ok(D.needSearchSuggest.every((id) => need[id]), '욕구 찾기 추천 id가 모두 있음');
   // 5번 경로
@@ -724,9 +729,14 @@ async function runForWidth(browser, base, width, D) {
   const sad01N = await page.evaluate(() => window.__maeum.records().filter((r) => (r.emotions && r.emotions.length ? r.emotions.map((x) => x.id) : [r.emotionId]).includes('sad01')).length);
   await page.click('.dex-tab[data-dex-tab="blue"]');
   ok(!(await page.$('[data-testid="dex-explain"]')), `[${width}px] [규칙 9] 누르기 전에는 설명이 접혀 있음`);
+  const dexLay = await page.$$eval('.dex-item', (e) => e.slice(0, 2).map((x) => { const r = x.getBoundingClientRect(); return { top: Math.round(r.top), left: Math.round(r.left) }; }));
+  ok(dexLay[0].top === dexLay[1].top && dexLay[0].left < dexLay[1].left, `[${width}px] [규칙 10] 도감 낱말은 2개씩 나란히`);
+  ok(!(await page.$('.dex-short')) && !/마음이 아래로 가라앉고/.test(await page.textContent('.dex-list')), `[${width}px] [규칙 10] 목록에는 낱말만 (밑에 설명 없음)`);
   await page.click('.dex-word[data-dex="sad01"]');
   const ex = await page.textContent('[data-testid="dex-explain"]');
-  ok(ex.includes(EMO.sad01.desc) && ex.includes('이럴 때 느껴요') && (await page.textContent('[data-testid="dex-detail-count"]')).includes(`${sad01N}번`), `[${width}px] [규칙 9] 서운함을 누르면 뜻·이럴 때·내 기록 ${sad01N}번`);
+  const dts = await page.$$eval('[data-testid="dex-explain"] dt', (e) => e.map((x) => x.textContent));
+  ok(JSON.stringify(dts) === JSON.stringify(['뜻', '비슷한 말', '반대말']), `[${width}px] [규칙 10] + 단추를 누르면 뜻·비슷한 말·반대말 3가지만 (${dts.join('·')}, 골라 본 횟수 ${sad01N}번은 안 보임)`);
+  ok((await page.textContent('[data-testid="dex-meaning"]')) === EMO.sad01.desc && (await page.textContent('[data-testid="dex-opposite"]')).includes(D.antonyms.byWord.sad01[0]) && (await page.textContent('[data-testid="dex-similar"]')).length > 1, `[${width}px] [규칙 10] 서운함: 뜻·비슷한 말·반대말(${D.antonyms.byWord.sad01.join(', ')})`);
   await h.snap('dex-detail');
   await page.click('.dex-word[data-dex="sad01"]');
   ok(!(await page.$('[data-testid="dex-explain"]')), `[${width}px] [규칙 9] 다시 누르면 접힘`);
