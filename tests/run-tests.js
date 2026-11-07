@@ -282,6 +282,8 @@ function makeHelpers(page, width) {
       return cur === name;
     },
     async opt(n) { await page.click(`#app > section .opt[data-num="${n}"]`); },
+    // 큰 감정 화면: n번 쪽을 체크하고 "다음"
+    async fam(n) { await page.click(`#app > section .opt[data-num="${n}"]`); await page.click('[data-testid="family-next"]'); },
     async question() { return (await page.textContent('#app h1')).trim(); },
     async snap(name) {
       // 위쪽 막대는 화면에 붙어 있어 스크롤하면 내용 위에 겹쳐 보여요. 점검은 맨 위에서 해요
@@ -357,6 +359,15 @@ async function runForWidth(browser, base, width, D) {
   {
     const homeText = await page.textContent('#app');
     ok(!/109|1577-0199|자살|상담·치료/.test(homeText), `[${width}px] 첫 화면에 상담 전화·안내 문구가 없음`);
+    // 처음 화면은 시작 버튼만 크게, 메뉴는 그 아래쪽에 작게
+    const lay = await page.evaluate(() => {
+      const r = (sel) => document.querySelector(sel).getBoundingClientRect();
+      const menus = Array.from(document.querySelectorAll('.menu-small .menu-btn')).map((b) => b.getBoundingClientRect());
+      return { start: r('[data-testid="start"]'), menuTop: Math.min(...menus.map((m) => m.top)), menuH: Math.max(...menus.map((m) => m.height)), n: menus.length, hints: document.querySelectorAll('.menu-small .opt-hint').length, stats: !!document.querySelector('[data-testid="home-stats"]') };
+    });
+    ok(lay.n === 5 && lay.hints === 0, `[${width}px] 아래쪽 메뉴 버튼 5개, 설명 줄 없음`);
+    ok(lay.menuTop > lay.start.bottom && lay.menuH < lay.start.height + 12, `[${width}px] 메뉴는 시작 버튼 아래에 작게 (높이 ${Math.round(lay.menuH)}px)`);
+    ok(!lay.stats, `[${width}px] 기록이 없으면 기록 요약 줄도 없음`);
   }
   await h.snap('home');
 
@@ -376,8 +387,9 @@ async function runForWidth(browser, base, width, D) {
       const tiles = await page.$$eval('#app .opts-grid .opt', (els) => els.map((e) => ({ id: e.getAttribute('data-id'), five: e.classList.contains('opt-five') })));
       ok(tiles.length === D.families.length + 1, `[${width}px] 첫 화면 칸 ${D.families.length + 1}개 (쪽 ${D.families.length} + 잘 모르겠어요)`);
       ok(tiles.filter((t) => t.five).map((t) => t.id).join() === 'not-sure', `[${width}px] 첫 화면에서 "이 중엔 없어요" 모양은 "잘 모르겠어요" 칸에만`);
+      ok(!(await page.$('[data-testid="family-next"]')), `[${width}px] 쪽을 체크하기 전에는 "다음" 버튼 없음`);
     }
-    await h.opt(fi);
+    await h.fam(fi);
     await h.expect('group', `${fam.label} 묶음`);
     await h.snap(`group-${fam.id}`);
     await h.opt(gi);
@@ -479,7 +491,7 @@ async function runForWidth(browser, base, width, D) {
 
   /* 2-3. 세부 감정에서 5번 → 몸 감각 → 숨은 감정 발견 + 욕구 5번 연속 */
   await newGame(page, h, '친구들이 나만 빼고 놀러 갔다는 걸 알았다.');
-  await h.opt(2); await h.expect('group', '숨은 감정: 묶음');
+  await h.fam(2); await h.expect('group', '숨은 감정: 묶음');
   await h.opt(1); await h.expect('words', '숨은 감정: 세부');
   await h.opt(5); await h.expect('approach', '숨은 감정: 몸 감각');
   ok((await page.getAttribute('#app > section', 'data-approach')) === 'body', `[${width}px] 세부 감정에서 5번 → 몸 감각 질문`);
@@ -555,7 +567,7 @@ async function runForWidth(browser, base, width, D) {
   {
     const fi = D.families.findIndex((f) => f.groups.some((g) => g.emotions.some((e) => e.id === 'fear23')));
     const gi = D.families[fi].groups.findIndex((g) => g.emotions.some((e) => e.id === 'fear23'));
-    await h.opt(fi + 1);
+    await h.fam(fi + 1);
     for (let k = 0; k < Math.floor(gi / 4); k++) await h.opt(5);
     await h.opt((gi % 4) + 1);
     await h.expect('words', '구별: 단어');
@@ -590,7 +602,7 @@ async function runForWidth(browser, base, width, D) {
   await page.click('[data-testid="next"]');
   await h.expect('family', '안 적고 시작: 큰 감정');
   ok(!(await page.$('.sit-chip')), `[${width}px] 안 적으면 있었던 일 표시가 없음`);
-  await h.opt(1); await h.opt(4); await h.opt(1); await page.click('[data-testid="pick-next"]');
+  await h.fam(1); await h.opt(4); await h.opt(1); await page.click('[data-testid="pick-next"]');
   await passToIntensity(page, h);
   await page.click('[data-score="4"]');
   await h.opt(3); await h.opt(1);
@@ -611,7 +623,7 @@ async function runForWidth(browser, base, width, D) {
 
   /* 2-5. 이전 버튼 */
   await newGame(page, h, '이전 버튼 점검');
-  await h.opt(3); await h.expect('group', '이전 버튼: 묶음');
+  await h.fam(3); await h.expect('group', '이전 버튼: 묶음');
   await h.opt(1); await h.expect('words', '이전 버튼: 세부');
   await page.click('.topbar .top-btn >> nth=0');
   await h.expect('group', '이전 버튼 → 묶음으로 돌아감');
@@ -754,8 +766,7 @@ async function runForWidth(browser, base, width, D) {
   await page.click('[data-testid="delete-all"]');
   await page.click('[data-testid="confirm-delete"]');
   await h.expect('home', '삭제 후 처음 화면');
-  ok((await page.textContent('[data-testid="stat-count"]')).includes('0개'), `[${width}px] 삭제 후 기록 0개`);
-  ok((await page.textContent('[data-testid="stat-dex"]')).includes('0 /'), `[${width}px] 삭제 후 도감 0개`);
+  ok(!(await page.$('[data-testid="home-stats"]')), `[${width}px] 삭제 후 기록 요약 줄이 사라짐(기록 0개)`);
   ok((await page.evaluate(() => localStorage.getItem('maeum-chatgi-v1'))) === null, `[${width}px] 휴대폰 저장소에서도 지워짐`);
 
   /* 2-10. 지운 뒤 파일을 불러와 되살리기 (휴대폰을 바꾼 경우와 같음) */
@@ -818,7 +829,7 @@ async function checkGroupPages(page, h, width, D) {
     const pages = Math.ceil(fam.groups.length / 4);
     await newGame(page, h, `묶음 넘기기 ${fam.label}: 오늘 있었던 일.`);
     await h.expect('family', `${fam.label} 묶음 넘기기: 큰 감정`);
-    await h.opt(fi + 1);
+    await h.fam(fi + 1);
     for (let pg = 0; pg < pages; pg++) {
       await h.expect('group', `${fam.label} 묶음 ${pg + 1}장`);
       ok((await page.getAttribute('#app > section', 'data-page')) === String(pg), `[${width}px ${fam.label}] 묶음 ${pg + 1}장 표시`);
@@ -887,7 +898,7 @@ async function checkSearch(page, h, width, D) {
   await page.click('[data-testid="home"]');
   // 묶음 화면에서도 찾기를 열 수 있음
   await newGame(page, h, '묶음 화면에서 찾기');
-  await h.opt(2);
+  await h.fam(2);
   await h.expect('group', '묶음 화면');
   await page.click('[data-testid="search-open"]');
   await h.expect('search', '묶음 화면 → 단어로 찾기');
@@ -984,7 +995,7 @@ async function checkMulti(page, h, width, D) {
   };
   await newGame(page, h, '졸업식이 끝나고 친구들과 헤어졌다.');
   await h.expect('family', '여러 감정: 큰 감정');
-  await page.click('#app .opt[data-id="mixed"]');
+  await page.click('#app .opt[data-id="mixed"]'); await page.click('[data-testid="family-next"]');
   await h.expect('group', '여러 감정: 섞인 마음 쪽 묶음');
   await h.opt(1);
   await h.expect('words', '여러 감정: 섞인 마음 단어');
@@ -1002,11 +1013,13 @@ async function checkMulti(page, h, width, D) {
   await h.snap('multi-family');
   await page.click('[data-pick="mix01"]');
   ok((await pickCount()) === 1, `[${width}px] 막대의 ✕로 복잡미묘함 빼기 → 1개`);
-  await page.click('#app .opt[data-id="mixed"]'); await h.opt(1);
+  ok((await page.getAttribute('#app .opt[data-id="mixed"]', 'aria-pressed')) === 'true', `[${width}px] 돌아와도 섞인 마음 쪽은 체크된 채로 있음`);
+  await page.click('[data-testid="family-next"]'); await h.opt(1);
   ok((await page.getAttribute('#app .opt[data-id="sad45"]', 'aria-pressed')) === 'true', `[${width}px] 다시 와도 착잡함은 체크된 채로 있음`);
   await h.opt(2);
   await page.click('[data-testid="pick-more"]');
-  await page.click('#app .opt[data-id="joy"]'); await h.opt(1);
+  await page.click('#app .opt[data-id="joy"]'); await page.click('[data-testid="family-next"]');
+  await h.expect('group', '여러 감정: 새로 체크한 기쁨 쪽으로 감'); await h.opt(1);
   await h.expect('words', '여러 감정: 기쁨 쪽 단어');
   await h.opt(1);
   ok((await pickCount()) === 3, `[${width}px] 기쁨까지 3개`);
@@ -1050,6 +1063,48 @@ async function checkMulti(page, h, width, D) {
   const rec = await page.evaluate(() => { const r = window.__maeum.records(); return r[r.length - 1]; });
   ok(rec.emotionId === 'sad45' && rec.emotions.length === 3 && rec.intensity === 7 && rec.emotions[2].family === 'joy', `[${width}px] 기록: 첫 감정 sad45, 감정 3개, 강도 7`);
   await page.click('[data-testid="home"]');
+
+  /* 처음 화면(큰 감정)부터 쪽을 여러 개 체크: 슬픔 + 화남 → 차례로 고르기 */
+  const famNum = (id) => D.families.findIndex((f) => f.id === id) + 1;
+  await newGame(page, h, '친구가 약속을 또 어겼다.');
+  await h.expect('family', '쪽 여러 개: 큰 감정');
+  await h.opt(famNum('sad')); await h.opt(famNum('anger'));
+  ok((await page.getAttribute('#app .opt[data-id="sad"]', 'aria-pressed')) === 'true' && (await page.getAttribute('#app .opt[data-id="anger"]', 'aria-pressed')) === 'true', `[${width}px] 큰 감정 화면에서 쪽 2개 체크`);
+  ok((await page.textContent('[data-testid="family-next"]')).includes('2개'), `[${width}px] "고른 쪽 2개" 버튼`);
+  await h.opt(famNum('sad'));
+  ok((await page.getAttribute('#app .opt[data-id="sad"]', 'aria-pressed')) === 'false', `[${width}px] 다시 누르면 쪽 체크가 풀림`);
+  await h.opt(famNum('sad')); await h.opt(famNum('fear')); await h.opt(famNum('joy'));
+  ok((await page.getAttribute('#app .opt[data-id="joy"]', 'aria-pressed')) === 'false', `[${width}px] 쪽은 3개까지 (4번째는 체크 안 됨)`);
+  await h.opt(famNum('fear'));
+  await h.snap('family-multi');
+  await page.click('[data-testid="family-next"]');
+  await h.expect('group', '쪽 여러 개: 첫 쪽(화남)');
+  ok((await page.getAttribute('#app > section', 'data-family')) === 'anger', `[${width}px] 먼저 체크한 쪽(화남)부터`);
+  ok((await page.textContent('[data-testid="fam-skip"]')).includes('슬픔'), `[${width}px] 묶음 화면에 "다음 쪽: 슬픔" 건너뛰기`);
+  await h.opt(1);
+  await h.expect('words', '쪽 여러 개: 화남 단어');
+  await h.opt(1);
+  ok((await page.textContent('[data-testid="fam-next"]')).includes('슬픔'), `[${width}px] 단어 화면에 "다음 쪽: 슬픔" 버튼`);
+  ok((await page.textContent('[data-testid="pick-next-bottom"]')).includes('1개'), `[${width}px] 여기까지 고른 감정으로 끝낼 수도 있음`);
+  await h.snap('words-fam-next');
+  await page.click('[data-testid="pick-next"]');
+  await h.expect('group', '쪽 여러 개: 다음 쪽(슬픔)');
+  ok((await page.getAttribute('#app > section', 'data-family')) === 'sad', `[${width}px] 위쪽 "다음"도 남은 쪽(슬픔)으로 감`);
+  ok(!(await page.$('[data-testid="fam-skip"]')), `[${width}px] 마지막 쪽에는 건너뛰기 없음`);
+  await h.opt(1);
+  await h.expect('words', '쪽 여러 개: 슬픔 단어');
+  await h.opt(1);
+  ok(!(await page.$('[data-testid="fam-next"]')), `[${width}px] 마지막 쪽에는 다음 쪽 버튼 없음`);
+  ok((await page.textContent('[data-testid="pick-next-bottom"]')).includes('2개'), `[${width}px] 두 쪽에서 감정 2개`);
+  const fa = D.families.find((f) => f.id === 'anger').groups[0].emotions[0].id;
+  const fs2 = D.families.find((f) => f.id === 'sad').groups[0].emotions[0].id;
+  ok((await page.textContent('[data-testid="pick-bar"]')).includes(findEmo(D, fa).word) && (await page.textContent('[data-testid="pick-bar"]')).includes(findEmo(D, fs2).word), `[${width}px] 고른 감정 막대에 화남·슬픔 쪽 단어`);
+  await page.click('[data-testid="pick-next-bottom"]');
+  for (let k = 0; k < 4 && (await h.screen('intensity')) === 'wording'; k++) await h.opt(1);
+  await h.expect('intensity', '쪽 여러 개: 강도');
+  ok((await page.textContent('#app .lead')).includes('(1 / 2)'), `[${width}px] 두 쪽에서 고른 감정마다 강도 (1 / 2)`);
+  await page.click('.topbar .top-btn >> nth=1');
+  await h.expect('home', '쪽 여러 개: 그만하기');
 }
 
 function allEmotionIds(D) {
@@ -1070,7 +1125,7 @@ const needById = (D, id) => D.needs.find((n) => n.id === id);
 async function checkNeeds(page, h, width, D) {
   const toNeed = async (sit, wi) => {
     await newGame(page, h, sit);
-    await h.opt(1); await h.opt(4); await h.opt(wi); await page.click('[data-testid="pick-next"]'); // 기쁨 / 편안하고 마음이 놓여요 / 2~4번 단어 (같은 감정이 겹치지 않게)
+    await h.fam(1); await h.opt(4); await h.opt(wi); await page.click('[data-testid="pick-next"]'); // 기쁨 / 편안하고 마음이 놓여요 / 2~4번 단어 (같은 감정이 겹치지 않게)
     await passToIntensity(page, h);
     await page.click('[data-score="5"]');
     await h.opt(5); // 원인: 다른 것 (글 없이)

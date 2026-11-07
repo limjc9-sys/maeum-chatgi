@@ -406,7 +406,12 @@
       })),
       el('div', { class: 'pick-actions' },
         showMore && ps.length < MAX_PICKS ? el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'pick-more', onclick: function () { go('family', {}); } }, T.pickMore || '다른 쪽에서 더 고르기') : null,
-        el('button', { class: 'btn btn-primary', type: 'button', 'data-testid': 'pick-next', onclick: pickNext }, T.pickNext || '다음 →')
+        el('button', { class: 'btn btn-primary', type: 'button', 'data-testid': 'pick-next', onclick: function () {
+          /* 체크해 둔 쪽이 남아 있으면 그 쪽으로, 없으면 강도로 */
+          var cur = (current.screen === 'words' || current.screen === 'group') ? current.params.family : null;
+          var nf = cur ? nextFam(cur) : null;
+          if (nf) go('group', { family: nf }); else pickNext();
+        } }, T.pickNext || '다음 →')
       )
     );
   }
@@ -540,22 +545,26 @@
       ),
       el('button', { class: 'btn btn-primary btn-big', type: 'button', onclick: startGame, 'data-testid': 'start' }, T.startButton),
       el('p', { class: 'encourage' }, T.homeEncourage),
-      el('div', { class: 'stats' },
-        statTile('📖', '감정 도감', found + ' / ' + ALL_WORDS.length, 'stat-dex'),
-        statTile('🔥', '연속 기록', s + '일', 'stat-streak'),
-        statTile('🗂', '전체 기록', recs.length + '개', 'stat-count')
-      ),
-      el('nav', { class: 'menu' },
-        menuBtn('📖', '감정 도감', '찾은 감정 단어 모아 보기', function () { go('dex', {}); }, 'menu-dex'),
-        menuBtn('📊', '주간 감정 보고서', '자주 나온 감정과 욕구', function () { go('report', { offset: 0 }); }, 'menu-report'),
-        menuBtn('🗂', '지난 기록', '지금까지 만든 마음 카드', function () { go('records', {}); }, 'menu-records'),
-        menuBtn('💾', '기록 옮기기', '파일로 저장하기·불러오기', function () { go('backup', {}); }, 'menu-backup'),
-        introCards().length ? menuBtn('❓', T.introMenu || '게임 방법', T.introMenuHint || '', function () { go('intro', { page: 0 }); }, 'menu-intro') : null
-      ),
-      installHelp(),
-      el('p', { class: 'privacy' }, T.privacy),
-      !storageOK ? el('p', { class: 'warn' }, '이 브라우저에서는 기록이 저장되지 않을 수 있어요. 일반 창(시크릿 창이 아닌 창)으로 열어 주세요.') : null,
-      el('button', { class: 'btn btn-danger-outline', type: 'button', onclick: function () { go('deleteConfirm', {}); }, 'data-testid': 'delete-all' }, '기록 전체 삭제')
+      /* 기록 요약 한 줄: 기록이 있을 때만 */
+      recs.length ? el('p', { class: 'home-stats', 'data-testid': 'home-stats' },
+        el('span', { 'data-testid': 'stat-count' }, fill(T.statRecords || '기록 {글}개', { '글': String(recs.length) })), ' · ',
+        el('span', { 'data-testid': 'stat-dex' }, fill(T.statDex || '도감 {글}', { '글': found + ' / ' + ALL_WORDS.length })), ' · ',
+        el('span', { 'data-testid': 'stat-streak' }, fill(T.statStreak || '연속 {글}일', { '글': String(s) }))
+      ) : null,
+      /* 아래쪽 작은 메뉴 */
+      el('div', { class: 'home-foot' },
+        el('nav', { class: 'menu-small', 'aria-label': '메뉴' },
+          menuBtn('📖', T.menuDex || '감정 도감', function () { go('dex', {}); }, 'menu-dex'),
+          menuBtn('📊', T.menuReport || '주간 보고서', function () { go('report', { offset: 0 }); }, 'menu-report'),
+          menuBtn('📋', T.menuRecords || '지난 기록', function () { go('records', {}); }, 'menu-records'),
+          menuBtn('💾', T.menuBackup || '기록 옮기기', function () { go('backup', {}); }, 'menu-backup'),
+          introCards().length ? menuBtn('❓', T.introMenu || '게임 방법', function () { go('intro', { page: 0 }); }, 'menu-intro') : null
+        ),
+        el('p', { class: 'privacy' }, T.privacy),
+        !storageOK ? el('p', { class: 'warn' }, '이 브라우저에서는 기록이 저장되지 않을 수 있어요. 일반 창(시크릿 창이 아닌 창)으로 열어 주세요.') : null,
+        installHelp(),
+        el('button', { class: 'btn btn-quiet-danger', type: 'button', onclick: function () { go('deleteConfirm', {}); }, 'data-testid': 'delete-all' }, '기록 전체 삭제')
+      )
     );
     return wrap;
   };
@@ -566,10 +575,10 @@
       el('span', { class: 'stat-label' }, label)
     );
   }
-  function menuBtn(icon, label, hint, onClick, testid) {
+  function menuBtn(icon, label, onClick, testid) {
     return el('button', { class: 'menu-btn', type: 'button', onclick: onClick, 'data-testid': testid },
       el('span', { class: 'menu-icon', 'aria-hidden': 'true' }, icon),
-      el('span', { class: 'opt-body' }, el('span', { class: 'opt-label' }, label), el('span', { class: 'opt-hint' }, hint))
+      el('span', { class: 'menu-label' }, label)
     );
   }
 
@@ -654,13 +663,51 @@
     );
   };
 
-  /* 감정 쪽 고르기: 쪽이 4개보다 많아 두 줄로 놓아요. 맨 끝 "잘 모르겠어요"는 다른 화면의 5번과 같은 일을 해요 */
+  /* 감정 쪽 고르기: 쪽이 4개보다 많아 두 줄로 놓아요. 맨 끝 "잘 모르겠어요"는 다른 화면의 5번과 같은 일을 해요.
+     쪽도 여러 개(3개까지) 체크할 수 있어요. draft.fams = 체크한 쪽 id 차례.
+     "다음"을 누르면 체크한 쪽을 차례로 돌며 감정을 고르고, 각 쪽 화면에서 "다음 쪽"으로 넘어가요. */
+  var MAX_FAMS = 3;
+  function fams() { return (draft && draft.fams) || []; }
+  function toggleFam(id) {
+    if (!draft.fams) draft.fams = [];
+    var at = draft.fams.indexOf(id);
+    if (at !== -1) draft.fams.splice(at, 1);
+    else if (draft.fams.length >= MAX_FAMS) { toast(T.familyMax || '쪽은 3개까지 고를 수 있어요.'); return; }
+    else draft.fams.push(id);
+    refresh();
+  }
+  /* 체크한 쪽 가운데 아직 고른 감정이 없는 첫 쪽 (모두 골랐으면 첫 쪽) */
+  function firstFam() {
+    var fs = fams();
+    for (var i = 0; i < fs.length; i++) {
+      var has = picks().some(function (x) { return EMO[x.id] && EMO[x.id].family === fs[i]; });
+      if (!has) return fs[i];
+    }
+    return fs[0] || null;
+  }
+  /* 지금 쪽 다음에 체크해 둔 쪽 (없거나 감정을 이미 3개 골랐으면 null) */
+  function nextFam(cur) {
+    var fs = fams();
+    var i = fs.indexOf(cur);
+    if (i === -1 || i + 1 >= fs.length || picks().length >= MAX_PICKS) return null;
+    return fs[i + 1];
+  }
+  function famName(id) { var f = FAMILY[id]; return f.emoji + ' ' + f.label; }
+
   screens.family = function () {
     var opts = D.families.map(function (f, i) {
-      return option(i + 1, f.emoji + ' ' + f.label, f.hint, function () { go('group', { family: f.id }); }, { color: f.color, id: f.id, cls: 'opt-tile', tile: true });
+      var on = fams().indexOf(f.id) !== -1;
+      return option(i + 1, f.emoji + ' ' + f.label, f.hint, function () { toggleFam(f.id); },
+        { color: f.color, id: f.id, cls: 'opt-tile' + (on ? ' opt-checked' : ''), tile: true, icon: on ? '✓' : null, pressed: on });
     });
     opts.push(option(D.families.length + 1, T.familyNotSure, T.familyNotSureHint, function () { if (D.moodMeter) go('meter', {}); else emotionFive(); }, { id: 'not-sure', icon: '?', cls: 'opt-five opt-tile', tile: true }));
-    return screen('family', null, topBar(), progress(), pickBar(false), situationChip(), heading(T.familyTitle), el('div', { class: 'opts opts-grid' }, opts), searchButton());
+    var n = fams().length;
+    return screen('family', null, topBar(), progress(), pickBar(false), situationChip(), heading(T.familyTitle),
+      el('p', { class: 'guide' }, T.familyGuide || '느껴지는 쪽을 모두 눌러 체크하세요. 3개까지 골라도 돼요.'),
+      el('div', { class: 'opts opts-grid' }, opts),
+      n ? el('button', { class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'family-next', onclick: function () { go('group', { family: firstFam() }); } },
+        fill(T.familyNext || '고른 쪽 {글}개에서 감정 찾기 →', { '글': String(n) })) : null,
+      searchButton());
   };
 
   function situationChip() {
@@ -688,8 +735,12 @@
       opts.push(fiveOption());
     }
     var lead = f.emoji + ' ' + f.label + (pages > 1 ? ' (' + (pg + 1) + ' / ' + pages + ')' : '');
+    var nf = nextFam(f.id);
     return screen('group', { 'data-family': f.id, 'data-page': String(pg) }, topBar(), progress(), pickBar(false),
-      heading(T.groupTitle, lead), el('div', { class: 'opts' }, opts), searchButton());
+      heading(T.groupTitle, lead), el('div', { class: 'opts' }, opts),
+      nf ? el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'fam-skip', onclick: function () { go('group', { family: nf }); } },
+        fill(T.familySkip || '이 쪽은 건너뛰고 다음 쪽: {글} →', { '글': famName(nf) })) : null,
+      searchButton());
   };
 
   screens.words = function (p) {
@@ -709,10 +760,15 @@
         { color: FAMILY[e.family].color, id: id, icon: on ? '✓' : null, cls: on ? 'opt-checked' : '', pressed: on });
     });
     opts.push(fiveOption());
+    var nf = p.family ? nextFam(p.family) : null;
+    var n = picks().length;
     return screen('words', null, topBar(), progress(), pickBar(true), heading(question, small),
       el('p', { class: 'guide' }, T.pickGuide || '맞는 감정을 눌러 체크하세요. 여러 개(3개까지) 골라도 돼요.'),
       el('div', { class: 'opts' }, opts),
-      picks().length ? el('button', { class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'pick-next-bottom', onclick: pickNext }, fill(T.pickNextCount || '고른 감정 {글}개로 다음 →', { '글': String(picks().length) })) : null);
+      nf ? el('button', { class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'fam-next', onclick: function () { go('group', { family: nf }); } },
+        fill(T.familyNextShort || '다음 쪽: {글} →', { '글': famName(nf) })) : null,
+      n ? el('button', { class: 'btn ' + (nf ? 'btn-secondary' : 'btn-primary btn-big'), type: 'button', 'data-testid': 'pick-next-bottom', onclick: pickNext },
+        nf ? fill(T.familyFinish || '여기까지 고른 감정 {글}개로 다음 →', { '글': String(n) }) : fill(T.pickNextCount || '고른 감정 {글}개로 다음 →', { '글': String(n) })) : null);
   };
 
   screens.wording = function (p) {

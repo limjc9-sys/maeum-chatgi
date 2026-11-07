@@ -256,16 +256,25 @@ input[type="search"]::-webkit-search-cancel-button { width: 20px; height: 20px; 
 .stat-value { font-size: 19px; font-weight: 800; }
 .stat-label { font-size: 16px; color: var(--ink-soft); }
 
-.menu { display: flex; flex-direction: column; gap: 10px; }
+/* 처음 화면: 시작 버튼만 크게, 메뉴는 아래쪽에 작게 */
+.screen[data-screen="home"] { min-height: calc(100vh - 48px); }
+.home-stats { font-size: 16px; color: var(--ink-soft); text-align: center; }
+.home-foot { margin-top: auto; display: flex; flex-direction: column; gap: 12px; padding-top: 24px; }
+.menu-small { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .menu-btn {
-  display: flex; align-items: center; gap: 12px;
-  width: 100%; min-height: 64px; padding: 10px 14px;
-  font: inherit; text-align: left; color: var(--ink);
-  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-width: 0; min-height: 60px; padding: 6px 4px;
+  font: inherit; font-size: 16px; color: var(--ink-soft); text-align: center;
+  background: transparent; border: 1px solid var(--line); border-radius: 12px;
   cursor: pointer;
 }
 .menu-btn:active { background: var(--brand-soft); }
-.menu-icon { font-size: 26px; width: 36px; text-align: center; flex-shrink: 0; }
+.menu-icon { font-size: 20px; line-height: 1.2; }
+.menu-label { font-size: 16px; line-height: 1.3; word-break: keep-all; }
+.btn-quiet-danger {
+  align-self: center; width: auto; min-height: 44px; padding: 0 12px;
+  background: transparent; border: none; color: var(--danger); font-size: 16px; font-weight: 400; text-decoration: underline;
+}
 
 .install {
   font-size: 16px; background: var(--surface); border: 1px solid var(--line);
