@@ -268,7 +268,7 @@ window.MAEUM_DATA.families = [
         label: '마음이 복잡하고 무거워요',
         hint: '생각이 얽힌 느낌',
         emotions: [
-          { id: 'sad57', word: '마음이 무거움', desc: '걱정과 슬픔이 얹혀 마음이 무거워요', same: [{ id: 'sad57a', word: '무거운 마음' }] },
+          { id: 'sad57', word: '마음이 무거움', desc: '마음이 즐겁지 않고 가라앉아 우울해요', same: [{ id: 'sad57a', word: '무거운 마음' }] },
           { id: 'sad46', word: '씁쓸함', desc: '일이 끝났는데도 뒷맛이 쓰게 남아요', same: [{ id: 'sad46a', word: '쓴웃음' }] },
           { id: 'sad47', word: '한스러움', desc: '되돌릴 수 없는 일이 원망스럽고 맺혀요', same: [{ id: 'sad47a', word: '통탄' }] },
           { id: 'sad48', word: '숙연함', desc: '무거운 일 앞에서 마음이 조용히 가라앉아요', same: [{ id: 'sad48a', word: '심각함' }] }
@@ -602,20 +602,20 @@ window.MAEUM_DATA.families = [
         label: '여러 마음이 뒤섞여요',
         hint: '갈피를 못 잡는 느낌',
         emotions: [
-          { id: 'sad45', word: '착잡함', desc: '여러 생각이 얽혀 마음이 무거워요', ask: '여러 생각이 얽혀 마음이 어수선했어요', same: [{ id: 'sad45a', word: '심란함' }, { id: 'sad45b', word: '뒤숭숭함' }, { id: 'sad45c', word: '싱숭생숭함' }] },
+          { id: 'sad45', word: '착잡함', desc: '여러 생각이 갈피를 못 잡게 뒤섞여 마음이 어수선해요', ask: '여러 생각이 얽혀 마음이 어수선했어요', same: [{ id: 'sad45a', word: '심란함' }, { id: 'sad45b', word: '뒤숭숭함' }, { id: 'sad45c', word: '싱숭생숭함' }] },
           { id: 'mix01', word: '복잡미묘함', desc: '한마디로 말하기 어렵게 여러 마음이 얽혀 있어요', same: [{ id: 'mix01a', word: '미묘함' }, { id: 'mix01b', word: '복잡한 마음' }] },
-          { id: 'mix02', word: '만감이 교차함', desc: '지난 일과 여러 감정이 한꺼번에 밀려와요' },
-          { id: 'mix03', word: '갈팡질팡함', desc: '이러고 싶다가도 저러고 싶어 마음이 오락가락해요', same: [{ id: 'mix03a', word: '마음이 오락가락함' }] }
+          { id: 'mix02', word: '만감이 교차함', desc: '온갖 느낌이 한꺼번에 솟아올라 서로 엇갈려요' },
+          { id: 'mix03', word: '갈팡질팡함', desc: '마음의 갈피를 잡지 못하고 이리저리 헤매요', same: [{ id: 'mix03a', word: '마음이 오락가락함' }] }
         ]
       },
       {
         label: '좋으면서 슬퍼요',
         hint: '기쁨과 아픔이 함께 있는 느낌',
         emotions: [
-          { id: 'mix04', word: '시원섭섭함', desc: '끝나서 홀가분하면서도 한편으로 아쉬워요', ask: '끝나서 홀가분하면서도 아쉬웠어요' },
+          { id: 'mix04', word: '시원섭섭함', desc: '답답하던 마음이 풀려 홀가분하면서도 한편으로 섭섭해요', ask: '끝나서 홀가분하면서도 아쉬웠어요' },
           { id: 'mix05', word: '웃픔', desc: '웃기면서도 한편으로 슬퍼요', same: [{ id: 'mix05a', word: '웃기면서 슬픔' }] },
           { id: 'mix06', word: '고마우면서 미안함', desc: '고마운 마음과 미안한 마음이 함께 들어요', ask: '고마운데 한편으로 미안했어요', same: [{ id: 'mix06a', word: '고맙고 미안함' }] },
-          { id: 'mix07', word: '달콤씁쓸함', desc: '좋았던 만큼 아쉬움이 남아 달면서도 써요' }
+          { id: 'mix07', word: '달콤씁쓸함', desc: '좋으면서도 한편으로 조금 언짢고 씁쓸해요' }
         ]
       },
       {

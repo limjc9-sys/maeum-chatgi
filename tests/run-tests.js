@@ -1153,10 +1153,30 @@ function checkPwaFiles() {
   });
 }
 
+/* ───── 4. 욕구 응답 모으기 스크립트 점검 (tools/needfit-report.js) ───── */
+function checkNeedFitReport() {
+  console.log('■ 욕구 응답 모으기 점검');
+  const tool = require(path.join(ROOT, 'tools', 'needfit-report.js'));
+  const r = (id, e, n, f) => ({ id, emotionId: e, needId: n, needFit: f });
+  const s = tool.summarize([
+    { records: [r('a1', 'sad05', 'grow4', 'no'), r('a2', 'sad05a', 'con6', 'yes'), r('x1', 'fear23', 'con7', 'yes')] },
+    { records: [r('b1', 'sad05', 'grow4', 'no'), r('b2', 'sad05', 'con6', 'yes'), r('x1', 'fear23', 'con7', 'yes')] },
+    { records: [r('c1', 'sad05', 'grow4', 'no'), r('c2', 'sad05', 'con6', 'yes'), r('c3', 'sad05', 'con2', 'unsure'), r('c4', 'sad05', 'nope', 'yes')] }
+  ]);
+  const sad = s.emotions.find((e) => e.emotionId === 'sad05');
+  const row = (id) => sad && sad.rows.find((x) => x.needId === id);
+  ok(s.people === 3 && s.answered === 8, '욕구 응답 모으기: 사람 3명, 같은 기록 id는 한 번만, 없는 욕구 id는 뺌');
+  ok(row('con6') && row('con6').yes === 3 && row('con6').suggest === '넣기 후보', '욕구 응답 모으기: 같은 뜻 다른 말(낙담)을 대표 단어(실망)로 묶고 넣기 후보를 냄');
+  ok(row('grow4') && row('grow4').suggest === '빼기 후보', '욕구 응답 모으기: "아니요"가 많은 목록 욕구는 빼기 후보');
+  ok(row('con2') && row('con2').suggest === '', '욕구 응답 모으기: "잘 모르겠음"만 있으면 후보 아님');
+  ok(tool.toMarkdown(s, tool.loadData().NEED).includes('| 위로(con6) |'), '욕구 응답 모으기: 결과 표에 욕구 이름');
+}
+
 (async () => {
   fs.rmSync(SHOTS, { recursive: true, force: true });
   const D = checkData();
   checkPwaFiles();
+  checkNeedFitReport();
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch();
