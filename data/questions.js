@@ -13,13 +13,15 @@
 window.MAEUM_DATA = window.MAEUM_DATA || {};
 
 window.MAEUM_DATA.text = {
-  appTitle: '내 마음 찾기',
-  appSubtitle: '오늘 있었던 일 속에서 내 감정의 이름을 찾아보는 게임',
+  appTitle: '감정 및 욕구 찾기',
+  appSubtitle: '오늘 있었던 일에서 내 감정의 이름과 그 밑의 욕구를 찾아요',
   privacy: '기록은 이 휴대폰 안에만 저장돼요. 어디로도 보내지 않아요.',
   startButton: '시작하기',
+  guideButton: '사용 방법',
+  disclaimer: '감정 낱말을 익히고 내 마음을 살펴보는 도구예요. 진단이나 검사가 아니에요.',
 
   /* 단계 이름 (화면 위쪽에 나와요) */
-  steps: ['있었던 일', '감정 고르기', '강도', '원인', '욕구', '결과'],
+  steps: ['있었던 일', '감정 고르기', '강도', '원인', '욕구', '마음 카드'],
 
   /* ① 상황 입력 */
   situationTitle: '오늘 어떤 일이 있었나요?',
@@ -28,90 +30,82 @@ window.MAEUM_DATA.text = {
   situationSkip: '적지 않고 시작하기',
   nextButton: '다음',
 
-  /* ② 큰 감정 고르기 */
-  familyTitle: '그때 마음은 어느 쪽이었나요?',
-  familyGuide: '느껴지는 쪽을 모두 눌러 체크하세요. 여러 마음이 섞였으면 3개까지 골라도 돼요.',
-  familyNext: '고른 쪽 {글}개에서 감정 찾기 →',
-  familyMax: '쪽은 3개까지 고를 수 있어요. 하나를 빼고 다시 골라 주세요.',
-  familyNextShort: '다음 쪽: {글} →',
-  familySkip: '이 쪽은 건너뛰고 다음 쪽: {글} →',
-  familyFinish: '여기까지 고른 감정 {글}개로 다음 →',
-  familyNotSure: '잘 모르겠어요',
-  familyNotSureHint: '괜찮아요. 다른 방법으로 찾아볼게요',
-
-  /* ③ 세부 감정 고르기 */
-  groupTitle: '조금 더 좁혀 볼게요. 어떤 느낌에 가까웠나요?',
-  groupMore: '다른 묶음 더 보기',
-  groupMoreHint: '비슷한 느낌 묶음이 더 있어요',
-  wordsTitle: '이 중 가까운 감정을 골라 보세요.',
-
-  /* 여러 감정 체크 (3개까지) */
-  pickGuide: '맞는 감정을 눌러 체크하세요. 여러 마음이 섞였으면 3개까지 골라도 돼요.',
+  /* ② 감정 고르기 (한 화면에서 모두 골라요. 개수 제한 없음) */
+  emotionTitle: '그때 어떤 감정이 있었나요?',
+  emotionGuide: '그런 것 같은 감정을 모두 눌러 체크하세요. 개수 제한은 없어요. 다시 누르면 풀려요.',
+  coreTitle: '핵심 감정',
+  coreHint: '많은 사람이 자주 겪는 기본 감정이에요.',
+  quadTitle: '기분 4칸에서 더 찾기',
+  quadGuide: '칸을 누르면 그 칸의 감정 낱말이 펼쳐져요. 다른 칸을 열어도 고른 감정은 그대로 남아요.',
+  quadClose: '접기',
+  thoughtTitle: '"무시당한" 같은 말이 먼저 떠오르나요?',
+  thoughtGuide: '이런 말은 상대가 한 일에 대한 생각이 섞인 말이에요. 누르면 그 밑에 있을 수 있는 느낌과 욕구를 보여 줘요.',
+  thoughtFeelings: '이런 느낌이었을 수 있어요. 맞는 것을 모두 눌러 체크하세요.',
+  thoughtNeeds: '이런 욕구가 중요했을 수 있어요. 욕구 단계에서 먼저 보여 드려요.',
+  notSure: '잘 모르겠어요',
+  notSureHint: '몸의 느낌, 하고 싶었던 행동으로 찾아볼게요',
   pickTitle: '고른 감정 {글}개',
-  pickLimit: '3개까지',
-  pickMore: '다른 쪽에서 더 고르기',
+  pickEmpty: '아직 고른 감정이 없어요. 낱말을 눌러 체크하세요.',
   pickNext: '다음 →',
+  backToEmotion: '← 감정 고르기 화면으로',
   pickNextCount: '고른 감정 {글}개로 다음 →',
-  pickMax: '감정은 3개까지 고를 수 있어요. 하나를 빼고 다시 골라 주세요.',
+  pickedLast: '방금 고른 감정',
   noneOfThese: '이 중엔 없어요',
   noneOfTheseHint: '다른 방법으로 물어볼게요',
-  wordingTitle: '뜻은 같은 말이에요. 평소에 쓰는 말을 골라 보세요.',
-  wordingGuide: '어느 것을 골라도 틀리지 않아요. 입에 붙는 말이면 돼요.',
-  wordingSameHint: '{감정과} 같은 뜻이에요',
-
-  /* 비슷한 감정 구별하기 (data/emotions.js의 compareSets) */
-  compareTitle: '비슷한 감정과 견주어 볼게요. 그때 일과 가장 맞는 문장을 골라 보세요.',
-  compareLead: '고른 감정: {감정}',
+  wordsGuide: '그런 것 같은 감정을 모두 눌러 체크하세요.',
 
   /* 단어로 찾기 */
-  searchButton: '🔍 단어로 찾기',
-  searchTitle: '떠오르는 감정 단어를 적어 보세요',
+  searchButton: '🔍 낱말로 찾기',
+  searchTitle: '떠오르는 감정 낱말을 적어 보세요',
   searchGuide: '예) 부끄러웠다, 미안함, 놀람, 서운해요',
-  searchPlaceholder: '감정 단어 적기',
+  searchPlaceholder: '감정 낱말 적기',
   searchSuggest: '자주 찾는 감정',
-  searchResults: '찾은 단어 {글}개',
-  searchNone: '맞는 단어를 못 찾았어요. 다른 말로 적거나, 이전 화면에서 쪽을 골라 찾아보세요.',
+  searchResults: '찾은 낱말 {글}개',
+  searchNone: '맞는 낱말을 못 찾았어요. 다른 말로 적거나, 기분 4칸을 열어 찾아보세요.',
   searchSame: '{감정과} 같은 뜻',
+  searchBack: '← 감정 고르기로 돌아가기',
 
-  /* ④ 강도 */
-  intensityTitle: '그 감정은 얼마나 컸나요?',
-  intensityGuide: '1점은 아주 조금, 10점은 아주 크게라는 뜻이에요.',
+  /* ③ 강도 */
+  intensityTitle: '감정마다 크기를 골라 주세요',
+  intensityGuide: '1은 아주 조금, 10은 아주 크게예요.',
+  intensityLeft: '아직 {글}개를 고르지 않았어요',
+  intensityNext: '다음 →',
 
-  /* ⑤ 원인 */
+  /* ④ 원인 */
   causeTitle: '그 마음은 무엇 때문에 생겼을까요?',
   causeOtherTitle: '어떤 것이었는지 적고 싶다면 적어 주세요.',
   causeOtherGuide: '안 적고 넘어가도 괜찮아요.',
   causeOtherPlaceholder: '예) 갑자기 비가 와서',
 
-  /* 욕구 고르기 */
-  needMore: '다른 욕구 찾기',
-  needMoreHint: '욕구 쪽을 골라 더 찾아볼게요',
+  /* ⑤ 욕구 고르기 (한 화면에서 모두 골라요. 개수 제한 없음) */
+  needTitle: '그 순간 무엇이 있었다면 괜찮았을까요?',
+  needTitleMet: '그 마음은 어떤 욕구가 채워져서 생겼을까요?',
+  needGuide: '그런 것 같은 욕구를 모두 눌러 체크하세요. 개수 제한은 없어요.',
+  needSuggestTitle: '먼저 살펴볼 욕구',
+  needSuggestHint: '고른 감정과 함께 흔히 보이는 욕구예요. 경향일 뿐 정답은 아니에요.',
+  needCatTitle: '욕구 14범주에서 더 찾기',
+  needCatGuide: '범주를 누르면 그 범주의 욕구 낱말이 펼쳐져요.',
+  needPickTitle: '고른 욕구 {글}개',
+  needPickEmpty: '아직 고른 욕구가 없어요.',
+  needNextCount: '고른 욕구 {글}개로 마음 카드 만들기 →',
   needSkip: '지금은 넘어가기',
-  needGroupTitle: '어느 쪽 욕구에 가까웠나요?',
-  needGroupMore: '다른 욕구 쪽 더 보기',
-  needGroupMoreHint: '욕구 쪽이 더 있어요',
-  needWordsTitle: '이 중 가장 가까운 욕구를 골라 보세요.',
-  needWordsMore: '이 쪽 욕구 더 보기',
-  needWordsMoreHint: '같은 쪽 욕구가 더 있어요',
-  needOtherGroup: '다른 욕구 쪽 보기',
-  needOtherGroupHint: '욕구 쪽 고르기로 돌아가요',
-  needCompareTitle: '비슷한 욕구와 견주어 볼게요. 그때 바랐던 것과 가장 맞는 문장을 골라 보세요.',
-  needCompareLead: '고른 욕구: {욕구}',
-  needSearchButton: '🔍 욕구 단어로 찾기',
-  needSearchTitle: '바랐던 것을 단어로 적어 보세요',
+  needSearchButton: '🔍 욕구 낱말로 찾기',
+  needSearchTitle: '바랐던 것을 낱말로 적어 보세요',
   needSearchGuide: '예) 인정받고 싶었다, 위로, 쉬고 싶었다, 사과',
-  needSearchPlaceholder: '욕구 단어 적기',
+  needSearchPlaceholder: '욕구 낱말 적기',
   needSearchSuggest: '자주 찾는 욕구',
+  needSearchBack: '← 욕구 고르기로 돌아가기',
 
-  /* 결과 카드 */
+  /* ⑥ 마음 카드 */
   resultTitle: '오늘의 마음 카드',
   resultEmotion: '찾은 감정',
   resultEmotionsMany: '찾은 감정 {글}개',
-  needFitQuestion: '이 욕구가 맞았나요?',
+  resultNote: '지금 고른 말은 이 순간의 해석이에요. 감정은 섞이고 바뀔 수 있어요.',
+  needFitQuestion: '고른 욕구가 맞았나요?',
   needFitYes: '네',
   needFitNo: '아니요',
   needFitUnsure: '잘 모르겠음',
-  needFitNote: '답은 기록에 남아요. 같은 감정을 다시 고르면 첫 욕구 보기에 반영돼요.',
+  needFitNote: '답은 기록에 남아요. 같은 감정을 다시 고르면 욕구 후보 차례에 반영돼요.',
   reflectTitle: '그 감정이 나에게 무엇을 말해 주나요?',
   reflectGuide: '적지 않아도 돼요. 적으면 이 카드와 함께 저장돼요.',
   reflectPlaceholder: '예) 내가 이 친구를 정말 아끼고 있었구나.',
@@ -119,14 +113,14 @@ window.MAEUM_DATA.text = {
   reflectUpdate: '고쳐서 저장하기',
   reflectDone: '카드에 저장했어요.',
   reflectSaved: '내가 남긴 말',
-  reportDistinctGuide: '서로 다른 감정 = 이번 주 기록에 나온 감정 단어 수. 섞인 마음 기록 = 감정을 2개 이상 고르거나 섞인 마음 쪽에서 고른 기록.',
-  reportFitGuide: '결과 카드의 "이 욕구가 맞았나요?"에 답한 횟수예요. "아니요"가 많았던 욕구는 같은 감정의 첫 욕구 보기에서 빠져요.',
+  reportDistinctGuide: '서로 다른 감정 = 이번 주 기록에 나온 감정 낱말 수. 여러 감정 기록 = 감정을 2개 이상 고른 기록.',
+  reportFitGuide: '마음 카드의 "고른 욕구가 맞았나요?"에 답한 횟수예요. "아니요"가 많았던 욕구는 같은 감정의 욕구 후보에서 빠져요.',
   resultIntensity: '강도',
   resultNeed: '필요했던 것',
   resultSummary: '한 줄 정리',
   resultTip: '작은 실천 제안',
   hiddenBonus: '숨은 감정 발견! 보너스 별 ★ 하나를 받았어요.',
-  newWordBonus: '새 감정 단어를 찾았어요. 도감에 채워졌어요.',
+  newWordBonus: '새 감정 낱말을 찾았어요. 도감에 채워졌어요.',
   homeButton: '처음 화면으로',
   dexButton: '감정 도감 보기',
 
@@ -135,16 +129,13 @@ window.MAEUM_DATA.text = {
   summaryMet: '{원인} {감정을} {강도} 느꼈어요. {욕구가} 채워졌기 때문이에요.',
   summaryNoNeed: '{원인} {감정을} {강도} 느꼈어요. 그 밑에 있는 욕구는 아직 찾는 중이에요.',
 
-  /* 이름 붙이기 어려운 감정·욕구 */
+  /* 이름 붙이기 어려운 감정 */
   unnamedTitle: '지금은 이름 붙이기 어려운 감정이에요',
   unnamedBody: '괜찮아요. 모든 감정에 바로 이름이 붙지는 않아요. 오늘 마음은 "지금은 이름 붙이기 어려운 감정"으로 저장해 둘게요. 시간이 지나면 이름이 떠오를 수도 있어요.',
-  unnamedNeedTitle: '욕구도 천천히 찾아도 돼요',
-  unnamedNeedBody: '무엇이 필요했는지 바로 떠오르지 않을 때도 있어요. 오늘은 "이름 붙이기 어려운 욕구"으로 남겨 둘게요.',
   continueButton: '계속하기',
 
-  /* 위로 문장 (홈 화면 아래쪽) */
+  /* 처음 화면 */
   homeEncourage: '정답은 없어요. 떠오르는 대로 골라도 괜찮아요.',
-  /* 처음 화면 아래쪽 작은 메뉴와 기록 요약 (기록이 1개 이상일 때만 요약 줄이 나와요) */
   menuDex: '감정 도감',
   menuReport: '주간 보고서',
   menuRecords: '지난 기록',
@@ -153,33 +144,73 @@ window.MAEUM_DATA.text = {
   statDex: '도감 {글}',
   statStreak: '연속 {글}일',
 
-  /* 게임 방법 안내 (처음 열 때 한 번 나와요. 처음 화면 메뉴에서 다시 볼 수 있어요) */
-  introSkip: '건너뛰기',
-  introPrev: '← 이전',
-  introNext: '다음 →',
-  introDone: '알겠어요, 시작할게요',
-  introMenu: '게임 방법',
-  introMenuHint: '처음 안내 다시 보기'
+  /* 사용 방법 (처음 열 때 한 번 나와요. 처음 화면 오른쪽 위 "사용 방법"으로 다시 볼 수 있어요) */
+  guideTitle: '사용 방법',
+  guideDone: '알겠어요, 시작할게요',
+  guideClose: '처음 화면으로',
+  installTitle: '홈 화면에 앱으로 설치하는 방법',
+  refsTitle: '이 앱을 설계할 때 참고한 자료',
+  refsNote: '서지는 조사자료(docs 폴더)에 정리한 내용을 따랐어요. 감정 낱말의 칸·범주 배치와 감정-욕구 연결은 위 자료를 바탕으로 한 작성자의 추정이며, 확정된 규칙이 아니에요.'
 };
 
-/* 게임 방법 안내 카드 (위에서부터 차례대로 한 장씩 나와요. 장수를 줄이거나 늘려도 돼요) */
-window.MAEUM_DATA.intro = [
-  {
-    icon: '💗',
-    title: '오늘 마음의 이름을 찾아요',
-    body: '오늘 있었던 일을 1~3줄로 적고, 질문에 하나씩 답하면 그때 감정의 이름을 찾을 수 있어요. 한 판은 5~10분이면 끝나요.'
-  },
-  {
-    icon: '🔍',
-    title: '딱 맞는 게 없으면 5번',
-    body: '보기 중에 맞는 것이 없으면 5번 "이 중엔 없어요"를 누르세요. 처음 감정 쪽 화면에서는 "잘 모르겠어요"를 누르면 기분과 힘 4칸으로 고를 수 있어요. 여러 마음이 섞였으면 처음 화면부터 쪽을 3개까지, 감정도 3개까지 함께 체크할 수 있어요. 몸의 느낌, 하고 싶었던 행동처럼 다른 방법으로 다시 물어봐요. 정답은 없어요.'
-  },
-  {
-    icon: '📖',
-    title: '모으고 돌아봐요',
-    body: '찾은 감정 단어는 감정 도감에 모여요. 숨은 감정을 찾으면 별 ★을 받아요. 기록은 이 휴대폰 안에만 저장돼요.'
-  }
-];
+/* 사용 방법 화면 (위에서부터 차례대로 나와요) */
+window.MAEUM_DATA.guide = {
+  sections: [
+    { icon: '🧭', title: '이 앱은', body: '오늘 있었던 일에서 내 감정의 이름을 찾고, 그 감정 밑에 있는 욕구를 살펴보는 도구예요. 진단이나 검사가 아니에요. 정답도 없어요.' },
+    { icon: '①', title: '있었던 일 적기', body: '1~3줄로 적어요. 적지 않고 시작해도 돼요.' },
+    { icon: '②', title: '감정 고르기', body: '맨 위 핵심 감정 5개(수치심·분노·두려움·상실감·슬픔)를 바로 누를 수 있어요. 더 찾으려면 기분 4칸(노랑·초록·빨강·파랑)을 눌러 펼쳐요. 그런 것 같은 감정은 칸과 범주를 가리지 않고 모두 체크하세요. 개수 제한이 없어요. "무시당한"처럼 생각이 섞인 말이 먼저 떠오르면 그 말을 눌러 밑에 있는 느낌을 찾아요. 낱말로 찾기, "잘 모르겠어요"(몸 느낌·행동으로 찾기)도 있어요.' },
+    { icon: '③', title: '강도', body: '고른 감정마다 1~10 가운데 크기를 골라요. 한 화면에 모두 나와요.' },
+    { icon: '④', title: '원인', body: '그 마음이 무엇 때문에 생겼는지 골라요.' },
+    { icon: '⑤', title: '욕구 고르기', body: '고른 감정과 함께 흔히 보이는 욕구가 먼저 나와요. 경향일 뿐 정답은 아니에요. 14범주를 펼쳐 그런 것 같은 욕구를 모두 체크하세요. 개수 제한이 없어요.' },
+    { icon: '⑥', title: '마음 카드', body: '감정·강도·욕구·한 줄 정리·작은 실천 제안이 카드로 남아요. 고른 욕구가 맞았는지 답하면 다음에 욕구 후보 차례가 바뀌어요.' },
+    { icon: '📖', title: '도감·보고서·기록', body: '찾은 감정 낱말은 감정 도감에 모여요. 주간 보고서에서 자주 나온 감정과 욕구를 볼 수 있어요. 기록은 이 휴대폰 안에만 저장되고, 기록 옮기기로 파일에 담아 옮길 수 있어요.' }
+  ],
+  install: [
+    '안드로이드(크롬): 오른쪽 위 ⋮ 메뉴 → "홈 화면에 추가" 또는 "앱 설치"를 누르세요.',
+    '아이폰(사파리): 아래쪽 공유 버튼(네모에 화살표) → "홈 화면에 추가"를 누르세요.',
+    '한 번 연 뒤에는 인터넷이 없어도 열려요.'
+  ],
+  references: [
+    { group: '감정과 욕구의 언어', items: [
+      'Rosenberg, M. B. (2015). Nonviolent Communication: A Language of Life (3rd ed.). PuddleDancer Press. [한국어판: 『비폭력대화』, 캐서린 한 옮김, 한국NVC출판사]',
+      'Center for Nonviolent Communication (2005). Feelings Inventory · Needs Inventory. cnvc.org',
+      '한국NVC센터. 느낌 목록 · 욕구 목록.'
+    ] },
+    { group: '기분 4칸 (쾌-불쾌 × 에너지)', items: [
+      'Russell, J. A. (1980). A circumplex model of affect. Journal of Personality and Social Psychology, 39(6), 1161–1178.',
+      'Brackett, M. (2019). Permission to Feel. Celadon Books. [한국어판: 『감정의 발견』, 북라이프] · Yale Center for Emotional Intelligence, RULER와 무드 미터'
+    ] },
+    { group: '감정 범주와 정서 입자도', items: [
+      'Ekman, P. (1992). An argument for basic emotions. Cognition and Emotion, 6(3–4), 169–200.',
+      'Plutchik, R. (2001). The nature of emotions. American Scientist, 89(4), 344–350.',
+      'Willcox, G. (1982). The Feeling Wheel. Transactional Analysis Journal, 12(4), 274–276.',
+      'Barrett, L. F. (2017). How Emotions Are Made. Houghton Mifflin Harcourt.',
+      'Kashdan, T. B., Barrett, L. F., & McKnight, P. E. (2015). Unpacking emotion differentiation. Current Directions in Psychological Science, 24(1), 10–16.',
+      'Lieberman, M. D., et al. (2007). Putting feelings into words. Psychological Science, 18(5), 421–428.'
+    ] },
+    { group: '여러 감정을 함께 고르는 근거', items: [
+      'Berrios, R., Totterdell, P., & Kellett, S. (2015). Eliciting mixed emotions: a meta-analysis comparing models, types, and measures. Frontiers in Psychology, 6, 428.',
+      'Larsen, J. T., & McGraw, A. P. (2011). Further evidence for mixed emotions. Journal of Personality and Social Psychology, 100(6), 1095–1110.'
+    ] },
+    { group: '욕구 이론', items: [
+      'Deci, E. L., & Ryan, R. M. (2000). The "what" and "why" of goal pursuits. Psychological Inquiry, 11(4), 227–268.',
+      'Tay, L., & Diener, E. (2011). Needs and subjective well-being around the world. Journal of Personality and Social Psychology, 101(2), 354–365.',
+      'Max-Neef, M. A. (1991). Human Scale Development. Apex Press.',
+      'Young, J. E., Klosko, J. S., & Weishaar, M. E. (2003). Schema Therapy: A Practitioner\'s Guide. Guilford Press.',
+      'Gottman, J. (1997). Raising an Emotionally Intelligent Child. Simon & Schuster.'
+    ] },
+    { group: '한국어 감정 낱말 연구', items: [
+      '박인조·민경환 (2005). 한국어 감정단어의 목록 작성과 차원 탐색. 한국심리학회지: 사회 및 성격, 19(1), 109–129.',
+      '손선주·박미숙·박지은·손진훈 (2012). 한국어 감정표현단어의 추출과 범주화. 감성과학, 15(1), 105–120.',
+      '홍영지·남예은·이윤형 (2016). 정서가, 각성가 및 구체성 평정을 통한 한국어 정서단어 목록 개발. 인지과학, 27(3), 377–406.'
+    ] },
+    { group: '앱 설계·효과 연구', items: [
+      'Chernev, A., Böckenholt, U., & Goodman, J. (2015). Choice overload: A conceptual review and meta-analysis. Journal of Consumer Psychology, 25(2), 333–358.',
+      'Linardon, J., et al. (2019). The efficacy of app-supported smartphone interventions for mental health problems: a meta-analysis of randomized controlled trials. World Psychiatry, 18(3), 325–336.',
+      'Cheng, V. W. S., et al. (2019). Gamification in apps and technologies for improving mental health and well-being: Systematic review. JMIR Mental Health, 6(6), e13717.'
+    ] }
+  ]
+};
 
 /* 강도 점수에 따라 문장에 들어가는 말 (1점부터 10점까지 차례대로) */
 window.MAEUM_DATA.intensityWords = ['살짝', '살짝', '조금', '조금', '꽤', '꽤', '많이', '많이', '아주 크게', '아주 크게'];
@@ -194,29 +225,12 @@ window.MAEUM_DATA.causes = [
 ];
 
 /*
-  "이 중엔 없어요"(5번)를 누를 때마다 차례대로 바뀌는 질문 방법
+  감정 고르기 화면의 "잘 모르겠어요"를 누르면 시작하는 질문 방법.
+  각 화면의 5번 "이 중엔 없어요"를 누를 때마다 차례대로 바뀌어요
   1번째: 몸 감각 → 2번째: 하고 싶었던 행동 → 3번째: 반대로(욕구부터) → 4번째: 비슷한 옛 경험
   그다음에도 5번을 누르면 "지금은 이름 붙이기 어려운 감정"으로 저장돼요.
   emotions 안의 이름표는 emotions.js의 id예요.
 */
-/*
-  "잘 모르겠어요"를 누르면 먼저 나오는 기분 4칸 (무드 미터 방식: 기분 좋음–나쁨 × 힘이 넘침–빠짐)
-  칸마다 emotions 4개 (emotions.js의 id). 5번 "이 중엔 없어요"는 아래 approaches(몸 감각부터)로 이어져요.
-  근거: 마크 브래킷의 무드 미터(docs/emotion-words-research.md S10), Russell(1980) 원형 모형
-*/
-window.MAEUM_DATA.moodMeter = {
-  intro: '감정 이름은 잠시 내려놓고, 기분과 힘만 골라 볼게요.',
-  question: '그때 기분과 몸의 힘은 어느 칸에 가까웠나요?',
-  axis: '위 = 힘이 넘침 · 아래 = 힘이 빠짐 / 왼쪽 = 기분 나쁨 · 오른쪽 = 기분 좋음',
-  wordsQuestion: '이 칸의 감정 중 가까운 것을 골라 보세요.',
-  options: [
-    { label: '기분 나쁘고 힘이 넘쳐요', hint: '화나거나 불안해서 가만있기 어려움', color: '#D9473A', emotions: ['ang29', 'fear31', 'ang01', 'fear09'] },
-    { label: '기분 좋고 힘이 넘쳐요', hint: '신나고 들뜸', color: '#E9A800', emotions: ['joy01', 'joy02', 'joy28', 'joy19'] },
-    { label: '기분 나쁘고 힘이 빠져요', hint: '슬프거나 지쳐서 처짐', color: '#3F7FE0', emotions: ['sad30', 'sad13', 'sad02', 'sad05'] },
-    { label: '기분 좋고 차분해요', hint: '편안하고 느긋함', color: '#2E9E6B', emotions: ['joy05', 'joy07', 'joy13', 'joy30'] }
-  ]
-};
-
 window.MAEUM_DATA.approaches = [
   {
     key: 'body',
@@ -267,85 +281,3 @@ window.MAEUM_DATA.approaches = [
     ]
   }
 ];
-
-/*
-  ⑥ 욕구 찾기
-  - 첫 욕구 화면: 고른 감정에 맞는 욕구 4개 (data/needs.js의 needsByEmotion, 없으면 아래 needsByCause)
-  - 5번 "다른 욕구 찾기" → 욕구 쪽 고르기 (data/needs.js의 needGroups, 한 장에 4쪽)
-    → 쪽 안의 욕구 4개씩 → 마지막 장의 5번은 "이름 붙이기 어려운 욕구"
-  question     = 기쁨 쪽이 아닐 때 질문
-  questionJoy  = 기쁨 쪽일 때 질문
-*/
-window.MAEUM_DATA.needRounds = [
-  {
-    question: '그 순간 무엇이 있었다면 괜찮았을까요?',
-    questionJoy: '그 기쁨은 어떤 욕구가 채워져서 생겼을까요?'
-  }
-];
-
-/* 첫 번째 욕구 질문의 보기: 감정 쪽 × 원인 (각 4개) */
-window.MAEUM_DATA.needsByCause = {
-  joy: {
-    word: ['con2', 'grow3', 'con4', 'mean5'],
-    attitude: ['con3', 'res1', 'con4', 'mean2'],
-    result: ['grow1', 'grow3', 'mean5', 'grow2'],
-    expect: ['grow6', 'mean3', 'free1', 'saf2'],
-    other: ['rest1', 'mean6', 'rest6', 'mean2']
-  },
-  sad: {
-    word: ['con2', 'res1', 'con6', 'clar4'],
-    attitude: ['con3', 'con5', 'con4', 'res1'],
-    result: ['grow3', 'grow4', 'con6', 'mean3'],
-    expect: ['saf2', 'con3', 'res5', 'grow4'],
-    other: ['rest1', 'con6', 'rest3', 'clar5']
-  },
-  anger: {
-    word: ['res1', 'res4', 'clar4', 'con1'],
-    attitude: ['res1', 'res6', 'res2', 'res3'],
-    result: ['res2', 'clar1', 'grow3', 'grow4'],
-    expect: ['res5', 'res3', 'clar3', 'free1'],
-    other: ['rest3', 'free4', 'res6', 'rest4']
-  },
-  fear: {
-    word: ['saf1', 'con6', 'clar3', 'saf3'],
-    attitude: ['saf4', 'saf1', 'res6', 'saf6'],
-    result: ['grow4', 'saf2', 'grow5', 'clar2'],
-    expect: ['saf5', 'free2', 'grow4', 'saf2'],
-    other: ['saf6', 'saf3', 'rest5', 'clar5']
-  },
-  shame: {
-    word: ['con7', 'res1', 'grow4', 'con2'],
-    attitude: ['con7', 'res1', 'con4', 'grow4'],
-    result: ['grow4', 'grow3', 'con7', 'mean7'],
-    expect: ['grow4', 'free2', 'con7', 'saf2'],
-    other: ['con7', 'grow4', 'rest3', 'clar6']
-  },
-  surprise: {
-    word: ['clar1', 'saf2', 'clar3', 'saf5'],
-    attitude: ['clar1', 'clar4', 'saf2', 'res7'],
-    result: ['saf2', 'clar1', 'grow4', 'saf5'],
-    expect: ['saf2', 'clar2', 'saf5', 'clar1'],
-    other: ['saf2', 'clar5', 'saf6', 'clar1']
-  },
-  disgust: {
-    word: ['res1', 'res6', 'res7', 'free5'],
-    attitude: ['res6', 'res1', 'res7', 'free5'],
-    result: ['res2', 'res7', 'clar1', 'saf7'],
-    expect: ['res7', 'res5', 'res2', 'clar3'],
-    other: ['saf7', 'res6', 'rest5', 'saf6']
-  },
-  mixed: {
-    word: ['con2', 'clar5', 'con1', 'clar6'],
-    attitude: ['clar4', 'con2', 'res1', 'clar5'],
-    result: ['clar5', 'mean3', 'con6', 'grow4'],
-    expect: ['clar5', 'saf2', 'clar6', 'con2'],
-    other: ['clar5', 'rest3', 'clar6', 'con1']
-  },
-  unknown: {
-    word: ['con1', 'clar4', 'res1', 'con2'],
-    attitude: ['con3', 'res1', 'saf1', 'clar1'],
-    result: ['grow4', 'grow3', 'clar2', 'mean3'],
-    expect: ['clar6', 'saf2', 'free2', 'con2'],
-    other: ['clar5', 'rest3', 'rest5', 'con1']
-  }
-};

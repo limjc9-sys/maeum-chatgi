@@ -6,8 +6,10 @@
   실행: node tools/needfit-report.js 기록1.json 기록2.json ... > 결과.md
   - 파일 하나 = 사람 한 명으로 셈 (같은 사람이 여러 번 보냈으면 한 파일만 넣으세요)
   - 같은 기록 id가 여러 파일에 있으면 한 번만 셈
-  - 앱처럼, 기록의 첫 감정(emotionId)을 대표 단어로 묶어 셈 (낙담 → 실망)
-  - 이 스크립트는 후보만 보여 줘요. needsByEmotion은 사람이 보고 직접 고쳐요.
+  - 앱처럼, 기록의 감정마다(여러 감정이면 모두) 원래 낱말로 묶어 셈 (낙담 → 실망)
+  - 욕구를 여러 개 고른 기록은 고른 욕구마다 같은 응답으로 셈
+  - "지금 목록" = needsByEmotion에 그 감정이 있으면 그 목록, 없으면 그 감정 범주의 needsByCategory
+  - 이 스크립트는 후보만 보여 줘요. 목록은 사람이 보고 직접 고쳐요.
 
   후보 기준 (작성자 설계, 사용 기록이 쌓이면 다시 정할 것):
   - 빼기 후보: 지금 목록에 있는 욕구인데, "아니요"가 "네"보다 많고 "아니요"라고 답한 사람이 MIN_PEOPLE명 이상
@@ -29,14 +31,12 @@ function loadData() {
   }
   const D = ctx.window.MAEUM_DATA;
   const EMO = {}, NEED = {};
-  const addEmo = (e) => {
-    EMO[e.id] = { word: e.word, parent: null };
-    (e.same || []).forEach((x) => { EMO[x.id] = { word: x.word, parent: e.id }; });
+  const addEmo = (e, cat) => {
+    EMO[e.id] = { word: e.word, parent: null, cat };
+    (e.same || []).forEach((x) => { EMO[x.id] = { word: x.word, parent: e.id, cat }; });
   };
-  (D.families || []).forEach((f) => {
-    (f.groups || []).forEach((g) => g.emotions.forEach(addEmo));
-    (f.hidden || []).forEach(addEmo);
-  });
+  (D.quadrants || []).forEach((q) => q.categories.forEach((c) => c.emotions.forEach((e) => addEmo(e, c.id))));
+  (D.retiredEmotions || []).forEach((e) => addEmo(e, null));
   (D.needs || []).forEach((n) => { NEED[n.id] = n.word; });
   return { D, EMO, NEED };
 }
@@ -62,22 +62,26 @@ function summarize(files, data) {
     people++;
     const who = 'p' + i;
     r.records.forEach((rec) => {
-      if (!rec || ['yes', 'no', 'unsure'].indexOf(rec.needFit) === -1 || !rec.needId || !NEED[rec.needId]) return;
+      if (!rec || ['yes', 'no', 'unsure'].indexOf(rec.needFit) === -1) return;
+      const needs = (Array.isArray(rec.needIds) && rec.needIds.length ? rec.needIds : [rec.needId]).filter((n) => n && NEED[n]);
+      if (!needs.length) return;
       const id = rec.id ? String(rec.id) : null;
       if (id && seen.has(id)) return;
       if (id) seen.add(id);
-      const key = mainKey(rec.emotionId);
-      if (!EMO[key]) return;
-      const row = ((table[key] = table[key] || {})[rec.needId] = table[key][rec.needId] || { yes: 0, no: 0, unsure: 0, yesPeople: new Set(), noPeople: new Set() });
-      row[rec.needFit]++;
-      if (rec.needFit === 'yes') row.yesPeople.add(who);
-      if (rec.needFit === 'no') row.noPeople.add(who);
-      answered++;
+      const emos = Array.isArray(rec.emotions) && rec.emotions.length ? rec.emotions.map((x) => x && x.id) : [rec.emotionId];
+      const keys = [...new Set(emos.map(mainKey).filter((k) => EMO[k]))];
+      keys.forEach((key) => needs.forEach((nid) => {
+        const row = ((table[key] = table[key] || {})[nid] = table[key][nid] || { yes: 0, no: 0, unsure: 0, yesPeople: new Set(), noPeople: new Set() });
+        row[rec.needFit]++;
+        if (rec.needFit === 'yes') row.yesPeople.add(who);
+        if (rec.needFit === 'no') row.noPeople.add(who);
+        answered++;
+      }));
     });
   });
   const result = [];
   Object.keys(table).sort().forEach((key) => {
-    const current = (D.needsByEmotion || {})[key] || null;
+    const current = (D.needsByEmotion || {})[key] || (EMO[key].cat && (D.needsByCategory || {})[EMO[key].cat]) || null;
     const rows = Object.keys(table[key]).map((nid) => {
       const x = table[key][nid];
       const inList = !!(current && current.indexOf(nid) !== -1);
@@ -96,7 +100,7 @@ function toMarkdown(s, NEED) {
   out.push('# 욕구 응답 모음', '');
   out.push(`- 파일(사람) ${s.people}개, 욕구 응답 ${s.answered}개, 후보 기준 인원 ${s.minPeople}명`);
   if (s.skipped.length) out.push('- 읽지 못한 파일: ' + s.skipped.join(' / '));
-  out.push('- "목록"은 지금 needsByEmotion에 있는 욕구 ✓. 목록이 없는 감정은 needsByCause(감정 쪽 × 원인)를 써서 후보를 내지 않아요.', '');
+  out.push('- "목록"은 지금 욕구 후보 목록(needsByEmotion, 없으면 needsByCategory)에 있는 욕구 ✓', '');
   s.emotions.forEach((e) => {
     out.push(`## ${e.emotion} (${e.emotionId})`);
     out.push(e.hasList ? '지금 목록: ' + e.current.map((id) => `${NEED[id] || id}(${id})`).join(', ') : '지금 목록: 없음');

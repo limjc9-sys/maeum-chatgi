@@ -1,169 +1,348 @@
 /*
   ───────────────────────────────────────────────
-  욕구 단어 파일 (needs.js)
+  욕구 낱말 파일 (needs.js)
   ───────────────────────────────────────────────
   - 따옴표 ' ' 안의 글자만 고치세요.
-  - id: '...' 부분은 절대 고치지 마세요.
-  - word = 짧은 이름 (보고서 막대그래프에 나와요)
-  - text = 문장 속에 들어가는 말. "~이/가 필요했어요" 앞에 붙어요.
-  - tip  = 결과 카드에 나오는 "작은 실천 제안"
-  - ask  = 비슷한 욕구와 견주어 볼 때 나오는 구별 문장 (아래 needCompareSets에 있는 욕구만)
+  - id: '...' 부분은 절대 고치거나 지우지 마세요. (기록이 이 이름표로 연결돼요)
+  - word = 짧은 이름 (화면 낱말·보고서 막대그래프에 나와요)
+  - text = 설명. 욕구를 하나만 골랐을 때 한 줄 정리 "~이/가 필요했어요" 앞에 붙어요.
+  - tip  = 결과 카드의 "작은 실천 제안". 없으면 그 범주(needCategories)의 tip을 써요.
+  - 욕구도 개수 제한 없이 여러 개 고를 수 있어요. (docs/design-rules.md 1번)
+  - 새 욕구 id: nd + 세 자리 번호
+  근거: 조사자료 3장 — CNVC·한국NVC센터 욕구 목록, 자기결정이론(Deci & Ryan), 스키마 치료(Young 외 2003),
+        Max-Neef(1991)를 합쳐 14범주로 다시 묶었어요. 범주 구성은 작성자 추정이에요.
 */
 window.MAEUM_DATA = window.MAEUM_DATA || {};
 
 window.MAEUM_DATA.needs = [
-  /* 이어짐 — 사람과 마음이 이어지는 것 */
-  { id: 'con1', word: '들어 줌', text: '누군가 내 말을 끝까지 들어 주는 것', ask: '누가 내 말을 끝까지 들어 줬으면 했어요', tip: '믿는 사람 한 명에게 "내 얘기 5분만 들어 줄래?" 하고 부탁해 보세요.' },
-  { id: 'con2', word: '알아줌', text: '내 마음을 알아주는 한마디', ask: '내 마음을 알아주는 한마디가 듣고 싶었어요', tip: '오늘 느낀 감정을 한 문장으로 적고, 스스로에게 "그럴 만했어"라고 말해 주세요.' },
+  { id: 'rest1', word: '쉴 틈', text: '잠깐 멈추고 쉴 틈', ask: '잠깐이라도 멈추고 쉬고 싶었어요', tip: '오늘 할 일 하나를 내일로 미루고, 그 시간에 쉬어 보세요.' },
+  { id: 'rest2', word: '충분한 잠', text: '푹 자고 일어나는 것', ask: '푹 자고 싶었어요', tip: '오늘은 평소보다 30분 일찍 휴대폰을 내려놓아 보세요.' },
+  { id: 'rest5', word: '몸 돌봄', text: '배고픔이나 아픈 곳을 챙기는 것', tip: '물 한 잔 마시고, 몸에서 불편한 곳이 있는지 살펴보세요.' },
+  { id: 'saf7', word: '깨끗함', text: '깨끗하고 정돈된 곳에 있는 것', tip: '주변 한 곳을 5분 동안 치우거나 손을 깨끗이 씻어 보세요.' },
+  { id: 'nd001', word: '먹을 것', text: '배를 든든히 채울 음식' },
+  { id: 'nd002', word: '물', text: '목을 축일 물 한 잔' },
+  { id: 'nd003', word: '맑은 공기', text: '숨쉬기 편한 맑은 공기' },
+  { id: 'nd004', word: '움직임', text: '몸을 움직이고 뻗는 것' },
+  { id: 'nd005', word: '신체 접촉', text: '안아 주거나 손을 잡아 주는 따뜻한 접촉' },
+  { id: 'nd006', word: '따뜻함', text: '춥지 않고 몸이 따뜻한 것' },
+  { id: 'nd007', word: '머물 곳', text: '편히 머물 수 있는 집과 방' },
+  { id: 'nd008', word: '건강', text: '아프지 않고 건강한 몸' },
+  { id: 'nd009', word: '햇빛', text: '햇볕을 쬐며 바깥에 있는 것' },
+  { id: 'nd010', word: '몸의 편안함', text: '몸이 쑤시거나 불편하지 않은 것' },
+  { id: 'saf1', word: '안전함', text: '다치지 않고 안전하다는 느낌', ask: '다칠 걱정 없이 안전하길 바랐어요', tip: '지금 있는 곳에서 편안하게 느껴지는 물건 세 가지를 찾아보세요.' },
+  { id: 'saf2', word: '미리 알기', text: '앞으로 어떻게 될지 미리 아는 것', ask: '앞으로 어떻게 될지 미리 알고 싶었어요', tip: '궁금한 것을 질문 목록으로 만들어, 알려 줄 수 있는 사람에게 물어보세요.' },
+  { id: 'saf4', word: '보호', text: '누군가 나를 지켜 주는 것', ask: '누가 나를 지켜 주길 바랐어요', tip: '불안할 때 도움을 청할 어른이나 기관을 한 곳 알아 두세요.' },
+  { id: 'saf5', word: '준비할 시간', text: '마음먹고 준비할 시간', tip: '다음 일정 전에 10분 준비 시간을 달력에 적어 두세요.' },
+  { id: 'nd011', word: '안정', text: '흔들리지 않고 한결같은 생활' },
+  { id: 'nd012', word: '일관성', text: '말과 규칙이 들쭉날쭉하지 않은 것' },
+  { id: 'nd013', word: '정서적 안전', text: '마음을 털어놓아도 다치지 않는 분위기' },
+  { id: 'nd014', word: '확신', text: '괜찮을 거라는 분명한 확인' },
+  { id: 'nd015', word: '신뢰', text: '믿고 맡길 수 있다는 마음' },
+  { id: 'nd016', word: '자기 보호', text: '나를 스스로 지킬 수 있는 것' },
   { id: 'con3', word: '곁에 있어 줌', text: '곁에 누군가 함께 있어 주는 것', ask: '말없이 곁에 함께 있어 주길 바랐어요', tip: '가까운 사람에게 짧은 안부 메시지를 하나 보내 보세요.' },
   { id: 'con4', word: '다정함', text: '부드러운 말투와 따뜻한 눈빛', tip: '오늘 누군가 나에게 다정했던 순간 하나를 떠올려 적어 보세요.' },
   { id: 'con5', word: '함께 끼기', text: '무리 안에 나도 함께 끼는 것', tip: '함께하고 싶은 사람에게 먼저 "같이 할래?" 하고 말을 걸어 보세요.' },
   { id: 'con6', word: '위로', text: '"괜찮아" 하고 토닥여 주는 손길', ask: '"괜찮아" 하고 토닥여 주길 바랐어요', tip: '두 손을 가슴에 얹고 천천히 세 번 숨 쉬며 "괜찮아"라고 말해 보세요.' },
-  { id: 'con7', word: '받아들여짐', text: '있는 그대로의 나를 받아 주는 것', tip: '"나는 지금 이대로도 괜찮아"를 소리 내어 한 번 말해 보세요.' },
-
-  /* 존중 — 한 사람으로 귀하게 대접받는 것 */
+  { id: 'saf3', word: '기댈 사람', text: '믿고 기댈 수 있는 사람', ask: '믿고 기댈 사람이 있길 바랐어요', tip: '힘들 때 연락할 수 있는 사람의 이름을 두 명 적어 두세요.' },
+  { id: 'grow5', word: '도움받기', text: '필요할 때 도와주는 손길', tip: '혼자 끙끙대던 일 하나를 골라 누군가에게 도움을 부탁해 보세요.' },
+  { id: 'nd017', word: '연결', text: '누군가와 마음이 이어져 있다는 느낌' },
+  { id: 'nd018', word: '사랑', text: '사랑을 주고받는 것' },
+  { id: 'nd019', word: '애정', text: '나를 아끼는 따뜻한 마음' },
+  { id: 'nd020', word: '친밀함', text: '마음을 터놓을 만큼 가까운 사이' },
+  { id: 'nd021', word: '소속감', text: '어딘가에 속해 있다는 느낌' },
+  { id: 'nd022', word: '함께함', text: '같이 시간을 보내는 사람' },
+  { id: 'nd023', word: '우정', text: '서로 아끼는 친구' },
+  { id: 'nd024', word: '돌봄', text: '나를 챙기고 돌봐 주는 손길' },
+  { id: 'nd025', word: '관심', text: '나에게 관심을 가져 주는 것' },
+  { id: 'nd026', word: '지지', text: '내 편이 되어 주는 것' },
+  { id: 'nd027', word: '협력', text: '힘을 모아 함께 하는 것' },
+  { id: 'nd028', word: '상호성', text: '서로 주고받는 균형' },
+  { id: 'nd029', word: '나눔', text: '가진 것과 마음을 서로 나누는 것' },
+  { id: 'nd030', word: '공동체', text: '함께 어울려 사는 모임과 이웃' },
   { id: 'res1', word: '존중', text: '나를 한 사람으로 귀하게 대해 주는 것', ask: '한 사람으로 귀하게 대해 주길 바랐어요', tip: '"나는 이렇게 대해 주면 좋겠어"를 한 문장으로 적어 보세요.' },
   { id: 'res2', word: '공평함', text: '모두에게 같은 기준을 적용하는 것', ask: '모두에게 같은 기준으로 대해 주길 바랐어요', tip: '무엇이 불공평했는지 사실만 세 줄로 적어 보세요. 나중에 말할 때 도움이 돼요.' },
+  { id: 'grow3', word: '노력 인정', text: '내가 애쓴 것을 봐 주는 것', ask: '내가 애쓴 것을 봐 주길 바랐어요', tip: '오늘 내가 애쓴 일 세 가지를 적고 스스로 칭찬해 보세요.' },
+  { id: 'con7', word: '받아들여짐', text: '있는 그대로의 나를 받아 주는 것', tip: '"나는 지금 이대로도 괜찮아"를 소리 내어 한 번 말해 보세요.' },
   { id: 'res3', word: '내 생각 물어봐 줌', text: '정하기 전에 내 생각도 물어봐 주는 것', ask: '정하기 전에 내 생각도 물어봐 주길 바랐어요', tip: '다음에 쓸 말을 미리 연습해 보세요. "나도 의견을 말해도 될까?"' },
   { id: 'res4', word: '진심 어린 사과', text: '잘못을 인정하는 진심 어린 사과', ask: '잘못을 인정하는 사과를 받고 싶었어요', tip: '듣고 싶은 사과의 말을 적어 보세요. 내가 무엇을 바랐는지 분명해져요.' },
-  { id: 'res5', word: '약속 지키기', text: '서로 한 약속을 지키는 것', tip: '다음 약속 때 시간과 장소를 한 번 더 확인하는 메시지를 보내 보세요.' },
-  { id: 'res6', word: '내 영역 지키기', text: '내 물건·시간·몸을 함부로 대하지 않는 것', ask: '내 물건·시간·몸을 함부로 대하지 않길 바랐어요', tip: '"그건 싫어"라고 짧게 말하는 연습을 거울 앞에서 해 보세요.' },
+  { id: 'nd031', word: '인정', text: '내가 한 일과 내 존재를 알아봐 주는 것' },
+  { id: 'nd032', word: '감사받음', text: '고맙다는 말을 듣는 것' },
+  { id: 'nd033', word: '배려', text: '내 형편을 헤아려 주는 것' },
+  { id: 'nd034', word: '존엄', text: '사람답게 대우받는 것' },
+  { id: 'nd035', word: '중요하게 여겨짐', text: '내가 중요한 사람으로 여겨지는 것' },
+  { id: 'nd036', word: '존재감', text: '내가 여기 있다는 것을 알아봐 주는 것' },
+  { id: 'nd037', word: '평등', text: '위아래 없이 똑같이 대하는 것' },
+  { id: 'nd038', word: '자기 존중', text: '나 스스로를 귀하게 여기는 것' },
+  { id: 'nd039', word: '자기 수용', text: '부족한 나도 그대로 받아들이는 것' },
+  { id: 'nd040', word: '자기 가치감', text: '나는 가치 있는 사람이라는 느낌' },
+  { id: 'con1', word: '들어 줌', text: '누군가 내 말을 끝까지 들어 주는 것', ask: '누가 내 말을 끝까지 들어 줬으면 했어요', tip: '믿는 사람 한 명에게 "내 얘기 5분만 들어 줄래?" 하고 부탁해 보세요.' },
+  { id: 'con2', word: '알아줌', text: '내 마음을 알아주는 한마디', ask: '내 마음을 알아주는 한마디가 듣고 싶었어요', tip: '오늘 느낀 감정을 한 문장으로 적고, 스스로에게 "그럴 만했어"라고 말해 주세요.' },
+  { id: 'clar1', word: '이유 설명', text: '왜 그런지 이유를 알려 주는 것', ask: '왜 그렇게 됐는지 이유를 알고 싶었어요', tip: '"왜 그렇게 됐는지 알려 줄 수 있어?"라고 물어볼 문장을 준비해 보세요.' },
+  { id: 'clar4', word: '오해 풀기', text: '서로의 오해를 푸는 것', ask: '서로 잘못 안 것을 풀고 싶었어요', tip: '"내가 이해한 게 맞는지 확인하고 싶어"라고 말을 건네 보세요.' },
+  { id: 'nd041', word: '공감', text: '내 마음을 함께 느껴 주는 것' },
+  { id: 'nd042', word: '이해받음', text: '내 사정을 제대로 이해받는 것' },
+  { id: 'nd043', word: '소통', text: '서로 말이 잘 통하는 것' },
+  { id: 'nd044', word: '있는 그대로 보여짐', text: '꾸미지 않은 내가 그대로 보이고 알려지는 것' },
+  { id: 'nd045', word: '연민', text: '내 아픔을 함께 아파해 주는 마음' },
   { id: 'res7', word: '정직함', text: '거짓 없이 진실하게 대하는 것', tip: '"솔직하게 말해 줬으면 좋겠어"를 한 문장으로 적어 보세요.' },
-
-  /* 안전 — 마음이 놓이고 믿을 수 있는 것 */
-  { id: 'saf1', word: '안전함', text: '다치지 않고 안전하다는 느낌', ask: '다칠 걱정 없이 안전하길 바랐어요', tip: '지금 있는 곳에서 편안하게 느껴지는 물건 세 가지를 찾아보세요.' },
-  { id: 'saf2', word: '미리 알기', text: '앞으로 어떻게 될지 미리 아는 것', ask: '앞으로 어떻게 될지 미리 알고 싶었어요', tip: '궁금한 것을 질문 목록으로 만들어, 알려 줄 수 있는 사람에게 물어보세요.' },
-  { id: 'saf3', word: '기댈 사람', text: '믿고 기댈 수 있는 사람', ask: '믿고 기댈 사람이 있길 바랐어요', tip: '힘들 때 연락할 수 있는 사람의 이름을 두 명 적어 두세요.' },
-  { id: 'saf4', word: '보호', text: '누군가 나를 지켜 주는 것', ask: '누가 나를 지켜 주길 바랐어요', tip: '불안할 때 도움을 청할 어른이나 기관을 한 곳 알아 두세요.' },
-  { id: 'saf5', word: '준비할 시간', text: '마음먹고 준비할 시간', tip: '다음 일정 전에 10분 준비 시간을 달력에 적어 두세요.' },
-  { id: 'saf6', word: '차분한 분위기', text: '조용하고 차분한 분위기', tip: '5분 동안 조용한 곳에서 눈을 감고 들리는 소리를 하나씩 세어 보세요.' },
-  { id: 'saf7', word: '깨끗함', text: '깨끗하고 정돈된 곳에 있는 것', tip: '주변 한 곳을 5분 동안 치우거나 손을 깨끗이 씻어 보세요.' },
-
-  /* 쉼 — 몸과 마음을 돌보는 것 */
-  { id: 'rest1', word: '쉴 틈', text: '잠깐 멈추고 쉴 틈', ask: '잠깐이라도 멈추고 쉬고 싶었어요', tip: '오늘 할 일 하나를 내일로 미루고, 그 시간에 쉬어 보세요.' },
-  { id: 'rest2', word: '충분한 잠', text: '푹 자고 일어나는 것', ask: '푹 자고 싶었어요', tip: '오늘은 평소보다 30분 일찍 휴대폰을 내려놓아 보세요.' },
-  { id: 'rest3', word: '혼자만의 시간', text: '아무도 방해하지 않는 나만의 시간', ask: '아무도 없는 곳에서 혼자 있고 싶었어요', tip: '오늘 15분, 혼자 있는 시간을 정해 좋아하는 것을 해 보세요.' },
-  { id: 'rest4', word: '여유', text: '서두르지 않아도 되는 여유', ask: '서두르지 않아도 되길 바랐어요', tip: '다음 일을 할 때 일부러 천천히, 한 번에 하나씩만 해 보세요.' },
-  { id: 'rest5', word: '몸 돌봄', text: '배고픔이나 아픈 곳을 챙기는 것', tip: '물 한 잔 마시고, 몸에서 불편한 곳이 있는지 살펴보세요.' },
-  { id: 'rest6', word: '즐거운 놀이', text: '마음껏 웃고 노는 시간', tip: '좋아하는 노래 한 곡을 틀고 몸을 움직여 보세요.' },
-
-  /* 해냄 — 자라고 해내는 것 */
-  { id: 'grow1', word: '해냈다는 느낌', text: '끝까지 해냈다는 느낌', tip: '아주 작은 일 하나를 골라 오늘 끝내 보세요.' },
-  { id: 'grow2', word: '배움', text: '새로 알게 되고 나아지는 것', tip: '오늘 일에서 배운 점 한 가지를 적어 보세요.' },
-  { id: 'grow3', word: '노력 인정', text: '내가 애쓴 것을 봐 주는 것', ask: '내가 애쓴 것을 봐 주길 바랐어요', tip: '오늘 내가 애쓴 일 세 가지를 적고 스스로 칭찬해 보세요.' },
-  { id: 'grow4', word: '실수해도 괜찮음', text: '실수해도 다시 해 볼 수 있다는 믿음', tip: '실수 하나를 떠올리고 "다음엔 이렇게 해 볼래"를 적어 보세요.' },
-  { id: 'grow5', word: '도움받기', text: '필요할 때 도와주는 손길', tip: '혼자 끙끙대던 일 하나를 골라 누군가에게 도움을 부탁해 보세요.' },
-  { id: 'grow6', word: '도전', text: '새로운 것에 도전해 볼 기회', tip: '이번 주에 해 보고 싶은 작은 도전 하나를 정해 보세요.' },
-
-  /* 자유 — 스스로 고르고 표현하는 것 */
+  { id: 'clar3', word: '솔직한 사실', text: '숨김없이 사실대로 알려 주는 것', ask: '숨김없이 사실대로 알려 주길 바랐어요', tip: '알고 싶은 사실을 질문 하나로 정리해 보세요.' },
+  { id: 'res5', word: '약속 지키기', text: '서로 한 약속을 지키는 것', tip: '다음 약속 때 시간과 장소를 한 번 더 확인하는 메시지를 보내 보세요.' },
+  { id: 'nd046', word: '진정성', text: '꾸미지 않은 진짜 마음' },
+  { id: 'nd047', word: '진실', text: '사실 그대로의 진실' },
+  { id: 'nd048', word: '투명성', text: '숨기는 것 없이 드러나 있는 것' },
+  { id: 'nd049', word: '말과 행동이 같음', text: '한 말과 하는 행동이 어긋나지 않는 것' },
+  { id: 'nd050', word: '떳떳함', text: '내 가치에 맞게 행동해 부끄럽지 않은 것' },
   { id: 'free1', word: '스스로 정하기', text: '내 일을 내가 정하는 것', ask: '내 일은 내가 정하고 싶었어요', tip: '내일 할 일 중 하나는 순서를 내가 정해 보세요.' },
   { id: 'free2', word: '내 속도', text: '내 속도대로 해도 되는 것', ask: '남과 견주지 않고 내 속도로 하고 싶었어요', tip: '남과 비교하지 않는 나만의 작은 목표를 하나 정해 보세요.' },
-  { id: 'free3', word: '솔직하게 말하기', text: '있는 그대로 솔직하게 말할 기회', tip: '하고 싶었던 말을 보내지 않는 편지로 적어 보세요.' },
-  { id: 'free4', word: '감정 드러내기', text: '울거나 화내도 괜찮다는 허락', tip: '안전한 곳에서 소리 내어 말하거나 울어도 괜찮아요. 5분만 나에게 허락해 보세요.' },
   { id: 'free5', word: '거절할 수 있음', text: '싫은 것은 싫다고 말할 수 있는 것', ask: '싫은 것은 싫다고 말하고 싶었어요', tip: '"이번엔 어려워"라는 거절 문장을 하나 준비해 두세요.' },
+  { id: 'rest3', word: '혼자만의 시간', text: '아무도 방해하지 않는 나만의 시간', ask: '아무도 없는 곳에서 혼자 있고 싶었어요', tip: '오늘 15분, 혼자 있는 시간을 정해 좋아하는 것을 해 보세요.' },
+  { id: 'nd051', word: '선택', text: '여러 길 가운데 내가 고를 수 있는 것' },
+  { id: 'nd052', word: '자유', text: '하고 싶은 것을 할 수 있는 자유' },
+  { id: 'nd053', word: '독립', text: '스스로 해 나갈 수 있는 것' },
+  { id: 'nd054', word: '나만의 공간', text: '나만 쓰는 공간과 거리' },
+  { id: 'nd055', word: '사생활', text: '내 일을 함부로 들여다보지 않는 것' },
+  { id: 'nd056', word: '자발성', text: '마음이 내킬 때 스스로 하는 것' },
+  { id: 'rest6', word: '즐거운 놀이', text: '마음껏 웃고 노는 시간', tip: '좋아하는 노래 한 곡을 틀고 몸을 움직여 보세요.' },
   { id: 'free6', word: '새로운 변화', text: '똑같은 하루에서 벗어나는 변화', tip: '평소와 다른 길로 걷거나 새로운 간식을 골라 보세요.' },
-
-  /* 의미 — 나누고 보탬이 되는 것 */
+  { id: 'nd057', word: '재미', text: '깔깔 웃을 만한 재미' },
+  { id: 'nd058', word: '즐거움', text: '즐겁게 지내는 시간' },
+  { id: 'nd059', word: '유머', text: '함께 웃는 농담' },
+  { id: 'nd060', word: '모험', text: '해 보지 않은 일에 나서 보는 것' },
+  { id: 'nd061', word: '자극', text: '지루하지 않은 새로운 자극' },
+  { id: 'nd062', word: '한가로움', text: '아무것도 안 해도 되는 한가한 시간' },
+  { id: 'nd063', word: '가벼움', text: '무겁지 않게 가볍게 지내는 것' },
+  { id: 'saf6', word: '차분한 분위기', text: '조용하고 차분한 분위기', tip: '5분 동안 조용한 곳에서 눈을 감고 들리는 소리를 하나씩 세어 보세요.' },
+  { id: 'rest4', word: '여유', text: '서두르지 않아도 되는 여유', ask: '서두르지 않아도 되길 바랐어요', tip: '다음 일을 할 때 일부러 천천히, 한 번에 하나씩만 해 보세요.' },
+  { id: 'mean6', word: '아름다움', text: '보기 좋고 마음이 맑아지는 것', tip: '하늘이나 나무처럼 보기 좋은 것을 1분 동안 바라보세요.' },
+  { id: 'nd064', word: '평화', text: '다툼 없이 평화로운 것' },
+  { id: 'nd065', word: '조화', text: '서로 잘 어울리는 것' },
+  { id: 'nd066', word: '질서', text: '제자리에 정돈된 것' },
+  { id: 'nd067', word: '균형', text: '일과 쉼, 나와 남 사이의 균형' },
+  { id: 'nd068', word: '희망', text: '앞으로 나아질 거라는 희망' },
+  { id: 'nd069', word: '영감', text: '마음을 움직이는 영감' },
+  { id: 'nd070', word: '단순함', text: '복잡하지 않고 단순한 것' },
+  { id: 'nd071', word: '마음의 평정', text: '좋은 일에도 궂은 일에도 흔들리지 않는 마음' },
+  { id: 'nd072', word: '영적 교감', text: '나보다 큰 것과 이어진 느낌' },
   { id: 'mean1', word: '보탬이 됨', text: '누군가에게 보탬이 된다는 느낌', tip: '오늘 누군가를 위해 할 수 있는 작은 친절 하나를 해 보세요.' },
-  { id: 'mean2', word: '기쁨 나누기', text: '좋은 일을 함께 나누는 것', tip: '오늘 좋았던 일을 한 사람에게 이야기해 보세요.' },
   { id: 'mean3', word: '의미', text: '이 일이 왜 중요한지 아는 것', tip: '"이 일이 나에게 중요한 이유"를 한 줄로 적어 보세요.' },
+  { id: 'mean2', word: '기쁨 나누기', text: '좋은 일을 함께 나누는 것', tip: '오늘 좋았던 일을 한 사람에게 이야기해 보세요.' },
   { id: 'mean4', word: '고마움 전하기', text: '고마운 마음을 전하는 것', tip: '고마운 사람에게 짧은 감사 메시지를 보내 보세요.' },
   { id: 'mean5', word: '축하', text: '잘된 일을 함께 기뻐해 주는 것', tip: '오늘의 좋은 일을 나만의 방식으로 축하해 보세요. 좋아하는 간식도 좋아요.' },
-  { id: 'mean6', word: '아름다움', text: '보기 좋고 마음이 맑아지는 것', tip: '하늘이나 나무처럼 보기 좋은 것을 1분 동안 바라보세요.' },
   { id: 'mean7', word: '바로잡을 기회', text: '내 잘못을 바로잡고 마음을 전할 기회', tip: '바로잡고 싶은 일 하나와 내가 할 수 있는 첫 행동을 적어 보세요.' },
-
-  /* 이해 — 알고 정리되는 것 */
-  { id: 'clar1', word: '이유 설명', text: '왜 그런지 이유를 알려 주는 것', ask: '왜 그렇게 됐는지 이유를 알고 싶었어요', tip: '"왜 그렇게 됐는지 알려 줄 수 있어?"라고 물어볼 문장을 준비해 보세요.' },
   { id: 'clar2', word: '분명함', text: '무엇을 해야 할지 분명히 아는 것', tip: '지금 해야 할 일을 딱 하나만 적어 보세요.' },
-  { id: 'clar3', word: '솔직한 사실', text: '숨김없이 사실대로 알려 주는 것', ask: '숨김없이 사실대로 알려 주길 바랐어요', tip: '알고 싶은 사실을 질문 하나로 정리해 보세요.' },
-  { id: 'clar4', word: '오해 풀기', text: '서로의 오해를 푸는 것', ask: '서로 잘못 안 것을 풀고 싶었어요', tip: '"내가 이해한 게 맞는지 확인하고 싶어"라고 말을 건네 보세요.' },
   { id: 'clar5', word: '생각 정리', text: '마음과 생각을 정리할 시간', tip: '머릿속 생각을 종이에 모두 적고, 중요한 것에 동그라미를 쳐 보세요.' },
-  { id: 'clar6', word: '나를 이해하기', text: '내가 왜 이런지 스스로 이해하는 것', tip: '오늘 기록을 일주일 뒤 다시 읽어 보세요. 되풀이되는 점이 보일 거예요.' }
+  { id: 'nd073', word: '목적', text: '왜 하는지 분명한 목적' },
+  { id: 'nd074', word: '참여', text: '함께하는 일에 나도 참여하는 것' },
+  { id: 'nd075', word: '애도', text: '잃은 것을 충분히 슬퍼할 시간' },
+  { id: 'nd076', word: '기념', text: '소중한 일과 사람을 기억하는 것' },
+  { id: 'nd077', word: '알아차림', text: '지금 일어나는 일을 또렷이 알아차리는 것' },
+  { id: 'nd078', word: '넓은 관점', text: '한발 물러서 넓게 볼 수 있는 눈' },
+  { id: 'nd079', word: '꿈', text: '이루고 싶은 꿈과 바람' },
+  { id: 'grow1', word: '해냈다는 느낌', text: '끝까지 해냈다는 느낌', tip: '아주 작은 일 하나를 골라 오늘 끝내 보세요.' },
+  { id: 'grow2', word: '배움', text: '새로 알게 되고 나아지는 것', tip: '오늘 일에서 배운 점 한 가지를 적어 보세요.' },
+  { id: 'grow4', word: '실수해도 괜찮음', text: '실수해도 다시 해 볼 수 있다는 믿음', tip: '실수 하나를 떠올리고 "다음엔 이렇게 해 볼래"를 적어 보세요.' },
+  { id: 'grow6', word: '도전', text: '새로운 것에 도전해 볼 기회', tip: '이번 주에 해 보고 싶은 작은 도전 하나를 정해 보세요.' },
+  { id: 'nd080', word: '유능감', text: '잘 해낼 수 있다는 느낌' },
+  { id: 'nd081', word: '효능감', text: '내 노력이 결과를 바꾼다는 느낌' },
+  { id: 'nd082', word: '성장', text: '어제보다 자라는 것' },
+  { id: 'nd083', word: '성취', text: '세운 목표를 이루는 것' },
+  { id: 'nd084', word: '발견', text: '새로운 것을 알아내는 것' },
+  { id: 'nd085', word: '숙달', text: '익숙해져 잘하게 되는 것' },
+  { id: 'nd086', word: '나아짐', text: '조금씩 나아지고 있다는 것' },
+  { id: 'nd087', word: '자신감', text: '할 수 있다는 믿음' },
+  { id: 'nd088', word: '회복', text: '다친 몸과 마음이 다시 낫는 것' },
+  { id: 'free3', word: '솔직하게 말하기', text: '있는 그대로 솔직하게 말할 기회', tip: '하고 싶었던 말을 보내지 않는 편지로 적어 보세요.' },
+  { id: 'free4', word: '감정 드러내기', text: '울거나 화내도 괜찮다는 허락', tip: '안전한 곳에서 소리 내어 말하거나 울어도 괜찮아요. 5분만 나에게 허락해 보세요.' },
+  { id: 'nd089', word: '자기표현', text: '내 생각과 마음을 드러내는 것' },
+  { id: 'nd090', word: '창조성', text: '새로운 것을 만들어 내는 것' },
+  { id: 'nd091', word: '상상', text: '마음껏 상상하는 것' },
+  { id: 'nd092', word: '호기심', text: '궁금한 것을 알아보는 것' },
+  { id: 'clar6', word: '나를 이해하기', text: '내가 왜 이런지 스스로 이해하는 것', tip: '오늘 기록을 일주일 뒤 다시 읽어 보세요. 되풀이되는 점이 보일 거예요.' },
+  { id: 'nd093', word: '나다움', text: '남에게 맞추지 않고 나답게 사는 것' },
+  { id: 'nd094', word: '자기 돌봄', text: '나를 스스로 챙기는 것' },
+  { id: 'nd095', word: '나와 가까워짐', text: '내 마음의 소리를 듣는 것' },
+  { id: 'nd096', word: '가치에 맞는 삶', text: '내가 소중히 여기는 대로 사는 것' },
+  { id: 'res6', word: '내 영역 지키기', text: '내 물건·시간·몸을 함부로 대하지 않는 것', ask: '내 물건·시간·몸을 함부로 대하지 않길 바랐어요', tip: '"그건 싫어"라고 짧게 말하는 연습을 거울 앞에서 해 보세요.' },
+  { id: 'nd097', word: '현실적인 한계', text: '할 수 있는 만큼만 하는 것' },
+  { id: 'nd098', word: '자기 조절', text: '내 행동과 마음을 스스로 다스리는 것' },
+  { id: 'nd099', word: '책임', text: '맡은 일을 끝까지 책임지는 것' },
+  { id: 'nd100', word: '절제', text: '지나치기 전에 멈추는 것' },
+  { id: 'nd101', word: '규칙과 틀', text: '지킬 규칙과 하루의 틀이 있는 것' }
+];
+
+/* 욕구 14범주 (화면에 이 차례로 나와요) */
+window.MAEUM_DATA.needCategories = [
+  { id: 'body', label: '몸·쉼', hint: '먹고 자고 쉬며 몸을 돌보는 것', tip: '물 한 잔 마시고, 몸에서 불편한 곳이 있는지 살펴보세요.',
+    needs: ['rest1', 'rest2', 'rest5', 'saf7', 'nd001', 'nd002', 'nd003', 'nd004', 'nd005', 'nd006', 'nd007', 'nd008', 'nd009', 'nd010'] },
+  { id: 'safe', label: '안전·안정', hint: '다치지 않고 앞을 내다볼 수 있는 것', tip: '지금 이 순간 안전하다고 느껴지는 것 세 가지를 찾아 적어 보세요.',
+    needs: ['saf1', 'saf2', 'saf4', 'saf5', 'nd011', 'nd012', 'nd013', 'nd014', 'nd015', 'nd016'] },
+  { id: 'conn', label: '연결·사랑·소속', hint: '사람들과 이어지고 아낌을 받는 것', tip: '가까운 사람에게 짧은 안부 메시지를 하나 보내 보세요.',
+    needs: ['con3', 'con4', 'con5', 'con6', 'saf3', 'grow5', 'nd017', 'nd018', 'nd019', 'nd020', 'nd021', 'nd022', 'nd023', 'nd024', 'nd025', 'nd026', 'nd027', 'nd028', 'nd029', 'nd030'] },
+  { id: 'resp', label: '존중·인정', hint: '한 사람으로 귀하게 대접받는 것', tip: '"나는 이렇게 대해 주면 좋겠어"를 한 문장으로 적어 보세요.',
+    needs: ['res1', 'res2', 'grow3', 'con7', 'res3', 'res4', 'nd031', 'nd032', 'nd033', 'nd034', 'nd035', 'nd036', 'nd037', 'nd038', 'nd039', 'nd040'] },
+  { id: 'und', label: '이해·공감', hint: '내 마음과 사정을 알아주는 것', tip: '내 마음을 한 문장으로 적고, 들어 줄 사람 한 명을 떠올려 보세요.',
+    needs: ['con1', 'con2', 'clar1', 'clar4', 'nd041', 'nd042', 'nd043', 'nd044', 'nd045'] },
+  { id: 'hon', label: '정직·진정성', hint: '거짓 없이 진짜 마음으로 대하는 것', tip: '하고 싶었던 솔직한 말을 보내지 않는 편지로 적어 보세요.',
+    needs: ['res7', 'clar3', 'res5', 'nd046', 'nd047', 'nd048', 'nd049', 'nd050'] },
+  { id: 'auto', label: '자율·자유', hint: '내 일을 내가 고르고 정하는 것', tip: '내일 할 일 가운데 하나는 순서와 방법을 내가 정해 보세요.',
+    needs: ['free1', 'free2', 'free5', 'rest3', 'nd051', 'nd052', 'nd053', 'nd054', 'nd055', 'nd056'] },
+  { id: 'play', label: '놀이·재미', hint: '웃고 즐기며 가볍게 지내는 것', tip: '좋아하는 노래 한 곡을 틀고 몸을 움직여 보세요.',
+    needs: ['rest6', 'free6', 'nd057', 'nd058', 'nd059', 'nd060', 'nd061', 'nd062', 'nd063'] },
+  { id: 'peace', label: '평화·조화·아름다움', hint: '다툼 없이 고요하고 보기 좋은 것', tip: '5분 동안 조용한 곳에서 천천히 숨을 쉬며 주변을 바라보세요.',
+    needs: ['saf6', 'rest4', 'mean6', 'nd064', 'nd065', 'nd066', 'nd067', 'nd068', 'nd069', 'nd070', 'nd071', 'nd072'] },
+  { id: 'mean', label: '의미·기여', hint: '내 삶과 일이 쓸모 있고 뜻이 있는 것', tip: '"이 일이 나에게 중요한 이유"를 한 줄로 적어 보세요.',
+    needs: ['mean1', 'mean3', 'mean2', 'mean4', 'mean5', 'mean7', 'clar2', 'clar5', 'nd073', 'nd074', 'nd075', 'nd076', 'nd077', 'nd078', 'nd079'] },
+  { id: 'grow', label: '성장·성취', hint: '배우고 해내며 나아지는 것', tip: '오늘 해낸 아주 작은 일 하나를 적고 스스로 인정해 주세요.',
+    needs: ['grow1', 'grow2', 'grow4', 'grow6', 'nd080', 'nd081', 'nd082', 'nd083', 'nd084', 'nd085', 'nd086', 'nd087', 'nd088'] },
+  { id: 'expr', label: '자기표현·창조', hint: '내 생각과 마음을 드러내고 새로 만드는 것', tip: '지금 마음을 그림이나 글로 5분만 표현해 보세요.',
+    needs: ['free3', 'free4', 'nd089', 'nd090', 'nd091', 'nd092'] },
+  { id: 'self', label: '나다움·자기 돌봄', hint: '나를 알고 나답게 사는 것', tip: '오늘 나를 위해 할 수 있는 작은 돌봄 하나를 정해 해 보세요.',
+    needs: ['clar6', 'nd093', 'nd094', 'nd095', 'nd096'] },
+  { id: 'limit', label: '한계·자기조절', hint: '할 수 있는 만큼을 알고 스스로 다스리는 것', tip: '오늘 할 수 있는 만큼을 정하고, 거기까지만 해도 괜찮다고 말해 주세요.',
+    needs: ['res6', 'nd097', 'nd098', 'nd099', 'nd100', 'nd101'] }
 ];
 
 /*
-  욕구 쪽 (needGroups) — 첫 욕구 화면에서 5번 "다른 욕구 찾기"를 누르면 나와요.
-  한 장에 4쪽씩 나오고, 쪽을 고르면 그 쪽 욕구가 4개씩 나와요.
-  needs 목록에는 needs.js 위쪽의 id를 적어요. 모든 욕구가 꼭 한 쪽에 들어가야 해요.
-  근거: 자기결정이론의 자율·유능·관계(Ryan & Deci 2000), 비폭력대화 욕구 목록(CNVC 2005) — docs/emotion-words-research.md 9번
+  감정 범주별 욕구 후보 — 조사자료 4장 "감정-욕구 연결표"에서 옮겼어요.
+  경향일 뿐 확정 규칙이 아니에요. 화면에는 "이런 욕구일 수도 있어요"로만 나와요.
 */
-window.MAEUM_DATA.needGroups = [
-  { id: 'con', label: '이어짐', hint: '들어 줌, 알아줌, 위로, 받아들여짐', emoji: '🤝', needs: ['con1', 'con2', 'con6', 'con7', 'con3', 'con4', 'con5'] },
-  { id: 'res', label: '존중', hint: '존중, 공평함, 사과, 정직함', emoji: '🙇', needs: ['res1', 'res2', 'res4', 'res7', 'res3', 'res5', 'res6'] },
-  { id: 'saf', label: '안전', hint: '안전함, 미리 알기, 기댈 사람', emoji: '🛡', needs: ['saf1', 'saf2', 'saf3', 'saf4', 'saf5', 'saf6', 'saf7'] },
-  { id: 'grow', label: '해냄', hint: '해냈다는 느낌, 노력 인정, 배움', emoji: '🌱', needs: ['grow1', 'grow3', 'grow2', 'grow4', 'grow5', 'grow6'] },
-  { id: 'rest', label: '쉼', hint: '쉴 틈, 잠, 혼자만의 시간', emoji: '🛌', needs: ['rest1', 'rest2', 'rest3', 'rest4', 'rest5', 'rest6'] },
-  { id: 'free', label: '자유', hint: '스스로 정하기, 내 속도, 거절', emoji: '🕊', needs: ['free1', 'free2', 'free5', 'free3', 'free4', 'free6'] },
-  { id: 'mean', label: '의미', hint: '보탬이 됨, 기쁨 나누기, 바로잡기', emoji: '✨', needs: ['mean1', 'mean2', 'mean3', 'mean7', 'mean4', 'mean5', 'mean6'] },
-  { id: 'clar', label: '이해', hint: '이유 설명, 오해 풀기, 생각 정리', emoji: '💡', needs: ['clar1', 'clar4', 'clar5', 'clar2', 'clar3', 'clar6'] }
-];
-
-/*
-  감정별 첫 욕구 보기 (needsByEmotion) — 이 목록에 있는 감정을 고르면 첫 욕구 화면에 이 4개가 나와요.
-  목록에 없는 감정은 data/questions.js의 needsByCause(감정 쪽 × 원인)를 써요.
-  같은 뜻 다른 말(예: 낙담)은 대표 단어(실망)의 목록을 따라요.
-*/
-window.MAEUM_DATA.needsByEmotion = {
-  fear23: ['con7', 'res1', 'grow3', 'grow4'],   // 수치심
-  sad20: ['mean7', 'clar4', 'free3', 'grow4'],  // 죄책감
-  fear13: ['grow4', 'con7', 'con2', 'rest3'],   // 창피함
-  fear14: ['grow4', 'con2', 'rest3', 'saf6'],   // 민망함
-  sad21: ['grow4', 'con7', 'mean7', 'clar6'],   // 자책감
-  sad22: ['mean7', 'clar4', 'con7', 'free3'],   // 면목 없음
-  sad23: ['res7', 'mean7', 'free3', 'clar6'],   // 양심이 찔림
-  fear05: ['saf1', 'saf4', 'saf3', 'saf6'],     // 무서움
-  fear07: ['saf2', 'saf3', 'saf5', 'grow5'],    // 두려움
-  fear31: ['saf6', 'saf2', 'clar5', 'saf3'],    // 불안함
-  fear01: ['saf2', 'clar2', 'saf5', 'grow5'],   // 걱정
-  fear24: ['saf2', 'clar1', 'saf5', 'saf6'],    // 깜짝 놀람
-  fear33: ['clar3', 'saf3', 'rest1', 'con6'],   // 충격받음
-  fear25: ['clar3', 'saf2', 'saf3', 'con6'],    // 철렁함
-  joy24: ['grow2', 'mean2', 'free6', 'mean6'],  // 신기함
-  sad30: ['con6', 'con3', 'free4', 'con1'],     // 슬픔
-  sad11: ['con6', 'con3', 'free4', 'rest3'],    // 상실감
-  sad05: ['grow4', 'con2', 'saf2', 'mean3'],    // 실망
-  sad01: ['con2', 'con3', 'con1', 'res1'],      // 서운함
-  sad02: ['con3', 'con5', 'con2', 'con1'],      // 외로움
-  sad15: ['con6', 'rest1', 'con3', 'clar6'],    // 우울함
-  sad13: ['rest1', 'rest2', 'rest4', 'grow5'],  // 지침
-  sad14: ['grow1', 'grow5', 'mean3', 'con6'],   // 무기력
-  sad24: ['grow6', 'free2', 'grow3', 'mean3'],  // 부러움
-  sad27: ['free2', 'con7', 'grow3', 'con2'],    // 샘남
-  sad25: ['con7', 'free2', 'grow3', 'grow4'],   // 열등감
-  sad26: ['res2', 'clar1', 'res3', 'con2'],     // 박탈감
-  ang29: ['res1', 'res2', 'res6', 'clar1'],     // 화남
-  ang19: ['res2', 'res1', 'res4', 'clar1'],     // 분노
-  ang05: ['res2', 'clar4', 'con2', 'clar1'],    // 억울함
-  ang09: ['res1', 'res3', 'grow3', 'con2'],     // 무시당한 느낌
-  ang01: ['rest1', 'rest4', 'res6', 'saf6'],    // 짜증
-  ang20: ['saf7', 'res6', 'rest5', 'saf6'],     // 역겨움
-  ang34: ['res2', 'res7', 'clar1', 'free4'],    // 경멸
-  ang33: ['res6', 'res4', 'free5', 'rest3'],    // 미움
-  ang22: ['res7', 'res5', 'clar3', 'res4'],     // 정떨어짐
-  joy28: ['mean5', 'mean2', 'grow1', 'con4'],   // 기쁨
-  joy29: ['mean2', 'con3', 'mean6', 'rest6'],   // 행복함
-  joy07: ['saf1', 'saf2', 'saf3', 'rest4'],     // 안심됨
-  joy10: ['grow3', 'mean5', 'grow1', 'mean2'],  // 자랑스러움
-  sad45: ['clar5', 'rest3', 'con1', 'clar6'],   // 착잡함
-  mix04: ['mean5', 'con3', 'mean3', 'rest3'],   // 시원섭섭함
-  mix08: ['clar4', 'res1', 'con2', 'res6'],     // 애증
-  mix06: ['mean7', 'mean4', 'con2', 'free3']    // 고마우면서 미안함
+window.MAEUM_DATA.needsByCategory = {
+  'r-anger': ['res1', 'res2', 'free1', 'saf1', 'nd042'],
+  'r-annoy': ['rest1', 'nd054', 'nd066', 'rest4', 'nd042', 'nd043'],
+  'r-unfair': ['res2', 'nd042', 'nd031', 'nd047', 'res1', 'nd036'],
+  'r-worry': ['saf1', 'saf2', 'nd014', 'clar2', 'nd026'],
+  'r-fear': ['saf1', 'saf4', 'nd026', 'nd015'],
+  'r-confuse': ['clar1', 'nd042', 'nd066', 'nd051', 'clar5'],
+  'r-uneasy': ['nd013', 'nd054', 'nd043', 'nd033'],
+  'r-shame': ['con7', 'res1', 'nd021', 'nd080', 'mean7', 'nd039'],
+  'r-disgust': ['nd049', 'nd050', 'res1', 'res6'],
+  'r-envy': ['nd031', 'nd018', 'nd021', 'nd080', 'nd040'],
+  'b-sad': ['nd017', 'con6', 'nd024', 'con3', 'free4'],
+  'b-loss': ['nd075', 'con6', 'nd017', 'nd024', 'nd042'],
+  'b-regret': ['nd025', 'nd033', 'nd036', 'nd028', 'nd015', 'nd068'],
+  'b-lonely': ['nd017', 'nd021', 'nd022', 'nd042', 'mean3'],
+  'b-helpless': ['nd081', 'nd051', 'nd026', 'rest1', 'nd068'],
+  'b-bored': ['nd061', 'rest6', 'grow6', 'mean3'],
+  'b-tired': ['rest1', 'rest2', 'nd067', 'nd026'],
+  'b-fragile': ['nd013', 'saf4', 'nd026', 'con7'],
+  'y-joy': ['mean5', 'mean2', 'nd017', 'rest6'],
+  'y-hope': ['nd068', 'nd079', 'nd082', 'grow6'],
+  'y-energy': ['nd004', 'nd061', 'grow6', 'nd056'],
+  'y-pride': ['nd031', 'nd080', 'nd083', 'grow3'],
+  'y-interest': ['grow2', 'nd084', 'nd092', 'nd061'],
+  'y-awe': ['mean6', 'nd069', 'mean3', 'nd084'],
+  'g-calm': ['nd064', 'rest4', 'rest1', 'nd071'],
+  'g-relief': ['saf1', 'rest1', 'nd014', 'nd063'],
+  'g-secure': ['nd011', 'nd015', 'nd026', 'nd066'],
+  'g-love': ['nd017', 'nd018', 'nd019', 'mean4']
 };
 
 /*
-  비슷한 욕구 구별하기 (needCompareSets) — 아래 줄에 있는 욕구를 고르면,
-  같은 줄의 욕구들과 ask 문장으로 견주어 한 번 더 골라요. 한 줄에 욕구 4개.
+  감정별 욕구 후보 (needsByEmotion) — 이 목록에 있는 감정을 고르면 이 욕구가 먼저 나와요.
+  같은 뜻 다른 말(예: 낙담)은 원래 낱말(실망)의 목록을 따라요. 작성자 추정이며 사용 기록으로 고쳐 가요.
 */
-window.MAEUM_DATA.needCompareSets = [
-  { name: '마음을 나누고 싶음', ids: ['con1', 'con2', 'con6', 'con3'] },
-  { name: '대접받고 싶음', ids: ['res1', 'res2', 'grow3', 'res6'] },
-  { name: '마음 놓고 싶음', ids: ['saf1', 'saf2', 'saf4', 'saf3'] },
-  { name: '쉬고 싶음', ids: ['rest1', 'rest3', 'rest4', 'rest2'] },
-  { name: '내 뜻대로 하고 싶음', ids: ['free1', 'free2', 'free5', 'res3'] },
-  { name: '제대로 알고 풀고 싶음', ids: ['clar1', 'clar3', 'clar4', 'res4'] }
+window.MAEUM_DATA.needsByEmotion = {
+  fear23: ['con7', 'res1', 'grow3', 'grow4'],
+  sad20: ['mean7', 'clar4', 'free3', 'grow4'],
+  fear13: ['grow4', 'con7', 'con2', 'rest3'],
+  fear14: ['grow4', 'con2', 'rest3', 'saf6'],
+  sad21: ['grow4', 'con7', 'mean7', 'clar6'],
+  sad22: ['mean7', 'clar4', 'con7', 'free3'],
+  sad23: ['res7', 'mean7', 'free3', 'clar6'],
+  fear05: ['saf1', 'saf4', 'saf3', 'saf6'],
+  fear07: ['saf2', 'saf3', 'saf5', 'grow5'],
+  fear31: ['saf6', 'saf2', 'clar5', 'saf3'],
+  fear01: ['saf2', 'clar2', 'saf5', 'grow5'],
+  fear24: ['saf2', 'clar1', 'saf5', 'saf6'],
+  fear33: ['clar3', 'saf3', 'rest1', 'con6'],
+  fear25: ['clar3', 'saf2', 'saf3', 'con6'],
+  joy24: ['grow2', 'mean2', 'free6', 'mean6'],
+  sad30: ['con6', 'con3', 'free4', 'con1'],
+  sad11: ['con6', 'con3', 'free4', 'rest3'],
+  sad05: ['grow4', 'con2', 'saf2', 'mean3'],
+  sad01: ['con2', 'con3', 'con1', 'res1'],
+  sad02: ['con3', 'con5', 'con2', 'con1'],
+  sad15: ['con6', 'rest1', 'con3', 'clar6'],
+  sad13: ['rest1', 'rest2', 'rest4', 'grow5'],
+  sad14: ['grow1', 'grow5', 'mean3', 'con6'],
+  sad24: ['grow6', 'free2', 'grow3', 'mean3'],
+  sad27: ['free2', 'con7', 'grow3', 'con2'],
+  sad25: ['con7', 'free2', 'grow3', 'grow4'],
+  sad26: ['res2', 'clar1', 'res3', 'con2'],
+  ang29: ['res1', 'res2', 'res6', 'clar1'],
+  ang19: ['res2', 'res1', 'res4', 'clar1'],
+  ang05: ['res2', 'clar4', 'con2', 'clar1'],
+  ang09: ['res1', 'res3', 'grow3', 'con2'],
+  ang01: ['rest1', 'rest4', 'res6', 'saf6'],
+  ang20: ['saf7', 'res6', 'rest5', 'saf6'],
+  ang34: ['res2', 'res7', 'clar1', 'free4'],
+  ang33: ['res6', 'res4', 'free5', 'rest3'],
+  ang22: ['res7', 'res5', 'clar3', 'res4'],
+  joy28: ['mean5', 'mean2', 'grow1', 'con4'],
+  joy29: ['mean2', 'con3', 'mean6', 'rest6'],
+  joy07: ['saf1', 'saf2', 'saf3', 'rest4'],
+  joy10: ['grow3', 'mean5', 'grow1', 'mean2'],
+  sad45: ['clar5', 'rest3', 'con1', 'clar6'],
+  mix04: ['mean5', 'con3', 'mean3', 'rest3'],
+  mix08: ['clar4', 'res1', 'con2', 'res6'],
+  ang02: ['nd042', 'nd043', 'free1', 'clar2'],
+  sad09: ['nd033', 'nd024', 'nd081', 'con6'],
+  fear02: ['saf1', 'saf2', 'nd014', 'clar2'],
+  fearH1: ['clar2', 'nd042', 'nd066', 'nd051'],
+  angH1: ['nd031', 'nd018', 'nd021', 'nd080'],
+  sad06: ['mean3', 'nd073', 'mean1', 'nd017'],
+  sadH6: ['mean3', 'nd073', 'nd017', 'mean1'],
+  sad53: ['rest1', 'rest2', 'nd067', 'nd026'],
+  sad28: ['nd061', 'rest6', 'grow6', 'mean3'],
+  sad10: ['nd017', 'nd019', 'nd075', 'con3'],
+  sad47: ['nd075', 'nd042', 'res2', 'nd039'],
+  angH5: ['nd025', 'nd033', 'nd036', 'nd028']
+};
+
+/*
+  생각이 섞인 말 (가짜 느낌) 번역표 — 조사자료 2-5. Rosenberg는 "무시당한" 같은 말을
+  느낌이 아니라 "상대가 나에게 한 일에 대한 생각"으로 보았어요. 그 밑의 느낌과 욕구 후보를 보여 줘요.
+  feelings = 감정 낱말 id, needs = 욕구 id
+*/
+window.MAEUM_DATA.thoughtWords = [
+  { word: '버림받은', feelings: ['fear05', 'blu04', 'sad02', 'sad30'], needs: ['nd024', 'nd017', 'nd021', 'nd026'] },
+  { word: '학대당한', feelings: ['fear06', 'fearH1', 'ang29'], needs: ['nd024', 'nd026', 'saf1', 'nd033'] },
+  { word: '공격당한', feelings: ['fear05', 'ang29'], needs: ['saf1'] },
+  { word: '배신당한', feelings: ['blu04', 'sad05', 'ang29'], needs: ['nd015', 'res7', 'res5'] },
+  { word: '이용당한', feelings: ['ang01', 'ang29'], needs: ['nd028', 'res2'] },
+  { word: '조종당한', feelings: ['ang01', 'fear31'], needs: ['nd048', 'free1'] },
+  { word: '부족한 사람이 된', feelings: ['fear13'], needs: ['nd080', 'con7'] },
+  { word: '비난받은', feelings: ['sad30', 'ang05', 'fear05'], needs: ['nd015', 'res2', 'nd042'] },
+  { word: '무시당한', feelings: ['sad01', 'sad02', 'ang29'], needs: ['res1', 'nd025', 'nd031', 'nd036'] },
+  { word: '모욕당한', feelings: ['ang06', 'blu04'], needs: ['res1', 'nd034'] },
+  { word: '거절당한', feelings: ['blu04', 'sad30', 'sad02'], needs: ['con7', 'nd021'] },
+  { word: '오해받은', feelings: ['ang02', 'ang05', 'sad01'], needs: ['nd042', 'res2'] },
+  { word: '방치된', feelings: ['sad02', 'sad01'], needs: ['nd024', 'nd025'] },
+  { word: '소외된', feelings: ['sad02', 'sad30'], needs: ['nd021', 'con5'] },
+  { word: '비판받은', feelings: ['fear31', 'fear13'], needs: ['con7', 'res1'] },
+  { word: '속은', feelings: ['ang29', 'sad06'], needs: ['res7', 'nd015'] },
+  { word: '위협당한', feelings: ['fear05', 'fear31'], needs: ['saf1', 'saf2'] },
+  { word: '강요당한', feelings: ['ang02', 'fear31'], needs: ['free1', 'nd051'] },
+  { word: '갇힌', feelings: ['fear05', 'red17'], needs: ['nd052', 'nd054'] },
+  { word: '통제당한', feelings: ['ang02', 'ang02a'], needs: ['free1', 'nd054'] },
+  { word: '깔보인', feelings: ['ang06', 'fear13'], needs: ['res1', 'nd037'] },
+  { word: '인정받지 못한', feelings: ['sad01', 'sad05'], needs: ['nd031', 'nd032'] },
+  { word: '말을 안 들어준', feelings: ['ang02', 'sad01'], needs: ['nd042', 'nd041'] },
+  { word: '투명인간 취급당한', feelings: ['sad02', 'sad01'], needs: ['nd036'] },
+  { word: '지지받지 못한', feelings: ['sad16', 'sad02'], needs: ['nd026', 'nd027'] },
+  { word: '사랑받지 못한', feelings: ['sad30', 'sad02'], needs: ['nd018', 'nd019'] },
+  { word: '당연시된', feelings: ['sad01', 'sad13'], needs: ['nd031', 'nd028'] },
+  { word: '피해자가 된', feelings: ['fear05', 'ang05', 'blu15'], needs: ['saf1', 'res2'] },
+  { word: '침해당한', feelings: ['fear05', 'ang29'], needs: ['saf1', 'res6'] },
+  { word: '혹사당한', feelings: ['sad13', 'ang01'], needs: ['rest1', 'nd067'] },
+  { word: '괴롭힘당한', feelings: ['fear05', 'ang29'], needs: ['saf1', 'res1'] },
+  { word: '실망시킨', feelings: ['sad05', 'sad30'], needs: ['nd015'] },
+  { word: '찬밥 신세가 된', feelings: ['sad01', 'sad04'], needs: ['nd021', 'nd025'] },
+  { word: '쓸모없는 (나는)', feelings: ['sad30', 'fear23a'], needs: ['mean1', 'nd039'] },
+  { word: '하찮은 (나는)', feelings: ['sad01', 'sad30'], needs: ['nd036'] }
 ];
 
-/* "욕구 단어로 찾기"에서 아무것도 적지 않았을 때 먼저 보여 주는 핵심 욕구 */
+/* "욕구 낱말로 찾기"에서 아무것도 적지 않았을 때 먼저 보여 주는 욕구 */
 window.MAEUM_DATA.needSearchSuggest = ['con2', 'res1', 'saf1', 'free1', 'grow1', 'rest1', 'con7', 'clar1'];
 
 /* 욕구를 끝내 찾지 못했을 때 저장되는 값 */
