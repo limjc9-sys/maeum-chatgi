@@ -206,12 +206,13 @@ h1:focus { outline: none; }
   min-height: 44px; padding: 6px 16px;
   background: var(--guide-soft); border: 0; border-radius: 22px; cursor: pointer;
 }
-.hero { padding: 36px 0 8px; display: flex; flex-direction: column; gap: 10px; }
+/* 처음 화면 글자는 모두 가운데 맞춤 */
+.hero { padding: 36px 0 8px; display: flex; flex-direction: column; gap: 10px; text-align: center; align-items: center; }
 .app-title { font-size: 36px; line-height: 1.2; font-weight: 900; letter-spacing: -1.2px; }
-.app-sub { font-size: 18px; color: var(--ink-soft); }
+.app-sub { font-size: 18px; color: var(--ink-soft); text-wrap: balance; }
 .btn-start { min-height: 64px; font-size: 20px; border-radius: 18px; letter-spacing: -0.2px; }
-.encourage { font-size: 16px; color: var(--ink-soft); }
-.home-stats { font-size: 16px; color: var(--ink-soft); }
+.encourage { font-size: 16px; color: var(--ink-soft); text-align: center; text-wrap: balance; }
+.home-stats { font-size: 16px; color: var(--ink-soft); text-align: center; }
 .home-foot { margin-top: auto; display: flex; flex-direction: column; gap: 12px; padding-top: 28px; }
 .menu-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .menu-btn {
@@ -372,7 +373,15 @@ h1:focus { outline: none; }
 }
 .toggle-mark { font-size: 22px; font-weight: 700; color: var(--ink-soft); flex-shrink: 0; }
 
-/* 생각이 섞인 말 */
+/* 상대가 나에게 한 일 (생각이 섞인 말): 여섯 묶음 */
+.tgroup { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border-radius: 16px; padding: 12px 14px; box-shadow: var(--shadow); }
+.tgroup-title { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.tgroup-num {
+  flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #EEE9FF; color: #4B2FB8; font-size: 16px; font-weight: 800;
+}
+.search-thought { --accent: #7A5AF8; background: #F7F4FF; }
 .thought-card { display: flex; flex-direction: column; gap: 8px; background: #F4F1FF; border-radius: 14px; padding: 12px; }
 .thought-head { font-size: 20px; font-weight: 900; color: #4B2FB8; }
 .thought-needs { font-size: 17px; font-weight: 700; }
@@ -405,6 +414,21 @@ h1:focus { outline: none; }
 }
 .int-value { font-size: 17px; font-weight: 800; color: var(--ink); flex-shrink: 0; }
 .int-desc { font-size: 16px; color: var(--ink-soft); }
+/* 감정마다 보류·빼기 */
+.int-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.int-act {
+  font: inherit; font-size: 16px; font-weight: 700; color: var(--ink-soft);
+  min-height: 44px; min-width: 76px; padding: 4px 14px;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 22px; cursor: pointer;
+}
+.int-act:active { background: var(--brand-soft); }
+.int-act-remove { color: var(--danger); }
+.int-act:focus-visible, .chip-restore:focus-visible { outline: 3px solid var(--guide); outline-offset: 2px; }
+.int-aside {
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--surface); border: 1.5px dashed var(--line); border-radius: 16px; padding: 12px 14px;
+}
+.chip-restore { border-style: dashed; color: var(--ink-soft); }
 .num-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .num-btn {
   font: inherit; font-size: 19px; font-weight: 800;
@@ -442,8 +466,7 @@ h1:focus { outline: none; }
 .card-need { font-size: 21px; font-weight: 900; }
 .card-desc, .card-text { font-size: 17px; }
 .card-summary { font-size: 18px; font-weight: 600; background: var(--brand-soft); border-radius: 12px; padding: 10px 12px; }
-.card-tip { background: #E9F6EF; border: 0; border-radius: 14px; padding: 12px; }
-.card-tip .card-label { color: var(--ok); }
+.card-held { font-size: 16px; color: var(--ink-soft); background: var(--brand-soft); border-radius: 10px; padding: 8px 12px; }
 .card-situation { font-size: 16px; color: var(--ink-soft); }
 .card-note { font-size: 16px; color: var(--ink-soft); }
 .card-multi { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -465,7 +488,6 @@ h1:focus { outline: none; }
   background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer;
 }
 .fit-btn.on { background: var(--brand); border-color: var(--brand); color: #fff; }
-.reflect .sec-title { display: block; }
 
 /* ───── 낱말로 찾기 ───── */
 .search-open { margin-top: 0; }

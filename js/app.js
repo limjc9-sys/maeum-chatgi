@@ -170,7 +170,7 @@
   function addRecord(r) { var d = load(); d.records.push(r); save(d); }
   function updateRecord(id, patch) {
     var d = load();
-    d.records.forEach(function (r) { if (r.id === id) Object.keys(patch).forEach(function (k) { r[k] = patch[k]; }); });
+    d.records.forEach(function (r) { if (r.id === id) Object.keys(patch).forEach(function (k) { if (patch[k] === undefined) delete r[k]; else r[k] = patch[k]; }); });
     save(d);
   }
   /* 사용 방법을 본 적이 있는지 (기록과 따로 저장해서 기록을 지워도 다시 안 나와요) */
@@ -245,7 +245,9 @@
     current = { screen: 'home', params: {} };
     render();
   }
-  var CARRY = ['picks', 'pathOf', 'lastPick', 'intensities', 'needs', 'lastNeed', 'hintNeeds', 'searchText', 'needSearchText'];
+  /* 이전 단계로 돌아가도 남겨 두는 것: 적은 글, 고른 감정·강도·보류·뺀 감정·원인·욕구, 만든 마음 카드 (docs/design-rules.md 6번) */
+  var CARRY = ['situation', 'picks', 'pathOf', 'lastPick', 'intensities', 'held', 'removed', 'cause', 'causeText',
+    'needs', 'lastNeed', 'hintNeeds', 'searchText', 'needSearchText', 'recordId'];
   function internalBack() {
     if (!stack.length) {
       if (current.screen !== 'home') goHome();
@@ -350,7 +352,7 @@
   function startGame() {
     draft = {
       situation: '', five: 0, path: 'normal', picks: [], pathOf: {}, intensities: {},
-      cause: null, causeText: '', needs: [], hintNeeds: [],
+      cause: null, causeText: '', needs: [], hintNeeds: [], held: [], removed: [], recordId: null,
       openQuad: null, thought: null, lastPick: null, openNeedCat: null, lastNeed: null
     };
     stack = [];
@@ -384,9 +386,17 @@
     }
     refresh();
   }
+  function heldIds() { return (draft && draft.held) || []; }
+  /* 강도를 고르는 감정 = 고른 감정에서 보류한 것을 뺀 것 */
+  function activeEmotions() {
+    var ids = draft.emotions && draft.emotions.length ? draft.emotions : (draft.emotionId ? [draft.emotionId] : []);
+    return ids.filter(function (id) { return EMO[id] && heldIds().indexOf(id) === -1; });
+  }
   function pickNext() {
     if (!picks().length) return;
     draft.emotions = picks().slice();
+    draft.held = heldIds().filter(function (id) { return isPicked(id); });
+    draft.removed = ((draft && draft.removed) || []).filter(function (id) { return !isPicked(id); });
     draft.emotionId = draft.emotions[0];
     draft.path = (draft.pathOf && draft.pathOf[draft.emotionId]) || 'normal';
     if (!draft.intensities) draft.intensities = {};
@@ -431,7 +441,7 @@
   }
   var MAX_SUGGEST = 12;
   function needCandidates() {
-    var ids = (draft.emotions || []).filter(function (id) { return EMO[id]; });
+    var ids = activeEmotions();
     var keys = ids.map(mainKey);
     var scores = keys.map(needFeedback);
     var bad = {}, out = [];
@@ -469,8 +479,11 @@
   }
 
   function finish() {
-    var before = foundSet();
-    var ids = draft.emotions && draft.emotions.length ? draft.emotions : [draft.emotionId];
+    var editing = draft.recordId && records().some(function (r) { return r.id === draft.recordId; });
+    var before = foundSet(records().filter(function (r) { return r.id !== draft.recordId; }));
+    var ids = activeEmotions();
+    if (!ids.length) ids = [draft.emotionId];
+    var held = heldIds().filter(function (id) { return EMO[id]; }).map(function (id) { return { id: id, word: EMO[id].word }; });
     var list = ids.map(function (id) {
       var x = EMO[id];
       var n = (draft.intensities && draft.intensities[id]) || draft.intensity || 1;
@@ -492,7 +505,6 @@
     var needPhrase = needs.length === 1 ? needs[0].text : joinWords(needs.map(function (n) { return n.word; }));
     var summary = fill(tpl, { '원인': causeSentence, '감정': joinWords(list.map(function (x) { return x.word; })), '강도': intensityWord(maxN), '욕구': needPhrase, '바람': needPhrase });
     var first = needs[0];
-    var tip = first ? (first.tip || (NCAT[NEED_CAT_OF[first.id]] || {}).tip || '') : UNNAMED_NEED.tip;
     var now = new Date();
     var rec = {
       id: 'r' + now.getTime() + Math.floor(Math.random() * 1000),
@@ -510,17 +522,23 @@
       needId: first ? first.id : UNNAMED_NEED.id,
       needWord: first ? needs.map(function (n) { return n.word; }).join(', ') : UNNAMED_NEED.word,
       summary: summary,
-      tip: tip,
       path: draft.path,
       five: draft.five || 0
     };
-    if (nids.length > 1) rec.needIds = nids;
-    addRecord(rec);
+    rec.needIds = nids.length > 1 ? nids : undefined;
+    rec.held = held.length ? held : undefined;
+    if (editing) {
+      /* 마음 카드에서 이전으로 돌아가 고친 뒤 다시 만들면: 새 기록을 더하지 않고 같은 카드를 고쳐요.
+         처음 만든 날짜·시각과 "고른 욕구가 맞았나요?" 답은 그대로 둬요 */
+      var patch = {};
+      Object.keys(rec).forEach(function (k) { if (k !== 'id' && k !== 'ts' && k !== 'date') patch[k] = rec[k]; });
+      updateRecord(draft.recordId, patch);
+    } else {
+      addRecord(rec);
+      draft.recordId = rec.id;
+    }
     var isNew = list.some(function (x) { return x.id !== UNNAMED.id && !before[x.id]; });
-    stack = [];
-    draft = null;
-    current = { screen: 'result', params: { id: rec.id, isNew: isNew } };
-    render();
+    go('result', { id: draft.recordId, isNew: isNew });
   }
 
   /* ───────── 화면들 ───────── */
@@ -544,13 +562,13 @@
       ),
       el('button', { class: 'btn btn-primary btn-big btn-start', type: 'button', onclick: startGame, 'data-testid': 'start' }, T.startButton),
       el('p', { class: 'encourage' }, T.homeEncourage),
-      /* 기록 요약 한 줄: 기록이 있을 때만 */
-      recs.length ? el('p', { class: 'home-stats', 'data-testid': 'home-stats' },
-        el('span', { 'data-testid': 'stat-count' }, fill(T.statRecords || '기록 {글}개', { '글': String(recs.length) })), ' · ',
-        el('span', { 'data-testid': 'stat-dex' }, fill(T.statDex || '도감 {글}', { '글': found + ' / ' + ALL_WORDS.length })), ' · ',
-        el('span', { 'data-testid': 'stat-streak' }, fill(T.statStreak || '연속 {글}일', { '글': String(s) }))
-      ) : null,
       el('div', { class: 'home-foot' },
+        /* 기록 요약 한 줄: 기록이 있을 때만, 메뉴 바로 위 아래쪽에 */
+        recs.length ? el('p', { class: 'home-stats', 'data-testid': 'home-stats' },
+          el('span', { 'data-testid': 'stat-count' }, fill(T.statRecords || '기록 {글}개', { '글': String(recs.length) })), ' · ',
+          el('span', { 'data-testid': 'stat-dex' }, fill(T.statDex || '도감 {글}', { '글': found + ' / ' + ALL_WORDS.length })), ' · ',
+          el('span', { 'data-testid': 'stat-streak' }, fill(T.statStreak || '연속 {글}일', { '글': String(s) }))
+        ) : null,
         /* 메뉴 4개는 한 줄로 */
         el('nav', { class: 'menu-row', 'aria-label': '메뉴' },
           menuBtn('📖', T.menuDex || '감정 도감', function () { go('dex', {}); }, 'menu-dex'),
@@ -682,14 +700,14 @@
     return el('p', { class: 'pick-note', 'data-testid': 'pick-note', style: '--accent:' + famOf(e).color },
       el('strong', { class: 'pick-note-word' }, '✓ ' + e.word), ' ' + (e.desc || ''));
   }
-  function selectThought(i) {
+  function selectThought(i, noRefresh) {
     var tw = (D.thoughtWords || [])[i];
     if (!tw) return;
-    if (draft.thought === i) { draft.thought = null; refresh(); return; }
+    if (draft.thought === i && !noRefresh) { draft.thought = null; refresh(); return; }
     draft.thought = i;
     if (!draft.hintNeeds) draft.hintNeeds = [];
     tw.needs.forEach(function (id) { if (NEED[id] && draft.hintNeeds.indexOf(id) === -1) draft.hintNeeds.push(id); });
-    refresh();
+    if (!noRefresh) refresh();
   }
 
   /* 감정 고르기 — 1 핵심 감정 → 2 기분 4칸 → 3 다른 방법, 세 묶음으로 단순하게 (docs/design-rules.md 1·5번) */
@@ -727,8 +745,13 @@
     return screen('emotion', null, topBar(), progress(), pickBar(), situationChip(),
       heading(T.emotionTitle),
       el('p', { class: 'guide' }, T.emotionGuide),
+      el('section', { class: 'sec', 'data-testid': 'quads' },
+        secHead(1, T.quadTitle, T.quadGuide),
+        el('div', { class: 'quad-grid' }, quadTiles),
+        panel
+      ),
       el('section', { class: 'sec core', 'data-testid': 'core' },
-        secHead(1, T.coreTitle || '핵심 감정', T.coreHint),
+        secHead(2, T.coreTitle || '핵심 감정으로 찾기', T.coreHint),
         el('div', { class: 'core-grid' }, core.map(function (id) {
           var e = EMO[id], on = isPicked(id);
           return el('button', {
@@ -740,16 +763,11 @@
         })),
         lastPickNote(core)
       ),
-      el('section', { class: 'sec', 'data-testid': 'quads' },
-        secHead(2, T.quadTitle, T.quadGuide),
-        el('div', { class: 'quad-grid' }, quadTiles),
-        panel
-      ),
       el('section', { class: 'sec', 'data-testid': 'ways' },
-        secHead(3, T.waysTitle || '다른 방법으로 찾기'),
+        secHead(3, T.waysTitle || '다른 방법으로 찾기', T.waysHint),
         el('div', { class: 'ways' },
           wayBtn('🔍', T.searchWay || '낱말로 찾기', T.searchWayHint, function () { go('search', {}); }, 'search-open'),
-          wayBtn('💬', T.thoughtWay || '"무시당한" 같은 말로 찾기', T.thoughtWayHint, function () { go('thought', {}); }, 'thought-open'),
+          wayBtn('💬', T.thoughtWay || '상대가 나에게 한 일로 찾기', T.thoughtWayHint, function () { go('thought', {}); }, 'thought-open'),
           wayBtn('🤔', T.notSure, T.notSureHint, emotionFive, 'not-sure'))
       ),
       n ? el('button', { class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'pick-next-bottom', onclick: pickNext },
@@ -758,25 +776,46 @@
   };
 
   /* "무시당한" 같은 말(생각이 섞인 말)로 찾기 — 따로 한 화면. 고른 감정은 감정 고르기 화면과 함께 써요 */
+  function thoughtGroups() {
+    var tws = D.thoughtWords || [];
+    var used = {};
+    var groups = (D.thoughtGroups || []).map(function (g) {
+      var idx = g.words.map(function (w) {
+        for (var i = 0; i < tws.length; i++) if (tws[i].word === w) { used[i] = true; return i; }
+        return -1;
+      }).filter(function (i) { return i !== -1; });
+      return { id: g.id, label: g.label, idx: idx };
+    });
+    var rest = tws.map(function (t, i) { return i; }).filter(function (i) { return !used[i]; });
+    if (rest.length) groups.push({ id: 'etc', label: '그 밖의 말', idx: rest });
+    return groups;
+  }
   screens.thought = function () {
     var tws = D.thoughtWords || [];
     var tw = typeof draft.thought === 'number' ? tws[draft.thought] : null;
     var n = picks().length;
-    return screen('thought', null, topBar(), progress(), pickBar(),
-      heading(T.thoughtTitle),
-      el('p', { class: 'guide' }, T.thoughtGuide),
-      el('div', { class: 'chips' }, tws.map(function (t, i) {
-        var on = draft.thought === i;
-        return el('button', { class: 'chip chip-thought' + (on ? ' on' : ''), type: 'button', 'data-thought': String(i), 'aria-pressed': String(on), onclick: function () { selectThought(i); } }, t.word);
-      })),
-      tw ? el('div', { class: 'thought-card', 'data-testid': 'thought-card' },
+    function card() {
+      return el('div', { class: 'thought-card', 'data-testid': 'thought-card' },
         el('p', { class: 'thought-head' }, '“' + tw.word + '”'),
         el('p', { class: 'guide' }, T.thoughtFeelings),
         el('div', { class: 'chips' }, tw.feelings.filter(function (id) { return EMO[id]; }).map(function (id) { return chip(id, 'thought'); })),
         lastPickNote(tw.feelings),
         el('p', { class: 'guide' }, T.thoughtNeeds),
-        el('p', { class: 'thought-needs', 'data-testid': 'thought-needs' }, tw.needs.filter(function (id) { return NEED[id]; }).map(function (id) { return NEED[id].word; }).join(' · '))
-      ) : null,
+        el('p', { class: 'thought-needs', 'data-testid': 'thought-needs' }, tw.needs.filter(function (id) { return NEED[id]; }).map(function (id) { return NEED[id].word; }).join(' · ')));
+    }
+    return screen('thought', null, topBar(), progress(), pickBar(),
+      heading(T.thoughtTitle),
+      el('p', { class: 'guide' }, T.thoughtGuide),
+      thoughtGroups().map(function (g, gi) {
+        var hasCard = tw && g.idx.indexOf(draft.thought) !== -1;
+        return el('section', { class: 'tgroup', 'data-tgroup': g.id },
+          el('h2', { class: 'tgroup-title' }, el('span', { class: 'tgroup-num', 'aria-hidden': 'true' }, String(gi + 1)), el('span', null, g.label)),
+          el('div', { class: 'chips' }, g.idx.map(function (i) {
+            var on = draft.thought === i;
+            return el('button', { class: 'chip chip-thought' + (on ? ' on' : ''), type: 'button', 'data-thought': String(i), 'aria-pressed': String(on), onclick: function () { selectThought(i); } }, tws[i].word);
+          })),
+          hasCard ? card() : null);
+      }),
       el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'back-to-emotion', onclick: back }, T.backToEmotion || '← 감정 고르기 화면으로'),
       n ? el('button', { class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'pick-next-bottom', onclick: pickNext },
         fill(T.pickNextCount || '고른 감정 {글}개로 다음 →', { '글': String(n) })) : null
@@ -913,6 +952,7 @@
         found = cfg.find(v);
         info.textContent = found.length ? fill(T.searchResults || '찾은 단어 {글}개', { '글': String(found.length) }) : (T.searchNone || '맞는 단어를 못 찾았어요.');
       }
+      if (cfg.extra) cfg.extra(v).forEach(function (node) { list.appendChild(node); });
       found.forEach(function (w) { list.appendChild(cfg.item(w)); });
     }
     input.addEventListener('input', function () { if (cfg.keep) draft[cfg.keep] = input.value; show(); });
@@ -940,6 +980,17 @@
       bar: pickBar,
       suggest: function () { return (D.searchSuggest || []).filter(function (id) { return EMO[id]; }).map(function (id) { return EMO[id]; }); },
       find: searchWords,
+      extra: function (v) {
+        if (!squash(v)) return [];
+        var items = (D.thoughtWords || []).map(function (t, i) { return { word: t.word.replace(/\s*\(.*\)\s*/g, ''), desc: '', i: i }; });
+        return searchList(items, v).slice(0, 2).map(function (x) {
+          var t = D.thoughtWords[x.i];
+          return el('button', {
+            class: 'search-item search-thought', type: 'button', 'data-testid': 'search-thought', 'data-thought': String(x.i),
+            onclick: function () { selectThought(x.i, true); go('thought', {}); }
+          }, el('span', { class: 'opt-body' }, el('span', { class: 'opt-label' }, '💬 “' + t.word + '” →'), el('span', { class: 'opt-hint' }, T.thoughtSearchHint || '')));
+        });
+      },
       item: function (w) {
         var fam = famOf(w);
         var head = w.parent ? EMO[w.parent] : null;
@@ -991,8 +1042,43 @@
   };
 
   /* 강도 — 고른 감정을 한 화면에 모두 보여 주고, 감정 낱말을 크고 진하게 강조해요 (docs/design-rules.md 3번) */
+  function holdEmotion(id) {
+    if (!draft.held) draft.held = [];
+    if (draft.held.indexOf(id) === -1) draft.held.push(id);
+    refresh();
+  }
+  function removeEmotion(id) {
+    draft.emotions = (draft.emotions || []).filter(function (x) { return x !== id; });
+    draft.picks = picks().filter(function (x) { return x !== id; });
+    draft.held = heldIds().filter(function (x) { return x !== id; });
+    if (!draft.removed) draft.removed = [];
+    if (draft.removed.indexOf(id) === -1) draft.removed.push(id);
+    refresh();
+  }
+  function restoreEmotion(id) {
+    draft.held = heldIds().filter(function (x) { return x !== id; });
+    if ((draft.removed || []).indexOf(id) !== -1) {
+      draft.removed = draft.removed.filter(function (x) { return x !== id; });
+      if (!isPicked(id)) draft.picks.push(id);
+      if ((draft.emotions || []).indexOf(id) === -1) draft.emotions.push(id);
+    }
+    refresh();
+  }
+  function restoreList(kind, ids, title, guide) {
+    if (!ids.length) return null;
+    return el('section', { class: 'int-aside', 'data-testid': kind },
+      el('h2', { class: 'sec-title' }, title + ' ' + ids.length + '개'),
+      el('p', { class: 'guide' }, guide),
+      el('div', { class: 'chips' }, ids.map(function (id) {
+        var e = EMO[id];
+        return el('button', {
+          class: 'chip chip-restore', type: 'button', 'data-restore': id, style: '--accent:' + famOf(e).color,
+          'aria-label': e.word + ' ' + (T.intensityRestore || '되살리기'), onclick: function () { restoreEmotion(id); }
+        }, '↺ ' + e.word);
+      })));
+  }
   screens.intensity = function () {
-    var list = draft.emotions && draft.emotions.length ? draft.emotions : [draft.emotionId];
+    var list = activeEmotions();
     if (!draft.intensities) draft.intensities = {};
     var left = list.filter(function (id) { return !draft.intensities[id]; }).length;
     var blocks = list.map(function (id) {
@@ -1015,16 +1101,25 @@
           el('p', { class: 'int-value', 'data-testid': 'int-value' }, cur ? cur + '점 · ' + intensityWord(cur) : '?')
         ),
         e.desc && id !== UNNAMED.id ? el('p', { class: 'int-desc' }, e.desc) : null,
-        el('div', { class: 'num-grid' }, grid)
+        el('div', { class: 'num-grid' }, grid),
+        id !== UNNAMED.id ? el('div', { class: 'int-actions' },
+          el('button', { class: 'int-act', type: 'button', 'data-hold': id, 'aria-label': e.word + ' 보류', onclick: function () { holdEmotion(id); } }, '⏸ ' + (T.intensityHold || '보류')),
+          el('button', { class: 'int-act int-act-remove', type: 'button', 'data-remove': id, 'aria-label': e.word + ' 빼기', onclick: function () { removeEmotion(id); } }, '✕ ' + (T.intensityRemove || '빼기'))
+        ) : null
       );
     });
+    var held = heldIds().filter(function (id) { return EMO[id]; });
+    var removed = ((draft && draft.removed) || []).filter(function (id) { return EMO[id]; });
     return screen('intensity', null, topBar(), progress(),
       heading(T.intensityTitle),
       el('p', { class: 'guide' }, T.intensityGuide),
       blocks,
+      list.length ? null : el('p', { class: 'warn', 'data-testid': 'int-none' }, T.intensityNone || '강도를 고를 감정이 없어요.'),
+      restoreList('held-list', held, T.heldTitle || '보류한 감정', T.heldGuide || ''),
+      restoreList('removed-list', removed, T.removedTitle || '뺀 감정', T.removedGuide || ''),
       left ? el('p', { class: 'guide', 'data-testid': 'int-left' }, fill(T.intensityLeft || '아직 {글}개를 고르지 않았어요', { '글': String(left) })) : null,
       el('button', {
-        class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'intensity-next', disabled: !!left,
+        class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'intensity-next', disabled: !!left || !list.length,
         onclick: function () { draft.intensity = draft.intensities[list[0]]; go('cause', {}); }
       }, T.intensityNext || '다음 →')
     );
@@ -1032,11 +1127,12 @@
 
   screens.cause = function () {
     var opts = D.causes.slice(0, 5).map(function (c, i) {
-      return option(i + 1, c.label, c.hint, function () {
+      var on = draft.cause === c.id;
+      return option(i + 1, c.label, c.id === 'other' && on && draft.causeText ? '"' + draft.causeText + '"' : c.hint, function () {
         if (c.id === 'other') { go('causeOther', {}); return; }
         draft.cause = c.id; draft.causeText = '';
         afterCause();
-      }, { cls: c.id === 'other' ? 'opt-other' : '' });
+      }, { cls: (c.id === 'other' ? 'opt-other' : '') + (on ? ' opt-checked' : ''), icon: on ? '✓' : null, pressed: on, id: c.id });
     });
     return screen('cause', null, topBar(), progress(), heading(T.causeTitle), el('div', { class: 'opts' }, opts));
   };
@@ -1061,7 +1157,7 @@
 
   /* 욕구 고르기 — 한 화면에서 후보·14범주·낱말로 찾기로 모두 골라요. 개수 제한 없음 (docs/design-rules.md 1번) */
   function needLead() {
-    return (draft.emotions || []).filter(function (id) { return EMO[id]; }).map(function (id) {
+    return activeEmotions().map(function (id) {
       return EMO[id].word + ' ' + (draft.intensities[id] || '') + '점';
     }).join(' · ');
   }
@@ -1096,7 +1192,7 @@
   }
 
   screens.need = function () {
-    var met = (draft.emotions || []).every(function (id) { return famOf(EMO[id]).met; });
+    var met = activeEmotions().every(function (id) { return famOf(EMO[id]).met; });
     var cand = needCandidates();
     var cats = D.needCategories.map(function (c) {
       var open = draft.openNeedCat === c.id;
@@ -1173,7 +1269,7 @@
     var one = nids.length === 1 ? NEED[nids[0]] : null;
     var found = Object.keys(foundSet()).length;
     return screen('result', null,
-      el('header', { class: 'topbar' }, el('span', { class: 'top-spacer' }), el('span', { class: 'top-step' }, '6 / 6 · ' + T.steps[5]), el('span', { class: 'top-spacer' })),
+      topBar(),
       progress(),
       el('article', { class: 'card', style: '--accent:' + fam.color, 'data-testid': 'result-card' },
         el('p', { class: 'card-date' }, prettyDateTime(rec.ts)),
@@ -1190,7 +1286,9 @@
               el('p', { class: 'card-value' }, el('strong', { class: 'card-word' }, x.word + (x.hidden ? ' ★' : '')), ' · ' + x.intensity + ' / 10'),
               intensityMeter(x.intensity),
               xe && xe.desc && x.id !== UNNAMED.id ? el('p', { class: 'card-desc' }, xe.desc) : null);
-          }))
+          })),
+          rec.held && rec.held.length ? el('p', { class: 'card-held', 'data-testid': 'result-held' },
+            el('strong', null, (T.resultHeld || '보류한 감정') + ': '), rec.held.map(function (x) { return x.word; }).join(' · ')) : null
         ),
         el('section', { class: 'card-row' },
           el('h2', { class: 'card-label' }, T.resultNeed),
@@ -1202,17 +1300,10 @@
           el('h2', { class: 'card-label' }, T.resultSummary),
           el('p', { class: 'card-summary', 'data-testid': 'result-summary' }, rec.summary)
         ),
-        el('section', { class: 'card-row card-tip' },
-          el('h2', { class: 'card-label' }, '🌱 ' + T.resultTip),
-          el('p', { class: 'card-text', 'data-testid': 'result-tip' }, rec.tip)
-        ),
-        rec.reflection ? el('section', { class: 'card-row' },
-          el('h2', { class: 'card-label' }, T.reflectSaved || '내가 남긴 말'),
-          el('p', { class: 'card-text', 'data-testid': 'result-reflection' }, rec.reflection)) : null,
         rec.situation ? el('p', { class: 'card-situation' }, '있었던 일: ' + rec.situation) : null,
         T.resultNote ? el('p', { class: 'card-note', 'data-testid': 'result-note' }, T.resultNote) : null
       ),
-      reflectBox(rec),
+      el('p', { class: 'guide', 'data-testid': 'result-back-note' }, T.resultBackNote || ''),
       el('p', { class: 'streak-line', 'data-testid': 'result-streak' }, '🔥 연속 기록 ' + streak() + '일 · 📖 도감 ' + found + ' / ' + ALL_WORDS.length),
       el('button', { class: 'btn btn-primary btn-big', type: 'button', onclick: goHome, 'data-testid': 'home' }, T.homeButton),
       el('button', { class: 'btn btn-secondary', type: 'button', onclick: function () { go('dex', {}); }, 'data-testid': 'to-dex' }, T.dexButton)
@@ -1234,23 +1325,6 @@
       rec.needFit ? el('p', { class: 'guide', 'data-testid': 'need-fit-note' }, T.needFitNote || '답은 기록에 남아 다음 욕구 보기를 고칠 때 쓰여요.') : null
     );
   }
-  /* 2. "그 감정이 나에게 무엇을 말해 주나요?" (적지 않아도 됨) */
-  function reflectBox(rec) {
-    var ta = el('textarea', { id: 'reflect', class: 'textarea textarea-small', rows: '3', maxlength: '300', placeholder: T.reflectPlaceholder || '', 'data-testid': 'reflect-input' });
-    ta.value = rec.reflection || '';
-    var count = el('p', { class: 'counter' }, ta.value.length + ' / 300');
-    ta.addEventListener('input', function () { count.textContent = ta.value.length + ' / 300'; });
-    return el('section', { class: 'report-sec reflect' },
-      el('label', { class: 'sec-title', for: 'reflect' }, T.reflectTitle || '그 감정이 나에게 무엇을 말해 주나요?'),
-      el('p', { class: 'guide' }, T.reflectGuide || '적지 않아도 돼요.'),
-      ta, count,
-      el('button', {
-        class: 'btn btn-secondary', type: 'button', 'data-testid': 'reflect-save',
-        onclick: function () { updateRecord(rec.id, { reflection: ta.value.trim().slice(0, 300) }); refresh(); toast(T.reflectDone || '카드에 저장했어요.'); }
-      }, rec.reflection ? (T.reflectUpdate || '고쳐서 저장하기') : (T.reflectSave || '카드에 저장하기'))
-    );
-  }
-
   screens.dex = function () {
     var found = foundSet();
     var total = ALL_WORDS.length;
@@ -1488,6 +1562,7 @@
             var xf = famOf(EMO[x.id] || x);
             return xf.emoji + ' ' + x.word + (x.hidden ? ' ★' : '') + ' ' + x.intensity + '점';
           }).join(' · ')),
+          r.held && r.held.length ? el('p', { class: 'rec-sit' }, (T.resultHeld || '보류한 감정') + ': ' + r.held.map(function (x) { return x.word; }).join(' · ')) : null,
           el('p', { class: 'rec-need' }, '필요했던 것: ' + r.needWord),
           el('p', { class: 'rec-summary' }, r.summary),
           r.reflection ? el('p', { class: 'rec-sit', 'data-testid': 'rec-reflection' }, (T.reflectSaved || '내가 남긴 말') + ': ' + r.reflection) : null,
@@ -1584,7 +1659,6 @@
       needId: needId || UNNAMED_NEED.id,
       needWord: needWord,
       summary: s(r.summary, 400),
-      tip: s(r.tip, 300),
       path: s(r.path, 20) || 'normal',
       five: Math.max(0, Math.round(Number(r.five)) || 0)
     };
@@ -1593,6 +1667,12 @@
     if (needIds.length > 1) out.needIds = needIds;
     var reflection = s(r.reflection, 300);
     if (reflection) out.reflection = reflection;
+    var held = Array.isArray(r.held) ? r.held.slice(0, 100).map(function (x) {
+      if (!x || typeof x !== 'object') return null;
+      var id = s(x.id, 40), word = s(x.word, 40) || (EMO[id] && EMO[id].word);
+      return word ? { id: id || 'imported', word: word } : null;
+    }).filter(Boolean) : [];
+    if (held.length) out.held = held;
     if (['yes', 'no', 'unsure'].indexOf(r.needFit) !== -1) out.needFit = r.needFit;
     return out;
   }

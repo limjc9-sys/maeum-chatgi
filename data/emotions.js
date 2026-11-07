@@ -7,7 +7,7 @@
   - 짜임: 기분 4칸(quadrants) → 칸 안의 범주(categories) → 감정 낱말(emotions)
       기분 4칸은 무드 미터(Brackett, Yale RULER)와 Russell(1980)의 두 축을 따랐어요.
         노랑 = 기분 좋음 · 힘이 넘침   초록 = 기분 좋음 · 차분함
-        빨강 = 기분 나쁨 · 힘이 셈     파랑 = 기분 나쁨 · 힘이 빠짐
+        빨강 = 기분 안 좋음 · 힘이 셈  파랑 = 기분 안 좋음 · 힘이 빠짐
       범주는 조사자료(감정·욕구 낱말 풀 2장)의 범주를 따랐어요. 칸·범주 배치는 작성자 추정이에요.
   - word  = 감정 이름
   - desc  = 낱말을 눌렀을 때 나오는 설명
@@ -194,7 +194,7 @@ window.MAEUM_DATA.quadrants = [
     ]
   },
   {
-    id: 'red', name: '빨강', face: '😠', label: '기분이 나쁘고 힘이 세요', hint: '화 · 불안 · 두려움 · 부끄러움', color: '#E04848', met: false,
+    id: 'red', name: '빨강', face: '😠', label: '기분이 안 좋고 힘이 세요', hint: '화 · 불안 · 두려움 · 부끄러움', color: '#E04848', met: false,
     categories: [
       {
         id: 'r-anger', label: '화·분노',
@@ -374,7 +374,7 @@ window.MAEUM_DATA.quadrants = [
     ]
   },
   {
-    id: 'blue', name: '파랑', face: '😢', label: '기분이 나쁘고 힘이 빠져요', hint: '슬픔 · 상실 · 외로움 · 지침', color: '#3B74D1', met: false,
+    id: 'blue', name: '파랑', face: '😢', label: '기분이 안 좋고 힘이 빠져요', hint: '슬픔 · 상실 · 외로움 · 지침', color: '#3B74D1', met: false,
     categories: [
       {
         id: 'b-sad', label: '슬픔·눈물',
@@ -506,7 +506,7 @@ window.MAEUM_DATA.quadrants = [
 ];
 
 /*
-  핵심 감정 6개 — 감정 고르기 화면 맨 위에 3개씩 두 줄로 크게 나와요.
+  핵심 감정 6개 — 감정 고르기 화면 ② "핵심 감정으로 찾기"에 3개씩 두 줄로 크게 나와요.
   사용자 지정 5개(수치심·분노·두려움·상실감·슬픔)에 죄책감을 더했어요(2026-11-07).
   차례: 나를 향한 감정(수치심·죄책감) → 분노 → 두려움 → 잃음(상실감·슬픔).
   수치심과 죄책감은 서로 다른 감정이라 나란히 두어 견주게 했어요(Tangney 외 1996).
