@@ -16,6 +16,7 @@ window.MAEUM_DATA.text = {
   appTitle: '감정 및 욕구 찾기',
   appSubtitle: '오늘 있었던 일에서 내 감정의 이름과 그 밑의 욕구를 찾아요',
   privacy: '기록은 이 휴대폰 안에만 저장돼요. 어디로도 보내지 않아요.',
+  copyright: '© 2026 Jaecheol, LIM. All rights reserved.',
   startButton: '시작하기',
   guideButton: '사용 방법',
   bigText: '글자 크게',
