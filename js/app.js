@@ -185,6 +185,15 @@
     try { window.localStorage.setItem(INTRO_KEY, '1'); } catch (e) { /* 무시 */ }
   }
 
+  var BIG_KEY = 'maeum-chatgi-bigtext';
+  function bigText() {
+    try { return window.localStorage.getItem(BIG_KEY) === '1'; } catch (e) { return document.documentElement.classList.contains('big-text'); }
+  }
+  function setBigText(on) {
+    try { if (on) window.localStorage.setItem(BIG_KEY, '1'); else window.localStorage.removeItem(BIG_KEY); } catch (e) { /* 무시 */ }
+    document.documentElement.classList.toggle('big-text', !!on);
+  }
+  document.documentElement.classList.toggle('big-text', bigText());
   function clearAll() {
     memoryStore = { version: 1, records: [] };
     try { window.localStorage.removeItem(STORE_KEY); } catch (e) { /* 무시 */ }
@@ -258,7 +267,7 @@
 
   /* ───────── 공통 화면 조각 ───────── */
   var STEP_OF = {
-    situation: 1, emotion: 2, words: 2, search: 2, approach: 2, unnamed: 2,
+    situation: 1, emotion: 2, words: 2, search: 2, thought: 2, approach: 2, unnamed: 2,
     intensity: 3, cause: 4, causeOther: 4, need: 5, needSearch: 5, result: 6
   };
 
@@ -317,6 +326,19 @@
       el('h1', { class: 'title', tabindex: '-1' }, text)
     );
   }
+  /* 번호 붙은 묶음 제목 (감정·욕구 고르기 화면을 1 → 2 → 3 차례로 보이게) */
+  function secHead(num, title, hint) {
+    return el('div', { class: 'sec-head' },
+      el('h2', { class: 'sec-title' }, el('span', { class: 'sec-num', 'aria-hidden': 'true' }, String(num)), el('span', null, title)),
+      hint ? el('p', { class: 'guide' }, hint) : null);
+  }
+  /* "다른 방법" 줄 단추 (그림 · 이름 · 한 줄 설명 · ›) */
+  function wayBtn(icon, title, hint, onClick, testid) {
+    return el('button', { class: 'way', type: 'button', onclick: onClick, 'data-testid': testid },
+      el('span', { class: 'way-icon', 'aria-hidden': 'true' }, icon),
+      el('span', { class: 'way-body' }, el('span', { class: 'way-title' }, title), hint ? el('span', { class: 'way-hint' }, hint) : null),
+      el('span', { class: 'way-go', 'aria-hidden': 'true' }, '›'));
+  }
   function toast(msg) {
     var t = el('div', { class: 'toast', role: 'status' }, msg);
     document.body.appendChild(t);
@@ -329,7 +351,7 @@
     draft = {
       situation: '', five: 0, path: 'normal', picks: [], pathOf: {}, intensities: {},
       cause: null, causeText: '', needs: [], hintNeeds: [],
-      openQuad: null, openThought: false, thought: null, lastPick: null, openNeedCat: null, lastNeed: null
+      openQuad: null, thought: null, lastPick: null, openNeedCat: null, lastNeed: null
     };
     stack = [];
     go('situation', {});
@@ -374,6 +396,7 @@
   /* 고른 감정 막대 (위쪽에 붙어 있어요). 낱말 옆 ✕를 누르면 빼요 */
   function pickBar() {
     var ps = picks();
+    if (!ps.length) return null; /* 아무것도 안 골랐을 때는 막대를 숨겨 첫 화면을 단순하게 둬요 */
     return el('div', { class: 'pick-bar', 'data-testid': 'pick-bar' },
       el('div', { class: 'pick-head' },
         el('p', { class: 'pick-title' }, ps.length ? fill(T.pickTitle || '고른 감정 {글}개', { '글': String(ps.length) }) : (T.pickEmpty || '')),
@@ -509,9 +532,10 @@
     var s = streak();
     return screen('home', null,
       el('div', { class: 'home-top' },
-        el('span', { class: 'mood-dots', 'aria-hidden': 'true' }, ['yellow', 'green', 'red', 'blue'].map(function (id) {
-          return el('span', { class: 'mood-dot', style: 'background:' + (FAMILY[id] ? FAMILY[id].color : '#ccc') });
-        })),
+        el('button', {
+          class: 'text-size' + (bigText() ? ' on' : ''), type: 'button', 'aria-pressed': String(bigText()), 'data-testid': 'big-text',
+          onclick: function () { setBigText(!bigText()); refresh(); }
+        }, el('span', { class: 'text-size-mark', 'aria-hidden': 'true' }, bigText() ? '✓' : '가'), ' ' + (T.bigText || '글자 크게')),
         el('button', { class: 'guide-link', type: 'button', onclick: function () { go('guide', {}); }, 'data-testid': 'menu-guide' }, T.guideButton || '사용 방법')
       ),
       el('div', { class: 'hero' },
@@ -599,8 +623,10 @@
             el('p', { class: 'guide-body' }, sec.body)));
       })),
       installHelp(),
-      el('section', { class: 'refs', 'data-testid': 'guide-refs' },
-        el('h2', { class: 'sec-title' }, T.refsTitle || '참고한 자료'),
+      el('details', { class: 'refs', 'data-testid': 'guide-refs' },
+        el('summary', null,
+          el('span', { class: 'refs-title' }, '📚 ' + (T.refsTitle || '참고한 자료')),
+          el('span', { class: 'refs-open' }, (T.refsOpen || '눌러서 보기') + ' · ' + (G.references || []).reduce(function (a, g) { return a + g.items.length; }, 0) + '개')),
         (G.references || []).map(function (g) {
           return el('div', { class: 'ref-group' },
             el('h3', { class: 'ref-head' }, g.group),
@@ -666,84 +692,92 @@
     refresh();
   }
 
+  /* 감정 고르기 — 1 핵심 감정 → 2 기분 4칸 → 3 다른 방법, 세 묶음으로 단순하게 (docs/design-rules.md 1·5번) */
   screens.emotion = function () {
     var core = (D.coreEmotions || []).filter(function (id) { return EMO[id]; });
+    var faces = D.coreFaces || {};
     var quadTiles = D.quadrants.map(function (q) {
       var open = draft.openQuad === q.id;
       var n = picks().filter(function (id) { return EMO[id] && EMO[id].family === q.id; }).length;
       return el('button', {
         class: 'quad' + (open ? ' open' : ''), type: 'button', 'data-quad': q.id, 'aria-expanded': String(open), style: '--accent:' + q.color,
+        'aria-label': q.name + ' 칸, ' + q.label + (n ? ', ' + n + '개 고름' : ''),
         onclick: function () { draft.openQuad = open ? null : q.id; refresh(); }
       },
-        el('span', { class: 'quad-name' }, q.name, n ? el('span', { class: 'quad-count' }, ' ✓' + n) : null),
-        el('span', { class: 'quad-label' }, q.label),
-        el('span', { class: 'quad-hint' }, q.hint));
+        el('span', { class: 'quad-top' },
+          el('span', { class: 'quad-face', 'aria-hidden': 'true' }, q.face || FAMILY[q.id].emoji),
+          n ? el('span', { class: 'quad-count' }, '✓' + n) : null),
+        el('span', { class: 'quad-name' }, q.label),
+        el('span', { class: 'quad-hint' }, String(q.hint).replace(/ · /g, '\u00A0· ')));
     });
     var openQ = D.quadrants.filter(function (q) { return q.id === draft.openQuad; })[0];
-    var panel = openQ ? el('section', { class: 'quad-panel', 'data-testid': 'quad-panel', 'data-quad': openQ.id, style: '--accent:' + openQ.color },
-      el('h2', { class: 'panel-title' }, FAMILY[openQ.id].emoji + ' ' + openQ.name + ' · ' + openQ.label),
+    var panel = openQ ? el('div', { class: 'quad-panel', 'data-testid': 'quad-panel', 'data-quad': openQ.id, style: '--accent:' + openQ.color },
+      el('h3', { class: 'panel-title' }, (openQ.face || '') + ' ' + openQ.name + ' · ' + openQ.label),
       openQ.categories.map(function (c) {
         var ids = CAT[c.id].ids;
         return el('div', { class: 'cat', 'data-cat': c.id },
-          el('h3', { class: 'cat-title' }, c.label),
+          el('h4', { class: 'cat-title' }, c.label),
           el('div', { class: 'chips' }, ids.map(function (id) { return chip(id); })),
           lastPickNote(ids));
       }),
       el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'quad-close', onclick: function () { draft.openQuad = null; refresh(); } }, T.quadClose || '접기')
     ) : null;
 
-    var tws = D.thoughtWords || [];
-    var tw = typeof draft.thought === 'number' ? tws[draft.thought] : null;
-    var thought = el('section', { class: 'sec sec-thought' },
-      el('button', {
-        class: 'sec-toggle', type: 'button', 'aria-expanded': String(!!draft.openThought), 'data-testid': 'thought-open',
-        onclick: function () { draft.openThought = !draft.openThought; refresh(); }
-      }, el('span', { class: 'sec-toggle-label' }, T.thoughtTitle), el('span', { class: 'toggle-mark', 'aria-hidden': 'true' }, draft.openThought ? '−' : '+')),
-      draft.openThought ? [
-        el('p', { class: 'guide' }, T.thoughtGuide),
-        el('div', { class: 'chips' }, tws.map(function (t, i) {
-          var on = draft.thought === i;
-          return el('button', { class: 'chip chip-thought' + (on ? ' on' : ''), type: 'button', 'data-thought': String(i), 'aria-pressed': String(on), onclick: function () { selectThought(i); } }, t.word);
-        })),
-        tw ? el('div', { class: 'thought-card', 'data-testid': 'thought-card' },
-          el('p', { class: 'thought-head' }, '“' + tw.word + '”'),
-          el('p', { class: 'guide' }, T.thoughtFeelings),
-          el('div', { class: 'chips' }, tw.feelings.filter(function (id) { return EMO[id]; }).map(function (id) { return chip(id, 'thought'); })),
-          lastPickNote(tw.feelings),
-          el('p', { class: 'guide' }, T.thoughtNeeds),
-          el('p', { class: 'thought-needs', 'data-testid': 'thought-needs' }, tw.needs.filter(function (id) { return NEED[id]; }).map(function (id) { return NEED[id].word; }).join(' · '))
-        ) : null
-      ] : null
-    );
-
     var n = picks().length;
     return screen('emotion', null, topBar(), progress(), pickBar(), situationChip(),
       heading(T.emotionTitle),
       el('p', { class: 'guide' }, T.emotionGuide),
       el('section', { class: 'sec core', 'data-testid': 'core' },
-        el('h2', { class: 'sec-title' }, T.coreTitle || '핵심 감정'),
-        T.coreHint ? el('p', { class: 'guide' }, T.coreHint) : null,
+        secHead(1, T.coreTitle || '핵심 감정', T.coreHint),
         el('div', { class: 'core-grid' }, core.map(function (id) {
           var e = EMO[id], on = isPicked(id);
           return el('button', {
             class: 'core-chip' + (on ? ' on' : ''), type: 'button', 'data-id': id, 'aria-pressed': String(on),
             style: '--accent:' + famOf(e).color, onclick: function () { togglePick(id, 'core'); }
-          }, el('span', { class: 'core-check', 'aria-hidden': 'true' }, on ? '✓' : ''), el('span', { class: 'core-word' }, e.word));
+          },
+            el('span', { class: 'core-face', 'aria-hidden': 'true' }, on ? '✓' : (faces[id] || '•')),
+            el('span', { class: 'core-word' }, e.word));
         })),
         lastPickNote(core)
       ),
-      el('section', { class: 'sec' },
-        el('h2', { class: 'sec-title' }, T.quadTitle),
-        el('p', { class: 'guide' }, T.quadGuide),
-        el('div', { class: 'quad-grid' }, quadTiles)
+      el('section', { class: 'sec', 'data-testid': 'quads' },
+        secHead(2, T.quadTitle, T.quadGuide),
+        el('div', { class: 'quad-grid' }, quadTiles),
+        panel
       ),
-      panel,
-      thought,
-      el('div', { class: 'sec-actions' },
-        searchButton(),
-        el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'not-sure', onclick: emotionFive },
-          el('span', { class: 'btn-main' }, T.notSure), el('span', { class: 'btn-sub' }, T.notSureHint))
+      el('section', { class: 'sec', 'data-testid': 'ways' },
+        secHead(3, T.waysTitle || '다른 방법으로 찾기'),
+        el('div', { class: 'ways' },
+          wayBtn('🔍', T.searchWay || '낱말로 찾기', T.searchWayHint, function () { go('search', {}); }, 'search-open'),
+          wayBtn('💬', T.thoughtWay || '"무시당한" 같은 말로 찾기', T.thoughtWayHint, function () { go('thought', {}); }, 'thought-open'),
+          wayBtn('🤔', T.notSure, T.notSureHint, emotionFive, 'not-sure'))
       ),
+      n ? el('button', { class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'pick-next-bottom', onclick: pickNext },
+        fill(T.pickNextCount || '고른 감정 {글}개로 다음 →', { '글': String(n) })) : null
+    );
+  };
+
+  /* "무시당한" 같은 말(생각이 섞인 말)로 찾기 — 따로 한 화면. 고른 감정은 감정 고르기 화면과 함께 써요 */
+  screens.thought = function () {
+    var tws = D.thoughtWords || [];
+    var tw = typeof draft.thought === 'number' ? tws[draft.thought] : null;
+    var n = picks().length;
+    return screen('thought', null, topBar(), progress(), pickBar(),
+      heading(T.thoughtTitle),
+      el('p', { class: 'guide' }, T.thoughtGuide),
+      el('div', { class: 'chips' }, tws.map(function (t, i) {
+        var on = draft.thought === i;
+        return el('button', { class: 'chip chip-thought' + (on ? ' on' : ''), type: 'button', 'data-thought': String(i), 'aria-pressed': String(on), onclick: function () { selectThought(i); } }, t.word);
+      })),
+      tw ? el('div', { class: 'thought-card', 'data-testid': 'thought-card' },
+        el('p', { class: 'thought-head' }, '“' + tw.word + '”'),
+        el('p', { class: 'guide' }, T.thoughtFeelings),
+        el('div', { class: 'chips' }, tw.feelings.filter(function (id) { return EMO[id]; }).map(function (id) { return chip(id, 'thought'); })),
+        lastPickNote(tw.feelings),
+        el('p', { class: 'guide' }, T.thoughtNeeds),
+        el('p', { class: 'thought-needs', 'data-testid': 'thought-needs' }, tw.needs.filter(function (id) { return NEED[id]; }).map(function (id) { return NEED[id].word; }).join(' · '))
+      ) : null,
+      el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'back-to-emotion', onclick: back }, T.backToEmotion || '← 감정 고르기 화면으로'),
       n ? el('button', { class: 'btn btn-primary btn-big', type: 'button', 'data-testid': 'pick-next-bottom', onclick: pickNext },
         fill(T.pickNextCount || '고른 감정 {글}개로 다음 →', { '글': String(n) })) : null
     );
@@ -774,10 +808,6 @@
   };
 
   /* ───── 단어로 찾기 ───── */
-  function searchButton() {
-    return el('button', { class: 'btn btn-secondary search-open', type: 'button', 'data-testid': 'search-open', onclick: function () { go('search', {}); } },
-      T.searchButton || '🔍 단어로 찾기');
-  }
 
   /* 한글 글자 나누기·붙이기 (받침 떼기, 모음 바꾸기에 써요) */
   function syl(ch) {
@@ -1048,6 +1078,7 @@
   }
   function needBar() {
     var ps = needPicks();
+    if (!ps.length) return null;
     return el('div', { class: 'pick-bar pick-bar-need', 'data-testid': 'need-bar' },
       el('div', { class: 'pick-head' },
         el('p', { class: 'pick-title' }, ps.length ? fill(T.needPickTitle || '고른 욕구 {글}개', { '글': String(ps.length) }) : (T.needPickEmpty || '')),
@@ -1082,21 +1113,22 @@
           el('span', { class: 'toggle-mark', 'aria-hidden': 'true' }, open ? '−' : '+')),
         open ? el('div', { class: 'ncat-body' }, el('div', { class: 'chips' }, ids.map(needChip)), lastNeedNote(ids)) : null);
     });
+    var num = 0;
     return screen('need', null, topBar(), progress(), needBar(),
       heading(met ? (T.needTitleMet || T.needTitle) : T.needTitle, needLead()),
       el('p', { class: 'guide' }, T.needGuide),
       cand.length ? el('section', { class: 'sec', 'data-testid': 'need-suggest' },
-        el('h2', { class: 'sec-title' }, T.needSuggestTitle),
-        el('p', { class: 'guide' }, T.needSuggestHint),
+        secHead(++num, T.needSuggestTitle, T.needSuggestHint),
         el('div', { class: 'chips' }, cand.map(needChip)),
         lastNeedNote(cand)) : null,
       el('section', { class: 'sec' },
-        el('h2', { class: 'sec-title' }, T.needCatTitle),
-        el('p', { class: 'guide' }, T.needCatGuide),
+        secHead(++num, T.needCatTitle, T.needCatGuide),
         el('div', { class: 'ncat-list' }, cats)),
-      el('div', { class: 'sec-actions' },
-        el('button', { class: 'btn btn-secondary search-open', type: 'button', 'data-testid': 'need-search-open', onclick: function () { go('needSearch', {}); } }, T.needSearchButton || '🔍 욕구 낱말로 찾기'),
-        el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'need-skip', onclick: function () { draft.needs = []; finish(); } }, T.needSkip || '지금은 넘어가기')),
+      el('section', { class: 'sec' },
+        secHead(++num, T.needWaysTitle || '다른 방법'),
+        el('div', { class: 'ways' },
+          wayBtn('🔍', T.needSearchButton || '욕구 낱말로 찾기', T.needSearchWayHint, function () { go('needSearch', {}); }, 'need-search-open'),
+          wayBtn('⏭', T.needSkip || '지금은 넘어가기', T.needSkipHint, function () { draft.needs = []; finish(); }, 'need-skip'))),
       needBottom()
     );
   };

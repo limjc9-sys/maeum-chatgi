@@ -18,12 +18,13 @@
   - 감정을 고르는 개수에는 제한이 없어요. 한 칸·한 범주에서만 고르게 만들지 마세요.
     (docs/design-rules.md 1번)
   - 새 낱말 id: 노랑 yel, 초록 grn, 빨강 red, 파랑 blu 뒤에 번호
+  - face  = 기분 4칸 단추에 나오는 얼굴 그림. 글을 읽기 어려운 어린이·어르신도 칸을 알아보게 해요.
 */
 window.MAEUM_DATA = window.MAEUM_DATA || {};
 
 window.MAEUM_DATA.quadrants = [
   {
-    id: 'yellow', name: '노랑', label: '기분이 좋고 힘이 넘쳐요', hint: '기쁨 · 설렘 · 뿌듯함 · 흥미', color: '#E0A100', met: true,
+    id: 'yellow', name: '노랑', face: '😄', label: '기분이 좋고 힘이 넘쳐요', hint: '기쁨 · 설렘 · 뿌듯함 · 흥미', color: '#E0A100', met: true,
     categories: [
       {
         id: 'y-joy', label: '기쁨·즐거움',
@@ -124,7 +125,7 @@ window.MAEUM_DATA.quadrants = [
     ]
   },
   {
-    id: 'green', name: '초록', label: '기분이 좋고 차분해요', hint: '편안함 · 안심 · 만족 · 따뜻함', color: '#2E9E6A', met: true,
+    id: 'green', name: '초록', face: '😌', label: '기분이 좋고 차분해요', hint: '편안함 · 안심 · 만족 · 따뜻함', color: '#2E9E6A', met: true,
     categories: [
       {
         id: 'g-calm', label: '평온·여유',
@@ -193,7 +194,7 @@ window.MAEUM_DATA.quadrants = [
     ]
   },
   {
-    id: 'red', name: '빨강', label: '기분이 나쁘고 힘이 세요', hint: '화 · 불안 · 두려움 · 부끄러움', color: '#E04848', met: false,
+    id: 'red', name: '빨강', face: '😠', label: '기분이 나쁘고 힘이 세요', hint: '화 · 불안 · 두려움 · 부끄러움', color: '#E04848', met: false,
     categories: [
       {
         id: 'r-anger', label: '화·분노',
@@ -373,7 +374,7 @@ window.MAEUM_DATA.quadrants = [
     ]
   },
   {
-    id: 'blue', name: '파랑', label: '기분이 나쁘고 힘이 빠져요', hint: '슬픔 · 상실 · 외로움 · 지침', color: '#3B74D1', met: false,
+    id: 'blue', name: '파랑', face: '😢', label: '기분이 나쁘고 힘이 빠져요', hint: '슬픔 · 상실 · 외로움 · 지침', color: '#3B74D1', met: false,
     categories: [
       {
         id: 'b-sad', label: '슬픔·눈물',
@@ -505,9 +506,14 @@ window.MAEUM_DATA.quadrants = [
 ];
 
 /*
-  핵심 감정 5개 — 감정 고르기 화면 맨 위에 크게 나와요. (사용자 지정: 수치심·분노·두려움·상실감·슬픔)
+  핵심 감정 6개 — 감정 고르기 화면 맨 위에 3개씩 두 줄로 크게 나와요.
+  사용자 지정 5개(수치심·분노·두려움·상실감·슬픔)에 죄책감을 더했어요(2026-11-07).
+  차례: 나를 향한 감정(수치심·죄책감) → 분노 → 두려움 → 잃음(상실감·슬픔).
+  수치심과 죄책감은 서로 다른 감정이라 나란히 두어 견주게 했어요(Tangney 외 1996).
+  coreFaces = 낱말 위에 나오는 얼굴 그림(어린이·어르신이 알아보기 쉽게)
 */
-window.MAEUM_DATA.coreEmotions = ['fear23', 'ang19', 'fear07', 'sad11', 'sad30'];
+window.MAEUM_DATA.coreEmotions = ['fear23', 'sad20', 'ang19', 'fear07', 'sad11', 'sad30'];
+window.MAEUM_DATA.coreFaces = { fear23: '😳', sad20: '😔', ang19: '😡', fear07: '😨', sad11: '💔', sad30: '😢' };
 
 /*
   옛 기록 읽기용 — 여러 감정을 함께 고를 수 있게 되면서 화면에서 뺀 "두 마음을 이은 말"이에요.

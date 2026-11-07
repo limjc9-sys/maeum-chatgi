@@ -46,7 +46,7 @@ const FIXED = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixed-ids.json'),
 /* 원자료(무드 미터, 손선주 외 2012 부록) 단어 → 앱 낱말 대응표. 욕설·비하어 26개는 저장소에 적지 않고 개수만 확인 */
 const SOURCE_MAP = JSON.parse(fs.readFileSync(path.join(__dirname, 'source-word-map.json'), 'utf8'));
 const EXCLUDED_EXPLETIVES = 26;
-const CORE_WORDS = ['수치심', '분노', '두려움', '상실감', '슬픔'];
+const CORE_WORDS = ['수치심', '죄책감', '분노', '두려움', '상실감', '슬픔'];
 /* 화면에 다시 나오면 안 되는 말 (재발 방지) */
 const BANNED_UI = [/\d개까지/, /건너뛰/, /섞인 마음 쪽/, /게임 방법/];
 
@@ -96,7 +96,7 @@ function checkData() {
   const catLabels = D.quadrants.flatMap((q) => q.categories.map((c) => c.label));
   ok(!catLabels.some((l) => /섞인/.test(l)), '[규칙 1] "섞인 마음" 칸·범주가 없음 (여러 감정은 각각 골라 표현)');
   // [규칙 1] 핵심 감정 5개
-  ok(JSON.stringify((D.coreEmotions || []).map((id) => emo[id] && emo[id].word)) === JSON.stringify(CORE_WORDS), `[규칙 1] 핵심 감정 5개: ${CORE_WORDS.join('·')}`);
+  ok(JSON.stringify((D.coreEmotions || []).map((id) => emo[id] && emo[id].word)) === JSON.stringify(CORE_WORDS), `[규칙 1] 핵심 감정 6개: ${CORE_WORDS.join('·')}`);
   // 예전 id는 지우지 않음
   FIXED.emotions.forEach((id) => ok(!!emo[id] || !!retired[id], `예전 감정 id ${id}가 그대로 있음`));
   FIXED.needs.forEach((id) => ok(D.needs.some((n) => n.id === id), `예전 욕구 id ${id}가 그대로 있음`));
@@ -131,6 +131,9 @@ function checkData() {
     if (o.need) ok(!!need[o.need], `경로 ${a.key}: 욕구 id ${o.need}`);
   }));
   // 사용 방법·참고자료
+  ok(CORE_WORDS.length % 3 === 0, '[규칙 5] 핵심 감정은 3개씩 줄이 꽉 차는 개수 (빈 칸 없음)');
+  ok(D.quadrants.every((q) => q.face), '[규칙 5] 기분 4칸마다 얼굴 그림(face)');
+  ok(D.coreEmotions.every((id) => D.coreFaces && D.coreFaces[id]), '[규칙 5] 핵심 감정마다 얼굴 그림(coreFaces)');
   ok(D.guide && D.guide.sections.length >= 6 && D.guide.install.length >= 2, '사용 방법: 설명 6개 이상, 설치 방법');
   const refs = D.guide.references.flatMap((g) => g.items);
   ok(refs.length >= 15 && refs.every((r) => /\(\d{4}\)/.test(r) || /한국NVC센터/.test(r)), `참고자료 15개 이상, 연도 표기 (지금 ${refs.length}개)`);
@@ -293,6 +296,11 @@ async function runForWidth(browser, base, width, D) {
     return items[items.length - 1].getAttribute('data-testid');
   });
   ok(refsLast === 'guide-refs', `[${width}px] [규칙 2] 참고자료가 사용 방법 맨 끝 부분에 있음`);
+  ok(!(await page.isVisible('[data-testid="guide-refs"] .ref-item >> nth=0')), `[${width}px] [규칙 2] 참고자료는 처음에 접혀 있음`);
+  await page.click('[data-testid="guide-refs"] summary');
+  ok(await page.isVisible('[data-testid="guide-refs"] .ref-item >> nth=0'), `[${width}px] [규칙 2] 참고자료 제목을 누르면 펼쳐짐`);
+  await h.snap('guide-refs-open');
+  await page.click('[data-testid="guide-refs"] summary');
   const guideBg = await bg(page, '[data-testid="guide-done"]');
   await h.snap('guide');
   await page.click('[data-testid="guide-back"]');
@@ -322,6 +330,22 @@ async function runForWidth(browser, base, width, D) {
     ok(Math.min(...lay.tops) > lay.startBottom, `[${width}px] 메뉴는 시작 버튼 아래`);
     const startBg = await bg(page, '[data-testid="start"]');
     ok(startBg !== guideBg, `[${width}px] [규칙 2] 사용 방법 버튼 색(${guideBg})이 시작하기 색(${startBg})과 다름`);
+    const [sr, sg, sb] = startBg.match(/\d+/g).map(Number);
+    ok(sb > sr + 60 && sb > sg + 30 && sr + sg + sb > 250, `[${width}px] [규칙 5] 시작하기는 먹색이 아닌 파랑 계통 (${startBg})`);
+    // 글자 크게: 켜도 화면이 넘치지 않고, 다시 열어도 유지
+    await page.click('[data-testid="big-text"]');
+    ok(await page.evaluate(() => document.documentElement.classList.contains('big-text')), `[${width}px] [규칙 5] 글자 크게 켜기`);
+    await h.snap('home-big');
+    await page.click('[data-testid="start"]');
+    await page.click('[data-testid="next"]');
+    await h.expect('emotion', '글자 크게: 감정 고르기');
+    await page.click('.quad[data-quad="red"]');
+    await h.snap('emotion-big');
+    await page.click('.topbar .top-btn >> nth=1');
+    await page.reload();
+    ok(await page.evaluate(() => document.documentElement.classList.contains('big-text')), `[${width}px] 글자 크게는 다시 열어도 유지`);
+    await page.click('[data-testid="big-text"]');
+    ok(!(await page.evaluate(() => document.documentElement.classList.contains('big-text'))), `[${width}px] 글자 크게 끄기`);
     ok(!(await page.$('[data-testid="home-stats"]')), `[${width}px] 기록이 없으면 기록 요약 줄 없음`);
     await h.snap('home');
     await page.click('[data-testid="menu-guide"]');
@@ -337,16 +361,23 @@ async function runForWidth(browser, base, width, D) {
     BANNED_UI.forEach((re) => ok(!re.test(emoText), `[${width}px] [규칙 1] 감정 고르기 화면에 "${re.source}" 없음`));
     ok(!(await page.$('[data-testid="fam-skip"], [data-testid="fam-next"]')), `[${width}px] [규칙 1] "이 쪽은 건너뛰기" 버튼 없음`);
     const coreWords = await page.$$eval('.core-chip .core-word', (e) => e.map((x) => x.textContent));
-    ok(JSON.stringify(coreWords) === JSON.stringify(CORE_WORDS), `[${width}px] [규칙 1] 핵심 감정 5개가 맨 위: ${coreWords.join('·')}`);
+    ok(JSON.stringify(coreWords) === JSON.stringify(CORE_WORDS), `[${width}px] [규칙 1] 핵심 감정 6개가 맨 위: ${coreWords.join('·')}`);
+    const rows = await page.$$eval('.core-chip', (e) => e.map((x) => Math.round(x.getBoundingClientRect().top)));
+    ok(new Set(rows).size === 2 && rows.filter((t) => t === rows[0]).length === 3, `[${width}px] [규칙 5] 핵심 감정이 3개씩 두 줄 (빈 칸 없음)`);
+    ok(!(await page.$('[data-testid="pick-bar"]')), `[${width}px] [규칙 5] 아무것도 안 골랐을 때는 고른 감정 막대가 없음`);
+    const secNums = await page.$$eval('[data-screen="emotion"] .sec-num', (e) => e.map((x) => x.textContent));
+    ok(JSON.stringify(secNums) === JSON.stringify(['1', '2', '3']), `[${width}px] [규칙 5] 감정 고르기는 1 핵심 감정 → 2 기분 4칸 → 3 다른 방법 (${secNums.join('·')})`);
+    ok((await page.$$('[data-testid="ways"] .way')).length === 3, `[${width}px] [규칙 5] 다른 방법 3가지가 한 묶음`);
     const order = await page.evaluate(() => document.querySelector('[data-testid="core"]').getBoundingClientRect().top < document.querySelector('.quad-grid').getBoundingClientRect().top);
     ok(order, `[${width}px] 핵심 감정이 기분 4칸보다 위`);
     ok((await page.$$('.quad')).length === 4, `[${width}px] 기분 4칸`);
     await h.snap('emotion');
   }
   for (const id of D.coreEmotions) await page.click(`.core-chip[data-id="${id}"]`);
-  ok((await h.count()) === 5, `[${width}px] 핵심 감정 5개 모두 체크`);
+  const NC = D.coreEmotions.length;
+  ok((await h.count()) === NC, `[${width}px] 핵심 감정 ${NC}개 모두 체크`);
   ok(!!(await page.$('[data-testid="pick-note"]')), `[${width}px] 방금 고른 낱말의 뜻이 나옴`);
-  // 4칸을 차례로 열어 칸마다 3개씩 더 고름 → 제한 없이 17개
+  // 4칸을 차례로 열어 칸마다 3개씩 더 고름 → 제한 없이 NC + 12개
   const quadPicks = {};
   for (const q of D.quadrants) {
     await page.click(`.quad[data-quad="${q.id}"]`);
@@ -357,32 +388,38 @@ async function runForWidth(browser, base, width, D) {
     quadPicks[q.id] = take;
     if (q.id === 'red') await h.snap('emotion-open');
   }
-  ok((await h.count()) === 17, `[${width}px] [규칙 1] 4칸 모두에서 골라 17개 (개수 제한 없음, 실제 ${await h.count()})`);
-  const quadCount = await page.textContent('.quad[data-quad="yellow"] .quad-name');
+  ok((await h.count()) === NC + 12, `[${width}px] [규칙 1] 4칸 모두에서 골라 ${NC + 12}개 (개수 제한 없음, 실제 ${await h.count()})`);
+  const quadCount = await page.textContent('.quad[data-quad="yellow"] .quad-count').catch(() => '');
   ok(quadCount.includes('✓3'), `[${width}px] 다른 칸을 열어도 노랑 칸에서 고른 3개가 남아 있음 (${quadCount})`);
   // 막대에서 빼고 다시 넣기
   await page.click(`[data-pick="${quadPicks.green[0]}"]`);
-  ok((await h.count()) === 16, `[${width}px] 고른 감정 막대의 ✕로 빼기`);
+  ok((await h.count()) === NC + 11, `[${width}px] 고른 감정 막대의 ✕로 빼기`);
   await page.click('.quad[data-quad="green"]');
   await page.click(`[data-testid="quad-panel"] .chip[data-id="${quadPicks.green[0]}"]`);
-  ok((await h.count()) === 17, `[${width}px] 다시 넣기`);
+  ok((await h.count()) === NC + 12, `[${width}px] 다시 넣기`);
   await page.click('[data-testid="quad-close"]');
   // 생각이 섞인 말 (가짜 느낌) → 밑의 느낌을 고르고 욕구 후보를 넘겨줌
   const twi = D.thoughtWords.findIndex((t) => t.word === '무시당한');
   const tw = D.thoughtWords[twi];
   await page.click('[data-testid="thought-open"]');
+  await h.expect('thought', '"무시당한" 같은 말로 찾기');
+  ok((await h.count()) === NC + 12, `[${width}px] 따로 연 화면에도 고른 감정이 그대로`);
   await page.click(`[data-thought="${twi}"]`);
   ok(await page.isVisible('[data-testid="thought-card"]'), `[${width}px] "무시당한"을 누르면 번역 카드`);
   ok((await page.textContent('[data-testid="thought-needs"]')).includes(NEEDW[tw.needs[0]]), `[${width}px] 번역 카드에 욕구 후보 "${NEEDW[tw.needs[0]]}"`);
   const freeFeel = tw.feelings.find((id) => !Object.values(quadPicks).flat().includes(id) && !D.coreEmotions.includes(id));
   await page.click(`[data-testid="thought-card"] .chip[data-id="${freeFeel}"]`);
-  ok((await h.count()) === 18, `[${width}px] 번역 카드의 느낌 "${EMO[freeFeel].word}"도 함께 체크 (18개)`);
+  const ALLN = NC + 13;
+  ok((await h.count()) === ALLN, `[${width}px] 번역 카드의 느낌 "${EMO[freeFeel].word}"도 함께 체크 (${ALLN}개)`);
   await h.snap('emotion-thought');
+  await page.click('[data-testid="back-to-emotion"]');
+  await h.expect('emotion', '말로 찾기 → 감정 고르기');
+  ok((await h.count()) === ALLN, `[${width}px] 돌아와도 말로 찾기에서 고른 감정이 남아 있음`);
   await page.click('[data-testid="pick-next-bottom"]');
 
-  /* 2-4. 강도: 한 화면에 18개, 감정 낱말 강조 [규칙 3] */
+  /* 2-4. 강도: 고른 감정 모두 한 화면에, 감정 낱말 강조 [규칙 3] */
   await h.expect('intensity', '강도');
-  ok((await page.$$('.int-block')).length === 18, `[${width}px] 강도 화면에 감정 18개`);
+  ok((await page.$$('.int-block')).length === ALLN, `[${width}px] 강도 화면에 감정 ${ALLN}개`);
   const st = await page.$eval('.int-word', (e) => { const c = getComputedStyle(e); return { size: parseFloat(c.fontSize), weight: parseInt(c.fontWeight, 10), color: c.color, body: getComputedStyle(document.body).color }; });
   ok(st.size >= 24 && st.weight >= 800 && st.color !== st.body, `[${width}px] [규칙 3] 강도 화면 감정 낱말 강조 (크기 ${st.size}px, 굵기 ${st.weight}, 색 ${st.color})`);
   ok(await page.isDisabled('[data-testid="intensity-next"]'), `[${width}px] 모두 고르기 전에는 다음 버튼이 꺼짐`);
@@ -417,14 +454,14 @@ async function runForWidth(browser, base, width, D) {
 
   /* 2-6. 마음 카드 */
   await h.expect('result', '마음 카드');
-  ok((await page.$$('[data-testid="result-emotion-item"]')).length === 18, `[${width}px] 마음 카드에 감정 18개`);
+  ok((await page.$$('[data-testid="result-emotion-item"]')).length === ALLN, `[${width}px] 마음 카드에 감정 ${ALLN}개`);
   const rn = await page.textContent('[data-testid="result-need"]');
   ok([cand[0], cand[1], bodyNeed, limitNeed].every((id) => rn.includes(NEEDW[id])), `[${width}px] 마음 카드에 욕구 4개: ${rn}`);
   const summary = await page.textContent('[data-testid="result-summary"]');
   ok(summary.includes('필요했어요') && !/[{}]/.test(summary), `[${width}px] 한 줄 정리: ${summary.slice(0, 40)}…`);
   ok(await page.isVisible('[data-testid="result-note"]'), `[${width}px] "이 순간의 해석" 안내`);
   let rec = await page.evaluate(() => { const r = window.__maeum.records(); return r[r.length - 1]; });
-  ok(rec.emotions.length === 18 && rec.needIds.length === 4 && rec.needId === cand[0], `[${width}px] 기록: 감정 18개, 욕구 4개`);
+  ok(rec.emotions.length === ALLN && rec.needIds.length === 4 && rec.needId === cand[0], `[${width}px] 기록: 감정 ${ALLN}개, 욕구 4개`);
   await page.click('[data-testid="need-fit-unsure"]');
   await page.fill('[data-testid="reflect-input"]', '쉬지 않고 달려 왔다');
   await page.click('[data-testid="reflect-save"]');
@@ -614,7 +651,7 @@ async function runForWidth(browser, base, width, D) {
   await download.saveAs(backupPath);
   const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
   ok(backup.app === 'maeum-chatgi' && backup.records.length === all11, `[${width}px] 내보낸 파일에 기록 ${all11}개`);
-  ok(backup.records.some((r) => Array.isArray(r.needIds) && r.needIds.length === 4 && r.emotions.length === 18), `[${width}px] 내보낸 파일에 감정 18개·욕구 4개 기록`);
+  ok(backup.records.some((r) => Array.isArray(r.needIds) && r.needIds.length === 4 && r.emotions.length === ALLN), `[${width}px] 내보낸 파일에 감정 ${ALLN}개·욕구 4개 기록`);
   const badPath = path.join(SHOTS, `bad-${width}.json`);
   fs.writeFileSync(badPath, '이건 기록 파일이 아니에요');
   await page.setInputFiles('[data-testid="import-file"]', badPath);
@@ -636,8 +673,8 @@ async function runForWidth(browser, base, width, D) {
   ok((await page.textContent('[data-testid="import-summary"]')).includes(`새 기록은 ${all11}개`) && (await page.textContent('#app')).includes('망가진 기록 1개'), `[${width}px] 새 기록 ${all11}개, 망가진 기록 1개 뺌`);
   await page.click('[data-testid="import-confirm"]');
   await h.expect('home', '불러온 뒤 처음 화면');
-  const back18 = await page.evaluate(() => window.__maeum.records().find((r) => r.emotions && r.emotions.length === 18));
-  ok(!!back18 && back18.needIds.length === 4, `[${width}px] 불러온 기록에 감정 18개·욕구 4개가 그대로`);
+  const backMany = await page.evaluate((n) => window.__maeum.records().find((r) => r.emotions && r.emotions.length === n), ALLN);
+  ok(!!backMany && backMany.needIds.length === 4, `[${width}px] 불러온 기록에 감정 ${ALLN}개·욕구 4개가 그대로`);
 
   /* 2-13. 인터넷 없이 열기 */
   const swReady = await page.evaluate(() => Promise.race([navigator.serviceWorker.ready.then(() => true), new Promise((r) => setTimeout(() => r(false), 5000))]));
