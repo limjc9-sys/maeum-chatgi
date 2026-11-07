@@ -171,7 +171,7 @@ icons/                앱 아이콘
 tests/run-tests.js    자동 점검 (설계 규칙 재발 방지 점검 포함)
 tests/fixed-ids.json  지우면 안 되는 예전 id 목록
 tools/needfit-report.js  여러 사람의 기록 파일에서 욕구 응답 모으기
-docs/                 설계 규칙(design-rules.md), 감정 낱말 조사 자료, 원자료 단어 대응표, 근거 종합 점검(meta-analysis.md)
+docs/                 설계 규칙(design-rules.md), 사람의 창작적 기여 내역(creative-contribution.md), 감정 낱말 조사 자료, 원자료 단어 대응표, 근거 종합 점검(meta-analysis.md)
 ```
 
 ## 욕구 응답 모으기 (개발자용)
