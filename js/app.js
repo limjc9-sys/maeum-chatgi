@@ -1036,7 +1036,7 @@
         var where = fam.emoji + ' ' + fam.short + (w.cat && CAT[w.cat] ? ' · ' + CAT[w.cat].label : '');
         var hint = where + ' · ' + (head ? fill(T.searchSame || '{감정과} 같은 뜻', { '감정': head.word }) + ' · ' : '') + w.desc;
         var on = isPicked(w.id);
-        return searchItem(w.id, (on ? '✓ ' : '') + (w.hidden ? '★ ' : '') + w.word, hint, fam.color,
+        return searchItem(w.id, (on ? '✓ ' : '') + w.word, hint, fam.color,
           function () { togglePick(w.id, 'search'); }, on);
       },
       after: pickNav
@@ -1299,16 +1299,15 @@
       el('article', { class: 'card', style: '--accent:' + fam.color, 'data-testid': 'result-card' },
         el('p', { class: 'card-date' }, prettyDateTime(rec.ts)),
         el('h1', { class: 'card-title', tabindex: '-1' }, T.resultTitle),
-        rec.hidden ? el('p', { class: 'bonus bonus-hidden', 'data-testid': 'hidden-bonus' }, '★ ' + T.hiddenBonus) : null,
         p.isNew ? el('p', { class: 'bonus bonus-new', 'data-testid': 'new-bonus' }, '📖 ' + T.newWordBonus + ' (' + found + ' / ' + ALL_WORDS.length + ')') : null,
         el('section', { class: 'card-row' },
           el('h2', { class: 'card-label' }, list.length > 1 ? fill(T.resultEmotionsMany || '찾은 감정 {글}개', { '글': String(list.length) }) : T.resultEmotion),
-          el('p', { class: 'card-emotion', 'data-testid': 'result-emotion' }, list.map(function (x) { return x.word + (x.hidden ? ' ★' : ''); }).join(' + ')),
+          el('p', { class: 'card-emotion', 'data-testid': 'result-emotion' }, list.map(function (x) { return x.word; }).join(' + ')),
           el('ul', { class: 'card-multi' }, list.map(function (x) {
             var xf = famOf(EMO[x.id] || x);
             var xe = EMO[x.id];
             return el('li', { class: 'card-multi-item', 'data-testid': 'result-emotion-item', style: '--accent:' + xf.color },
-              el('p', { class: 'card-value' }, el('strong', { class: 'card-word' }, x.word + (x.hidden ? ' ★' : '')), ' · ' + x.intensity + ' / 10'),
+              el('p', { class: 'card-value' }, el('strong', { class: 'card-word' }, x.word), ' · ' + x.intensity + ' / 10'),
               intensityMeter(x.intensity),
               xe && xe.desc && x.id !== UNNAMED.id ? el('p', { class: 'card-desc' }, xe.desc) : null);
           })),
@@ -1353,43 +1352,61 @@
   /* 감정 도감 — 기분 4칸 가운데 하나를 고르면 그 칸의 감정 목록이 나와요.
      낱말을 누르면 바로 아래에 쉬운 설명(뜻, 이럴 때 느껴요, 같은 뜻 다른 말, 어디에 있나요, 내 기록)이 펼쳐져요 */
   var DEX = { quad: null, open: null, q: '' };
-  function dexStats(id) {
-    var w = EMO[id];
-    var ids = [id].concat(w.same || []);
-    var recs = records().filter(function (r) { return recEmotions(r).some(function (x) { return ids.indexOf(x.id) !== -1; }); });
-    return recs;
+  /* 비슷한 말: 같은 뜻 다른 말을 먼저, 모자라면 같은 범주의 다른 낱말로 3개까지 */
+  function similarWords(w) {
+    var out = (w.same || []).map(function (id) { return EMO[id] && EMO[id].word; }).filter(Boolean);
+    if (out.length < 3 && w.cat && CAT[w.cat]) {
+      CAT[w.cat].ids.forEach(function (id) {
+        var x = EMO[id];
+        if (out.length < 3 && x && !x.parent && x.id !== w.id && out.indexOf(x.word) === -1) out.push(x.word);
+      });
+    }
+    return out;
+  }
+  /* 반대말: data/emotions.js의 antonyms (낱말별 → 없으면 범주별) */
+  function antonymWords(w) {
+    var A = D.antonyms || {};
+    var byWord = A.byWord || {}, byCat = A.byCategory || {};
+    if (Object.prototype.hasOwnProperty.call(byWord, w.id)) return byWord[w.id];
+    return byCat[w.cat] || [];
   }
   function dexExplain(w) {
     var f = famOf(w);
-    var recs = dexStats(w.id);
-    var same = (w.same || []).map(function (id) { return EMO[id] && EMO[id].word; }).filter(Boolean);
-    var first = recs.length ? recs.reduce(function (a, r) { return r.ts < a.ts ? r : a; }) : null;
-    var last = recs.length ? recs.reduce(function (a, r) { return r.ts > a.ts ? r : a; }) : null;
+    var sim = similarWords(w);
+    var ant = antonymWords(w);
     function row(label, value, testid) {
-      return el('div', { class: 'dex-row' }, el('dt', null, label), el('dd', { 'data-testid': testid || null }, value));
+      return el('div', { class: 'dex-row' }, el('dt', null, label), el('dd', { 'data-testid': testid }, value));
     }
     return el('dl', { class: 'dex-explain', 'data-testid': 'dex-explain', style: '--accent:' + f.color },
-      row('뜻', w.desc, 'dex-detail-desc'),
-      w.ask ? row('이럴 때 느껴요', w.ask) : null,
-      same.length ? row('같은 뜻 다른 말', same.join(', '), 'dex-detail-same') : null,
-      row('어디에 있나요', (FAMILY[w.family] ? (D.quadrants.filter(function (q) { return q.id === w.family; })[0] || {}).face || '' : '') + ' ' + f.label + (w.cat && CAT[w.cat] ? ' › ' + CAT[w.cat].label : '')),
-      w.hidden ? row('숨은 감정', '★ 처음 고르면 보너스 별을 받아요') : null,
-      row('내 기록', recs.length ? recs.length + '번 골랐어요 · 처음 ' + longDate(first.ts) + (recs.length > 1 ? ' · 가장 최근 ' + longDate(last.ts) : '') : '아직 고른 적 없어요', 'dex-detail-count'));
+      row(T.dexMeaning || '뜻', w.desc, 'dex-meaning'),
+      row(T.dexSimilar || '비슷한 말', sim.length ? sim.join(', ') : (T.dexNone || '없어요'), 'dex-similar'),
+      row(T.dexOpposite || '반대말', ant.length ? ant.join(', ') : (T.dexNoOpposite || '뚜렷한 반대말이 없어요'), 'dex-opposite'));
   }
-  function dexRow(w, found) {
+  function dexRow(w, found, wide) {
     var open = DEX.open === w.id;
     var got = [w.id].concat(w.same || []).some(function (id) { return found[id]; });
-    return el('li', { class: 'dex-item' + (open ? ' open' : ''), style: '--accent:' + famOf(w).color },
+    return el('li', { class: 'dex-item' + (open ? ' open' : '') + (wide ? ' wide' : ''), style: '--accent:' + famOf(w).color },
       el('button', {
         class: 'dex-word', type: 'button', 'data-dex': w.id, 'aria-expanded': String(open),
+        'aria-label': w.word + (open ? ' 설명 접기' : ' 설명 보기'),
         onclick: function () { DEX.open = open ? null : w.id; refresh(); }
       },
         el('span', { class: 'dex-mark', 'aria-hidden': 'true' }, got ? '✓' : ''),
-        el('span', { class: 'dex-text' },
-          el('span', { class: 'dex-name' }, (w.hidden ? '★ ' : '') + w.word),
-          open ? null : el('span', { class: 'dex-short' }, w.desc)),
-        el('span', { class: 'toggle-mark', 'aria-hidden': 'true' }, open ? '−' : '+')),
-      open ? dexExplain(w) : null);
+        el('span', { class: 'dex-name' }, w.word),
+        el('span', { class: 'toggle-mark', 'aria-hidden': 'true' }, open ? '−' : '+')));
+  }
+  /* 2개씩 나란히 놓고, 펼친 설명은 그 줄 바로 아래에 한 줄 전체로 넣어요 (짝이 흐트러지지 않게) */
+  function dexItems(ids, found) {
+    var out = [];
+    ids.forEach(function (id, i) {
+      out.push(dexRow(EMO[id], found, i === ids.length - 1 && ids.length % 2 === 1));
+      var rowEnd = i % 2 === 1 || i === ids.length - 1;
+      if (rowEnd) {
+        var openId = [ids[i - (i % 2)], ids[i - (i % 2) + 1]].filter(function (x) { return x && x === DEX.open; })[0];
+        if (openId) out.push(el('li', { class: 'dex-exp-li', style: '--accent:' + famOf(EMO[openId]).color }, dexExplain(EMO[openId])));
+      }
+    });
+    return out;
   }
   screens.dex = function () {
     var found = foundSet();
@@ -1404,13 +1421,13 @@
       return el('button', {
         class: 'dex-tab' + (on ? ' on' : ''), type: 'button', role: 'tab', 'aria-selected': String(on), 'data-dex-tab': x.id, style: '--accent:' + x.color,
         onclick: function () { DEX.quad = x.id; DEX.open = null; refresh(); }
-      }, el('span', { class: 'dex-tab-face', 'aria-hidden': 'true' }, x.face || ''), el('span', { class: 'dex-tab-name' }, x.name), el('span', { class: 'dex-tab-count' }, got + '/' + words.length));
+      }, el('span', { class: 'dex-tab-dot', 'aria-hidden': 'true' }), el('span', { class: 'dex-tab-name' }, x.name), el('span', { class: 'dex-tab-count' }, got + '/' + words.length));
     }));
     var list = el('div', { class: 'dex-list' }, q.categories.map(function (c) {
       var mains = CAT[c.id].ids.filter(function (id) { return !EMO[id].parent; });
       return el('section', { class: 'dex-cat', 'data-cat': c.id },
         el('h3', { class: 'dex-cat-title' }, c.label + ' (' + mains.length + ')'),
-        el('ul', { class: 'dex-items' }, mains.map(function (id) { return dexRow(EMO[id], found); })));
+        el('ul', { class: 'dex-items' }, dexItems(mains, found)));
     }));
     return screen('dex', null, simpleTop('감정 도감'),
       heading('감정 도감', T.dexLead || '감정 낱말을 누르면 뜻과 쓰임이 나와요'),
@@ -1418,7 +1435,7 @@
       el('div', { class: 'bar-track big' }, el('div', { class: 'bar-fill', style: 'width:' + Math.round(nFound / total * 100) + '%' })),
       el('p', { class: 'guide' }, T.dexGuide || ''),
       tabs,
-      el('h2', { class: 'sec-title dex-quad-title', style: '--accent:' + q.color }, (q.face || '') + ' ' + q.name + ' · ' + q.label),
+      el('h2', { class: 'sec-title dex-quad-title', style: '--accent:' + q.color }, q.name + ' · ' + q.label),
       list,
       menuNav()
     );
@@ -1556,7 +1573,7 @@
       el('p', { class: 'rec-date' }, prettyDateTime(r.ts)),
       el('p', { class: 'rec-emotion' }, recEmotions(r).map(function (x) {
         var xf = famOf(EMO[x.id] || x);
-        return xf.emoji + ' ' + x.word + (x.hidden ? ' ★' : '') + ' ' + x.intensity + '점';
+        return xf.emoji + ' ' + x.word + ' ' + x.intensity + '점';
       }).join(' · ')),
       r.held && r.held.length ? el('p', { class: 'rec-sit' }, (T.resultHeld || '보류한 감정') + ': ' + r.held.map(function (x) { return x.word; }).join(' · ')) : null,
       el('p', { class: 'rec-need' }, '필요했던 것: ' + r.needWord),
