@@ -1,4 +1,5 @@
-/* 감정 및 욕구 찾기 — 화면 모양
+/* © 2026 Jaecheol, LIM. All rights reserved.
+   감정 및 욕구 찾기 — 화면 모양
    색: 기본은 흰 바탕 + 먹색 글자. 누르는 큰 단추(시작하기·다음)는 편안한 파랑(--brand).
    기분 4칸 색(노랑·초록·빨강·파랑)은 포인트로만 써요.
    사용 방법 화면은 남색(--guide)으로 시작 버튼(파랑)과 구분해요. (docs/design-rules.md 2번) */
@@ -226,6 +227,8 @@ h1:focus { outline: none; }
 .menu-icon { font-size: 22px; line-height: 1.2; }
 .menu-label { font-size: 16px; line-height: 1.25; font-weight: 600; word-break: keep-all; }
 .privacy { font-size: 16px; color: var(--ink-soft); text-align: center; }
+/* 저작권 표시: 일부러 작고 흐릿하게 (16px 글자 규칙의 예외) */
+.copyright { font-size: 11px; line-height: 1.4; color: #A3AAB6; opacity: 0.8; text-align: center; letter-spacing: 0.2px; margin-top: -4px; }
 
 /* ───── 사용 방법 (남색) ───── */
 .screen[data-screen="guide"] .progress .dot.on { background: var(--guide); }

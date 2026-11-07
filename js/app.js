@@ -1,4 +1,5 @@
 /*
+  © 2026 Jaecheol, LIM. All rights reserved. Unauthorized copying or distribution is prohibited.
   감정 및 욕구 찾기 — 화면 동작 코드
   문장과 낱말은 data 폴더의 파일에 있어요. 이 파일은 고치지 않아도 돼요.
   지켜야 할 설계 규칙: docs/design-rules.md
@@ -625,7 +626,9 @@
         ),
         el('p', { class: 'privacy' }, T.privacy),
         !storageOK ? el('p', { class: 'warn' }, '이 브라우저에서는 기록이 저장되지 않을 수 있어요. 일반 창(시크릿 창이 아닌 창)으로 열어 주세요.') : null,
-        el('button', { class: 'btn btn-quiet-danger', type: 'button', onclick: function () { go('deleteConfirm', {}); }, 'data-testid': 'delete-all' }, '기록 전체 삭제')
+        el('button', { class: 'btn btn-quiet-danger', type: 'button', onclick: function () { go('deleteConfirm', {}); }, 'data-testid': 'delete-all' }, '기록 전체 삭제'),
+        /* 저작권 표시: 흐릿한 영어로 작게 (docs/design-rules.md 2번) */
+        el('p', { class: 'copyright', 'data-testid': 'copyright', lang: 'en' }, T.copyright || '© 2026 Jaecheol, LIM. All rights reserved.')
       )
     );
   };

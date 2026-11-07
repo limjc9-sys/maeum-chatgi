@@ -178,7 +178,7 @@ async function layoutCheck(page, label) {
       if (!hasText) return;
       leaves.push(el);
       const fs = parseFloat(getComputedStyle(el).fontSize);
-      if (fs < 16) out.push(`글자 16px 미만(${fs}px): "${el.textContent.trim().slice(0, 20)}"`);
+      if (fs < 16 && !el.closest('.copyright')) out.push(`글자 16px 미만(${fs}px): "${el.textContent.trim().slice(0, 20)}"`);
       const r = el.getBoundingClientRect();
       const inScroller = el.closest('.pick-chips');
       if (!inScroller && (r.right > vw + 1 || r.left < -1)) out.push(`화면 밖으로 나감: "${el.textContent.trim().slice(0, 20)}"`);
@@ -373,6 +373,8 @@ async function runForWidth(browser, base, width, D) {
     await page.click('[data-testid="big-text"]');
     ok(!(await page.evaluate(() => document.documentElement.classList.contains('big-text'))), `[${width}px] 글자 크게 끄기`);
     ok(!(await page.$('[data-testid="home-stats"]')), `[${width}px] 기록이 없으면 기록 요약 줄 없음`);
+    const cp = await page.$eval('[data-testid="copyright"]', (e) => { const c = getComputedStyle(e); return { t: e.textContent, fs: parseFloat(c.fontSize), color: c.color }; }).catch(() => null);
+    ok(!!cp && cp.t === '© 2026 Jaecheol, LIM. All rights reserved.' && cp.fs <= 12 && cp.color !== 'rgb(28, 34, 48)', `[${width}px] [규칙 2] 처음 화면 맨 아래 저작권 표시(작고 흐릿한 영어) ${JSON.stringify(cp)}`);
     await h.snap('home');
     await page.click('[data-testid="menu-guide"]');
     await h.expect('guide', '처음 화면 → 사용 방법');
