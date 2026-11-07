@@ -101,6 +101,20 @@ window.MAEUM_DATA.text = {
   resultTitle: '오늘의 마음 카드',
   resultEmotion: '찾은 감정',
   resultEmotionsMany: '찾은 감정 {글}개',
+  needFitQuestion: '이 욕구가 맞았나요?',
+  needFitYes: '네',
+  needFitNo: '아니요',
+  needFitUnsure: '잘 모르겠음',
+  needFitNote: '답은 기록에 남아요. 같은 감정을 다시 고르면 첫 욕구 보기에 반영돼요.',
+  reflectTitle: '그 감정이 나에게 무엇을 말해 주나요?',
+  reflectGuide: '적지 않아도 돼요. 적으면 이 카드와 함께 저장돼요.',
+  reflectPlaceholder: '예) 내가 이 친구를 정말 아끼고 있었구나.',
+  reflectSave: '카드에 저장하기',
+  reflectUpdate: '고쳐서 저장하기',
+  reflectDone: '카드에 저장했어요.',
+  reflectSaved: '내가 남긴 말',
+  reportDistinctGuide: '서로 다른 감정 = 이번 주 기록에 나온 감정 단어 수. 섞인 마음 기록 = 감정을 2개 이상 고르거나 섞인 마음 쪽에서 고른 기록.',
+  reportFitGuide: '결과 카드의 "이 욕구가 맞았나요?"에 답한 횟수예요. "아니요"가 많았던 욕구는 같은 감정의 첫 욕구 보기에서 빠져요.',
   resultIntensity: '강도',
   resultNeed: '필요했던 것',
   resultSummary: '한 줄 정리',
@@ -144,7 +158,7 @@ window.MAEUM_DATA.intro = [
   {
     icon: '🔍',
     title: '딱 맞는 게 없으면 5번',
-    body: '보기 중에 맞는 것이 없으면 5번 "이 중엔 없어요"를 누르세요. 처음 감정 쪽 화면에서는 "잘 모르겠어요"를 누르면 돼요. 여러 마음이 섞였으면 감정을 3개까지 함께 체크할 수 있어요. 몸의 느낌, 하고 싶었던 행동처럼 다른 방법으로 다시 물어봐요. 정답은 없어요.'
+    body: '보기 중에 맞는 것이 없으면 5번 "이 중엔 없어요"를 누르세요. 처음 감정 쪽 화면에서는 "잘 모르겠어요"를 누르면 기분과 힘 4칸으로 고를 수 있어요. 여러 마음이 섞였으면 감정을 3개까지 함께 체크할 수 있어요. 몸의 느낌, 하고 싶었던 행동처럼 다른 방법으로 다시 물어봐요. 정답은 없어요.'
   },
   {
     icon: '📖',
@@ -171,6 +185,24 @@ window.MAEUM_DATA.causes = [
   그다음에도 5번을 누르면 "지금은 이름 붙이기 어려운 감정"으로 저장돼요.
   emotions 안의 이름표는 emotions.js의 id예요.
 */
+/*
+  "잘 모르겠어요"를 누르면 먼저 나오는 기분 4칸 (무드 미터 방식: 기분 좋음–나쁨 × 힘이 넘침–빠짐)
+  칸마다 emotions 4개 (emotions.js의 id). 5번 "이 중엔 없어요"는 아래 approaches(몸 감각부터)로 이어져요.
+  근거: 마크 브래킷의 무드 미터(docs/emotion-words-research.md S10), Russell(1980) 원형 모형
+*/
+window.MAEUM_DATA.moodMeter = {
+  intro: '감정 이름은 잠시 내려놓고, 기분과 힘만 골라 볼게요.',
+  question: '그때 기분과 몸의 힘은 어느 칸에 가까웠나요?',
+  axis: '위 = 힘이 넘침 · 아래 = 힘이 빠짐 / 왼쪽 = 기분 나쁨 · 오른쪽 = 기분 좋음',
+  wordsQuestion: '이 칸의 감정 중 가까운 것을 골라 보세요.',
+  options: [
+    { label: '기분 나쁘고 힘이 넘쳐요', hint: '화나거나 불안해서 가만있기 어려움', color: '#D9473A', emotions: ['ang29', 'fear31', 'ang01', 'fear09'] },
+    { label: '기분 좋고 힘이 넘쳐요', hint: '신나고 들뜸', color: '#E9A800', emotions: ['joy01', 'joy02', 'joy28', 'joy19'] },
+    { label: '기분 나쁘고 힘이 빠져요', hint: '슬프거나 지쳐서 처짐', color: '#3F7FE0', emotions: ['sad30', 'sad13', 'sad02', 'sad05'] },
+    { label: '기분 좋고 차분해요', hint: '편안하고 느긋함', color: '#2E9E6B', emotions: ['joy05', 'joy07', 'joy13', 'joy30'] }
+  ]
+};
+
 window.MAEUM_DATA.approaches = [
   {
     key: 'body',

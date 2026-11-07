@@ -158,6 +158,11 @@
   }
   function records() { return load().records; }
   function addRecord(r) { var d = load(); d.records.push(r); save(d); }
+  function updateRecord(id, patch) {
+    var d = load();
+    d.records.forEach(function (r) { if (r.id === id) Object.keys(patch).forEach(function (k) { r[k] = patch[k]; }); });
+    save(d);
+  }
   /* 게임 방법 안내를 본 적이 있는지 (기록과 따로 저장해서 기록을 지워도 다시 안 나와요) */
   var INTRO_KEY = 'maeum-chatgi-intro-seen';
   var introSeenMemory = false;
@@ -240,7 +245,7 @@
 
   /* ───────── 공통 화면 조각 ───────── */
   var STEP_OF = {
-    situation: 1, family: 2, group: 2, words: 2, wording: 2, compare: 2, search: 2, approach: 2, unnamed: 2,
+    situation: 1, family: 2, meter: 2, group: 2, words: 2, wording: 2, compare: 2, search: 2, approach: 2, unnamed: 2,
     intensity: 3, cause: 4, causeOther: 4, need: 5, needGroup: 5, needWords: 5, needCompare: 5, needSearch: 5, needUnnamed: 5, result: 6
   };
 
@@ -411,15 +416,34 @@
     else go('need', { round: 0 });
   }
 
-  /* 첫 욕구 화면의 보기 4개: 감정별 목록 → 없으면 감정 쪽 × 원인 */
+  /* 첫 욕구 화면의 보기 4개: 감정별 목록 → 없으면 감정 쪽 × 원인.
+     결과 카드에서 "이 욕구가 맞았나요?"에 답한 기록이 있으면 반영해요:
+     같은 감정에서 "네"가 많았던 욕구는 앞에, "아니요"가 더 많았던 욕구는 빼요. ("잘 모르겠음"은 그대로) */
+  function mainKey(id) { var e = EMO[id]; return e ? (e.parent || e.id) : id; }
+  function needFeedback(key) {
+    var score = {};
+    records().forEach(function (r) {
+      if (!r.needFit || !r.needId || mainKey(r.emotionId) !== key) return;
+      score[r.needId] = (score[r.needId] || 0) + (r.needFit === 'yes' ? 1 : r.needFit === 'no' ? -1 : 0);
+    });
+    return score;
+  }
   function needCandidates() {
     var e = EMO[draft.emotionId];
-    var key = e ? (e.parent || e.id) : null;
-    var byEmo = (D.needsByEmotion || {})[key];
-    if (byEmo) return byEmo.filter(function (id) { return NEED[id]; }).slice(0, 4);
+    var key = e ? mainKey(e.id) : null;
     var fam = e ? e.family : 'unknown';
     var byFam = D.needsByCause[fam] || D.needsByCause.unknown;
-    return (byFam[draft.cause] || byFam.other || []).filter(function (id) { return NEED[id]; }).slice(0, 4);
+    var byCause = byFam[draft.cause] || byFam.other || [];
+    var base = ((D.needsByEmotion || {})[key] || byCause).slice();
+    var score = key ? needFeedback(key) : {};
+    var liked = Object.keys(score).filter(function (id) { return score[id] > 0 && NEED[id]; }).sort(function (a, b) { return score[b] - score[a]; }).slice(0, 2);
+    var out = [];
+    function add(id) { if (out.length < 4 && NEED[id] && out.indexOf(id) === -1 && !(score[id] < 0)) out.push(id); }
+    liked.forEach(add);
+    base.forEach(add);
+    byCause.forEach(add);
+    (D.needs || []).forEach(function (n) { add(n.id); });
+    return out;
   }
   /* 비슷한 욕구 구별하기: 고른 욕구가 든 첫 번째 줄 */
   function needCompareSetFor(id) {
@@ -635,7 +659,7 @@
     var opts = D.families.map(function (f, i) {
       return option(i + 1, f.emoji + ' ' + f.label, f.hint, function () { go('group', { family: f.id }); }, { color: f.color, id: f.id, cls: 'opt-tile', tile: true });
     });
-    opts.push(option(D.families.length + 1, T.familyNotSure, T.familyNotSureHint, emotionFive, { id: 'not-sure', icon: '?', cls: 'opt-five opt-tile', tile: true }));
+    opts.push(option(D.families.length + 1, T.familyNotSure, T.familyNotSureHint, function () { if (D.moodMeter) go('meter', {}); else emotionFive(); }, { id: 'not-sure', icon: '?', cls: 'opt-five opt-tile', tile: true }));
     return screen('family', null, topBar(), progress(), pickBar(false), situationChip(), heading(T.familyTitle), el('div', { class: 'opts opts-grid' }, opts), searchButton());
   };
 
@@ -869,6 +893,21 @@
     });
   };
 
+  /* 기분 4칸 (무드 미터 방식): 기분 좋음–나쁨 × 힘이 넘침–빠짐 */
+  screens.meter = function () {
+    var M = D.moodMeter;
+    var opts = M.options.slice(0, 4).map(function (o, i) {
+      return option(i + 1, o.label, o.hint, function () {
+        go('words', { ids: o.emotions, question: M.wordsQuestion, small: '“' + o.label + '”', path: 'meter' });
+      }, { color: o.color, id: 'meter-' + (i + 1), cls: 'opt-tile', tile: true });
+    });
+    return screen('meter', null, topBar(), progress(), pickBar(false),
+      heading(M.question, M.intro),
+      el('p', { class: 'guide meter-axis' }, M.axis),
+      el('div', { class: 'opts opts-grid meter-grid' }, opts),
+      el('div', { class: 'opts' }, fiveOption()));
+  };
+
   screens.approach = function (p) {
     var ap = D.approaches[p.index];
     var opts = ap.options.slice(0, 4).map(function (o, i) {
@@ -1096,7 +1135,8 @@
         el('section', { class: 'card-row' },
           el('h2', { class: 'card-label' }, T.resultNeed),
           el('p', { class: 'card-value', 'data-testid': 'result-need' }, need.word),
-          need.text && rec.needId !== UNNAMED_NEED.id ? el('p', { class: 'card-desc' }, need.text) : null
+          need.text && rec.needId !== UNNAMED_NEED.id ? el('p', { class: 'card-desc' }, need.text) : null,
+          rec.needId !== UNNAMED_NEED.id ? needFitBox(rec) : null
         ),
         el('section', { class: 'card-row' },
           el('h2', { class: 'card-label' }, T.resultSummary),
@@ -1106,13 +1146,49 @@
           el('h2', { class: 'card-label' }, '🌱 ' + T.resultTip),
           el('p', { class: 'card-text', 'data-testid': 'result-tip' }, rec.tip)
         ),
+        rec.reflection ? el('section', { class: 'card-row' },
+          el('h2', { class: 'card-label' }, T.reflectSaved || '내가 남긴 말'),
+          el('p', { class: 'card-text', 'data-testid': 'result-reflection' }, rec.reflection)) : null,
         rec.situation ? el('p', { class: 'card-situation' }, '있었던 일: ' + rec.situation) : null
       ),
+      reflectBox(rec),
       el('p', { class: 'streak-line', 'data-testid': 'result-streak' }, '🔥 연속 기록 ' + streak() + '일 · 📖 도감 ' + found + ' / ' + ALL_WORDS.length),
       el('button', { class: 'btn btn-primary btn-big', type: 'button', onclick: goHome, 'data-testid': 'home' }, T.homeButton),
       el('button', { class: 'btn btn-secondary', type: 'button', onclick: function () { go('dex', {}); }, 'data-testid': 'to-dex' }, T.dexButton)
     );
   };
+
+  /* 6. "이 욕구가 맞았나요?" 네 / 아니요 / 잘 모르겠음 */
+  function needFitBox(rec) {
+    var choices = [['yes', T.needFitYes || '네'], ['no', T.needFitNo || '아니요'], ['unsure', T.needFitUnsure || '잘 모르겠음']];
+    return el('div', { class: 'fit-box' },
+      el('p', { class: 'fit-q' }, T.needFitQuestion || '이 욕구가 맞았나요?'),
+      el('div', { class: 'fit-btns' }, choices.map(function (c) {
+        var on = rec.needFit === c[0];
+        return el('button', {
+          class: 'fit-btn' + (on ? ' on' : ''), type: 'button', 'data-testid': 'need-fit-' + c[0], 'aria-pressed': String(on),
+          onclick: function () { updateRecord(rec.id, { needFit: on ? '' : c[0] }); refresh(); }
+        }, c[1]);
+      })),
+      rec.needFit ? el('p', { class: 'guide', 'data-testid': 'need-fit-note' }, T.needFitNote || '답은 기록에 남아 다음 욕구 보기를 고칠 때 쓰여요.') : null
+    );
+  }
+  /* 2. "그 감정이 나에게 무엇을 말해 주나요?" (적지 않아도 됨) */
+  function reflectBox(rec) {
+    var ta = el('textarea', { id: 'reflect', class: 'textarea textarea-small', rows: '3', maxlength: '300', placeholder: T.reflectPlaceholder || '', 'data-testid': 'reflect-input' });
+    ta.value = rec.reflection || '';
+    var count = el('p', { class: 'counter' }, ta.value.length + ' / 300');
+    ta.addEventListener('input', function () { count.textContent = ta.value.length + ' / 300'; });
+    return el('section', { class: 'report-sec reflect' },
+      el('label', { class: 'sec-title', for: 'reflect' }, T.reflectTitle || '그 감정이 나에게 무엇을 말해 주나요?'),
+      el('p', { class: 'guide' }, T.reflectGuide || '적지 않아도 돼요.'),
+      ta, count,
+      el('button', {
+        class: 'btn btn-secondary', type: 'button', 'data-testid': 'reflect-save',
+        onclick: function () { updateRecord(rec.id, { reflection: ta.value.trim().slice(0, 300) }); refresh(); toast(T.reflectDone || '카드에 저장했어요.'); }
+      }, rec.reflection ? (T.reflectUpdate || '고쳐서 저장하기') : (T.reflectSave || '카드에 저장하기'))
+    );
+  }
 
   screens.dex = function () {
     var found = foundSet();
@@ -1244,6 +1320,14 @@
     recs.forEach(function (r) { days[r.date] = true; });
     var wordOf = {};
     recs.forEach(function (r) { recEmotions(r).forEach(function (x) { wordOf[x.id] = x.word; }); wordOf['n:' + r.needId] = r.needWord; });
+    var distinct = Object.keys(foundSet(recs)).length;
+    var mixedN = recs.filter(function (r) { var xs = recEmotions(r); return xs.length > 1 || xs.some(function (x) { return x.family === 'mixed'; }); }).length;
+    var pairs = countBy(recs, function (r) {
+      if (!r.needId || r.needId === UNNAMED_NEED.id) return [];
+      return recEmotions(r).filter(function (x) { return x.id !== UNNAMED.id; }).map(function (x) { return x.id + '>' + r.needId; });
+    }).slice(0, 5);
+    var fit = { yes: 0, no: 0, unsure: 0 };
+    recs.forEach(function (r) { if (fit[r.needFit] !== undefined) fit[r.needFit]++; });
     return screen('report', null, simpleTop('주간 감정 보고서'),
       heading('주간 감정 보고서', prettyDate(start) + ' ~ ' + prettyDate(end)),
       el('div', { class: 'week-nav' },
@@ -1255,15 +1339,69 @@
         statTile('📅', '기록한 날', Object.keys(days).length + '일', 'report-days'),
         statTile('🌡', '평균 강도', recs.length ? avg.toFixed(1) : '-', 'report-avg')
       ),
+      el('div', { class: 'stats stats-two' },
+        statTile('🎨', '서로 다른 감정', distinct + '개', 'report-distinct'),
+        statTile('🌗', '섞인 마음 기록', mixedN + '개', 'report-mixed')
+      ),
+      el('p', { class: 'guide' }, T.reportDistinctGuide || ''),
+      el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '하루 평균 강도'),
+        intensityChart(start, recs)),
       el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '자주 나온 감정'),
         bars(emo, function (k) { return (EMO[k] && EMO[k].word) || wordOf[k] || k; }, function (k) { return EMO[k] ? FAMILY[EMO[k].family].color : null; }, 'bars-emotion')),
       el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '자주 나온 욕구'),
         bars(need, function (k) { return (NEED[k] && NEED[k].word) || wordOf['n:' + k] || k; }, null, 'bars-need')),
+      el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '자주 함께 나온 감정·욕구'),
+        bars(pairs, function (k) { var a = k.split('>'); return ((EMO[a[0]] && EMO[a[0]].word) || wordOf[a[0]] || a[0]) + ' → ' + ((NEED[a[1]] && NEED[a[1]].word) || wordOf['n:' + a[1]] || a[1]); }, null, 'bars-pair')),
+      el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '욕구가 맞았나요?'),
+        el('p', { class: 'body-text', 'data-testid': 'report-needfit' }, '네 ' + fit.yes + '번 · 아니요 ' + fit.no + '번 · 잘 모르겠음 ' + fit.unsure + '번'),
+        el('p', { class: 'guide' }, T.reportFitGuide || '')),
       el('section', { class: 'report-sec' }, el('h2', { class: 'sec-title' }, '감정 쪽 나눠 보기'),
         bars(fam, function (k) { var f = FAMILY[k] || FAMILY.unknown; return f.emoji + ' ' + f.label; }, function (k) { return (FAMILY[k] || FAMILY.unknown).color; }, 'bars-family')),
       recs.length ? el('p', { class: 'guide' }, reportComment(emo, need, wordOf)) : null
     );
   };
+  /* 하루 평균 강도 꺾은선 (그날 기록에 든 모든 감정의 강도 평균) */
+  function intensityChart(start, recs) {
+    var names = ['일', '월', '화', '수', '목', '금', '토'];
+    var pts = [];
+    for (var i = 0; i < 7; i++) {
+      var d = addDays(start, i), k = dateKey(d);
+      var vals = [];
+      recs.filter(function (r) { return r.date === k; }).forEach(function (r) { recEmotions(r).forEach(function (x) { vals.push(x.intensity); }); });
+      pts.push({ day: names[d.getDay()], v: vals.length ? vals.reduce(function (a, b) { return a + b; }, 0) / vals.length : null });
+    }
+    var W = 280, H = 120, xs = function (i) { return 20 + i * 40; }, ys = function (v) { return 110 - v * 10; };
+    var svgNS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('class', 'chart');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', '하루 평균 강도: ' + pts.map(function (p) { return p.day + ' ' + (p.v === null ? '기록 없음' : p.v.toFixed(1)); }).join(', '));
+    [0, 5, 10].forEach(function (v) {
+      var g = document.createElementNS(svgNS, 'line');
+      g.setAttribute('x1', 10); g.setAttribute('x2', W - 10); g.setAttribute('y1', ys(v)); g.setAttribute('y2', ys(v));
+      g.setAttribute('class', 'chart-grid');
+      svg.appendChild(g);
+    });
+    for (var j = 1; j < 7; j++) {
+      if (pts[j].v === null || pts[j - 1].v === null) continue;
+      var ln = document.createElementNS(svgNS, 'line');
+      ln.setAttribute('x1', xs(j - 1)); ln.setAttribute('y1', ys(pts[j - 1].v)); ln.setAttribute('x2', xs(j)); ln.setAttribute('y2', ys(pts[j].v));
+      ln.setAttribute('class', 'chart-line');
+      svg.appendChild(ln);
+    }
+    pts.forEach(function (p, i) {
+      if (p.v === null) return;
+      var c = document.createElementNS(svgNS, 'circle');
+      c.setAttribute('cx', xs(i)); c.setAttribute('cy', ys(p.v)); c.setAttribute('r', 5);
+      c.setAttribute('class', 'chart-dot');
+      svg.appendChild(c);
+    });
+    return el('div', { class: 'chart-wrap', 'data-testid': 'intensity-chart' }, svg,
+      el('div', { class: 'chart-days', 'aria-hidden': 'true' }, pts.map(function (p) {
+        return el('span', { class: 'chart-day' }, el('span', null, p.day), el('span', { class: 'chart-v' }, p.v === null ? '-' : p.v.toFixed(1)));
+      })));
+  }
   function reportComment(emo, need, wordOf) {
     var e = emo[0], n = need[0];
     var ew = (EMO[e.key] && EMO[e.key].word) || wordOf[e.key];
@@ -1285,6 +1423,7 @@
           }).join(' · ')),
           el('p', { class: 'rec-need' }, '필요했던 것: ' + r.needWord),
           el('p', { class: 'rec-summary' }, r.summary),
+          r.reflection ? el('p', { class: 'rec-sit', 'data-testid': 'rec-reflection' }, (T.reflectSaved || '내가 남긴 말') + ': ' + r.reflection) : null,
           r.situation ? el('p', { class: 'rec-sit' }, '있었던 일: ' + r.situation) : null
         );
       })) : el('p', { class: 'guide' }, '아직 기록이 없어요. 처음 화면에서 "시작하기"를 눌러 보세요.')
@@ -1383,6 +1522,9 @@
       five: Math.max(0, Math.round(Number(r.five)) || 0)
     };
     if (emotions.length > 1) out.emotions = emotions;
+    var reflection = s(r.reflection, 300);
+    if (reflection) out.reflection = reflection;
+    if (['yes', 'no', 'unsure'].indexOf(r.needFit) !== -1) out.needFit = r.needFit;
     return out;
   }
   function parseBackup(text) {
