@@ -143,7 +143,11 @@ window.MAEUM_DATA.needsByEmotion = {
   joy28: ['mean5', 'mean2', 'grow1', 'con4'],   // 기쁨
   joy29: ['mean2', 'con3', 'mean6', 'rest6'],   // 행복함
   joy07: ['saf1', 'saf2', 'saf3', 'rest4'],     // 안심됨
-  joy10: ['grow3', 'mean5', 'grow1', 'mean2']   // 자랑스러움
+  joy10: ['grow3', 'mean5', 'grow1', 'mean2'],  // 자랑스러움
+  sad45: ['clar5', 'rest3', 'con1', 'clar6'],   // 착잡함
+  mix04: ['mean5', 'con3', 'mean3', 'rest3'],   // 시원섭섭함
+  mix08: ['clar4', 'res1', 'con2', 'res6'],     // 애증
+  mix06: ['mean7', 'mean4', 'con2', 'free3']    // 고마우면서 미안함
 };
 
 /*

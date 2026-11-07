@@ -37,7 +37,16 @@ window.MAEUM_DATA.text = {
   groupTitle: '조금 더 좁혀 볼게요. 어떤 느낌에 가까웠나요?',
   groupMore: '다른 묶음 더 보기',
   groupMoreHint: '비슷한 느낌 묶음이 더 있어요',
-  wordsTitle: '이 중 가장 가까운 감정을 골라 보세요.',
+  wordsTitle: '이 중 가까운 감정을 골라 보세요.',
+
+  /* 여러 감정 체크 (3개까지) */
+  pickGuide: '맞는 감정을 눌러 체크하세요. 여러 마음이 섞였으면 3개까지 골라도 돼요.',
+  pickTitle: '고른 감정 {글}개',
+  pickLimit: '3개까지',
+  pickMore: '다른 쪽에서 더 고르기',
+  pickNext: '다음 →',
+  pickNextCount: '고른 감정 {글}개로 다음 →',
+  pickMax: '감정은 3개까지 고를 수 있어요. 하나를 빼고 다시 골라 주세요.',
   noneOfThese: '이 중엔 없어요',
   noneOfTheseHint: '다른 방법으로 물어볼게요',
   wordingTitle: '뜻은 같은 말이에요. 평소에 쓰는 말을 골라 보세요.',
@@ -91,6 +100,7 @@ window.MAEUM_DATA.text = {
   /* 결과 카드 */
   resultTitle: '오늘의 마음 카드',
   resultEmotion: '찾은 감정',
+  resultEmotionsMany: '찾은 감정 {글}개',
   resultIntensity: '강도',
   resultNeed: '필요했던 것',
   resultSummary: '한 줄 정리',
@@ -134,7 +144,7 @@ window.MAEUM_DATA.intro = [
   {
     icon: '🔍',
     title: '딱 맞는 게 없으면 5번',
-    body: '보기 중에 맞는 것이 없으면 5번 "이 중엔 없어요"를 누르세요. 처음 감정 쪽 화면에서는 "잘 모르겠어요"를 누르면 돼요. 몸의 느낌, 하고 싶었던 행동처럼 다른 방법으로 다시 물어봐요. 정답은 없어요.'
+    body: '보기 중에 맞는 것이 없으면 5번 "이 중엔 없어요"를 누르세요. 처음 감정 쪽 화면에서는 "잘 모르겠어요"를 누르면 돼요. 여러 마음이 섞였으면 감정을 3개까지 함께 체크할 수 있어요. 몸의 느낌, 하고 싶었던 행동처럼 다른 방법으로 다시 물어봐요. 정답은 없어요.'
   },
   {
     icon: '📖',
@@ -277,6 +287,13 @@ window.MAEUM_DATA.needsByCause = {
     result: ['res2', 'res7', 'clar1', 'saf7'],
     expect: ['res7', 'res5', 'res2', 'clar3'],
     other: ['saf7', 'res6', 'rest5', 'saf6']
+  },
+  mixed: {
+    word: ['con2', 'clar5', 'con1', 'clar6'],
+    attitude: ['clar4', 'con2', 'res1', 'clar5'],
+    result: ['clar5', 'mean3', 'con6', 'grow4'],
+    expect: ['clar5', 'saf2', 'clar6', 'con2'],
+    other: ['clar5', 'rest3', 'clar6', 'con1']
   },
   unknown: {
     word: ['con1', 'clar4', 'res1', 'con2'],
