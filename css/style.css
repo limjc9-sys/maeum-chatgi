@@ -608,3 +608,78 @@ body.no-scroll { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .opt, .toast, .chip { transition: none; }
 }
+
+/* ───── 아래쪽 이동 막대 (모든 화면 같은 모양, docs/design-rules.md 8번) ───── */
+.navbar-space { height: 84px; flex-shrink: 0; }
+.navbar {
+  position: fixed; z-index: 20; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(246, 247, 249, 0.97); border-top: 1px solid var(--line);
+  box-shadow: 0 -4px 14px rgba(28, 34, 48, 0.06);
+}
+.nav-btn {
+  font: inherit; font-size: 18px; font-weight: 800;
+  min-height: 56px; padding: 8px 12px; border-radius: 14px; cursor: pointer;
+  border: 1.5px solid transparent;
+}
+.nav-back { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.nav-back:active { background: var(--brand-soft); }
+.nav-next { background: var(--brand); color: #fff; }
+.nav-next:active { background: var(--brand-dark); }
+.nav-next:disabled { background: #B9C7DD; color: #fff; cursor: default; }
+.nav-guide { background: var(--guide); }
+.nav-guide:active { background: var(--guide-dark); }
+.nav-danger { background: var(--danger); }
+.nav-btn:focus-visible { outline: 3px solid var(--guide); outline-offset: 2px; }
+
+/* 고치는 중 안내 */
+.edit-note { font-size: 16px; font-weight: 700; color: var(--brand-dark); background: var(--brand-tint); border-radius: 12px; padding: 10px 12px; }
+
+/* 지난 기록: 수정·피드백·삭제 */
+.rec-feedback { font-size: 16px; background: var(--brand-tint); border-radius: 10px; padding: 8px 10px; }
+.rec-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
+.rec-act {
+  font: inherit; font-size: 16px; font-weight: 700; color: var(--ink);
+  min-height: 48px; padding: 4px 6px;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer;
+}
+.rec-act:active { background: var(--brand-soft); }
+.rec-act-danger { color: var(--danger); }
+.rec-act:focus-visible { outline: 3px solid var(--guide); outline-offset: 2px; }
+.feedback-hints { margin: 0; padding-left: 20px; font-size: 16px; color: var(--ink-soft); display: flex; flex-direction: column; gap: 2px; }
+
+/* 감정 도감: 칸 고르기 + 범주별 목록 + 펼치는 설명 */
+.dex-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.dex-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  font: inherit; color: var(--ink); min-height: 76px; padding: 6px 2px;
+  background: color-mix(in srgb, var(--accent) 10%, #fff); border: 2px solid transparent; border-radius: 14px; cursor: pointer;
+}
+.dex-tab.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 24%, #fff); }
+.dex-tab-face { font-size: 22px; line-height: 1.2; }
+.dex-tab-name { font-size: 16px; font-weight: 800; }
+.dex-tab-count { font-size: 16px; color: var(--ink-soft); }
+.dex-tab:focus-visible, .dex-word:focus-visible { outline: 3px solid var(--guide); outline-offset: 2px; }
+.dex-quad-title { border-left: 6px solid var(--accent); padding-left: 10px; }
+.dex-list { display: flex; flex-direction: column; gap: 14px; }
+.dex-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.dex-item { background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; overflow: hidden; }
+.dex-item.open { border-color: var(--accent); }
+.dex-word {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) 22px; align-items: center; column-gap: 8px;
+  width: 100%; min-height: 56px; padding: 8px 12px;
+  font: inherit; text-align: left; color: var(--ink); background: transparent; border: 0; cursor: pointer;
+}
+.dex-mark { font-size: 16px; font-weight: 900; color: color-mix(in srgb, var(--accent) 80%, #000); }
+.dex-name { font-size: 18px; font-weight: 800; }
+.dex-text { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.dex-short { font-size: 16px; color: var(--ink-soft); line-height: 1.4; }
+.dex-explain {
+  margin: 0; padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 8px;
+  background: color-mix(in srgb, var(--accent) 7%, #fff); border-top: 1px solid var(--line);
+}
+.dex-row { display: flex; flex-direction: column; gap: 0; }
+.dex-row dt { font-size: 16px; font-weight: 800; color: color-mix(in srgb, var(--accent) 75%, #000); }
+.dex-row dd { margin: 0; font-size: 17px; line-height: 1.5; }
