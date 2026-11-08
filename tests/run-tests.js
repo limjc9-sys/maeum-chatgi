@@ -147,6 +147,41 @@ function checkData() {
   ok(bodyFeels.length >= 30 && new Set(bodyFeels.map((f) => f.id)).size === bodyFeels.length && new Set(bodyFeels.map((f) => f.label)).size === bodyFeels.length, `[규칙 11] 몸의 느낌 30개 이상, id·이름이 겹치지 않음 (지금 ${bodyFeels.length}개)`);
   bodyFeels.forEach((f) => ok(f.emotions.length >= 3 && f.emotions.every((id) => emo[id]) && new Set(f.emotions).size === f.emotions.length, `몸의 느낌 "${f.label}": 감정 후보 3개 이상, id 확인`));
   ok(bodyAp.guide && bodyAp.wordsQuestion && bodyAp.wordsGuide && /모두/.test(bodyAp.guide) && /모두/.test(bodyAp.wordsGuide), '[규칙 1] 몸의 느낌·감정 후보 안내에 "모두" 고르기');
+  // [규칙 12] 몸의 반응 보완 장(docs/body-reactions.md) 반영
+  bodyFeels.forEach((f) => ok(/^[NPHA](·[NPHA])*$/.test(f.src || '') && (f.idioms || []).length >= 1, `[규칙 12] 몸의 느낌 "${f.label}": 근거 표시(${f.src})·관용 표현`));
+  const GOOD = new Set(['yellow', 'green']);
+  bodyFeels.filter((f) => f.emotions.some((id) => GOOD.has(emo[id].quad)) && f.emotions.some((id) => !GOOD.has(emo[id].quad)))
+    .forEach((f) => ok(!!f.ask, `[규칙 12] 좋은 기분·안 좋은 기분에 함께 걸치는 "${f.label}"에 상황 질문`));
+  ['b-chest-pound', 'b-chest-tight', 'b-belly-burn', 'b-tears', 'b-face-hot'].forEach((id) => ok(!!(bodyFeels.find((f) => f.id === id) || {}).ask, `[규칙 12] 여러 감정에 걸치는 표현(${id})에 상황 질문`));
+  ok(['b-chest-ache', 'b-breath', 'b-dizzy'].every((id) => (bodyFeels.find((f) => f.id === id) || {}).care) && bodyAp.careNote && /진료/.test(bodyAp.careNote), '[규칙 12] 가슴이 아림·숨이 가쁨·어지러움에 진료 안내');
+  ok(/가장 먼저/.test(bodyAp.question), '[규칙 12] 몸 질문은 "가장 먼저 느껴진 곳"처럼 중립적으로');
+  const bodyTexts = JSON.stringify(bodyAp) + [D.text.bodyWay, D.text.bodyWayHint, D.text.bodySearchHint].join(' ');
+  ok(!/미주신경|화병|진단|거짓말하지|이상한 곳|아픈 곳|점수|척도/.test(bodyTexts), '[규칙 12] 몸의 느낌 문장에 다미주신경 용어·진단명·점수·"이상한 곳" 같은 말이 없음');
+  {
+    const doc = fs.readFileSync(path.join(ROOT, 'docs', 'body-reactions.md'), 'utf8').split('## 2-7')[1].split('## 4-2')[0];
+    const want = doc.split('\n').filter((l) => /^\| [^-감]/.test(l)).flatMap((l) => l.split('|')[2].split(',').map((x) => x.replace(/\(.*?\)/g, '').trim()).filter(Boolean));
+    const have = new Set(bodyFeels.flatMap((f) => f.idioms).map((x) => x.replace(/\s/g, '')));
+    const miss = want.filter((x) => !have.has(x.replace(/\s/g, '')));
+    ok(want.length >= 150 && miss.length === 0, `[규칙 12] 2-7 몸 관용 표현 ${want.length}개가 모두 몸의 느낌에 이어짐 (빠진 것: ${miss.join(', ')})`);
+  }
+  ok((D.guide.references.find((g) => g.group === '몸의 반응') || { items: [] }).items.length >= 6, '[규칙 12] 참고자료에 몸의 반응 문헌');
+  // [규칙 13] 몸 그림 12곳·느낌의 결 10계열·단계·세기·연습 카드
+  const AREAS = ['머리', '눈', '얼굴', '입·턱', '목', '가슴', '명치', '배(속)', '어깨·등', '팔·손', '다리·발', '온몸'];
+  ok(JSON.stringify((D.bodyAreas || []).map((a) => a.label)) === JSON.stringify(AREAS), `[규칙 13] 몸 그림 12곳 (2-6): ${(D.bodyAreas || []).map((a) => a.label).join('·')}`);
+  const partIds = bodyAp.parts.map((pt) => pt.id);
+  ok(D.bodyAreas.every((a) => partIds.includes(a.part)) && partIds.every((id) => D.bodyAreas.some((a) => a.part === id)), '[규칙 13] 12곳이 몸의 느낌 6묶음에 하나씩 들어감');
+  const TEXES = ['뜨거움', '차가움', '조임·압박', '무게·힘', '따뜻함', '움직임·떨림', '간지러움·찌릿함', '비어 있음·참', '통증·불편', '호흡·소화·에너지'];
+  ok(JSON.stringify((D.bodyTextures || []).map((t) => t.label)) === JSON.stringify(TEXES) && D.bodyTextures.every((t) => t.icon), '[규칙 13] 느낌의 결 10계열 (2-6 이름 그대로, 그림 포함)');
+  ok(JSON.stringify(D.bodyTextures.filter((t) => t.basic).map((t) => t.label)) === JSON.stringify(['뜨거움', '차가움', '조임·압박', '무게·힘']), '[규칙 13] "쉽게" 단계의 결 4계열 (5-6(8) 입문)');
+  const AREA_OF = Object.fromEntries(D.bodyAreas.map((a) => [a.id, a.part]));
+  bodyAp.parts.forEach((pt) => pt.feelings.forEach((f) => ok(AREA_OF[f.area] === pt.id && D.bodyTextures.some((t) => t.id === f.tex), `[규칙 13] "${f.label}": 곳(${f.area})이 묶음(${pt.id})과 맞고, 결(${f.tex}) 있음`)));
+  ok(D.bodyAreas.every((a) => bodyFeels.some((f) => f.area === a.id)) && D.bodyTextures.every((t) => bodyFeels.some((f) => f.tex === t.id)), '[규칙 13] 12곳·10계열마다 느낌이 하나 이상');
+  ok(JSON.stringify((D.bodyModes || []).map((m) => m.id)) === JSON.stringify(['easy', 'detail', 'write']), '[규칙 13] 단계 3개: 쉽게 · 자세히 · 적어서 찾기');
+  ok(JSON.stringify((D.bodyLevels || []).map((l) => l.label)) === JSON.stringify(['약', '중', '강']), '[규칙 13] 몸의 느낌 세기: 약·중·강');
+  const Q = D.bodyQuiz || [];
+  ok(Q.length >= 8 && Q.every((c) => bodyFeels.some((f) => f.id === c.body) && c.situation && c.options.length >= 2 && c.options.every((id) => emo[id]) && c.options.includes(c.answer)), `[규칙 13] 몸 느낌 연습 카드 ${Q.length}개: 느낌·감정 id, 답이 보기 안에`);
+  ok([...new Set(Q.map((c) => c.body))].every((b) => new Set(Q.filter((c) => c.body === b).map((c) => c.answer)).size >= 2), '[규칙 13] 같은 몸의 느낌이 상황에 따라 다른 감정이 되는 짝 (변별)');
+  ok(!/점수:|\d+점|맞힌|틀렸/.test(JSON.stringify(Q) + [D.text.quizLead, D.text.quizFeedback, D.text.quizOther].join(' ')), '[규칙 13] 연습 카드에 점수·맞힘/틀림 말이 없음');
   D.approaches.filter((a) => a.options).forEach((a) => a.options.forEach((o) => {
     ok(o.emotions.length === 4 && o.emotions.every((id) => emo[id]), `경로 ${a.key}/${o.label}: 감정 4개 id 확인`);
     if (o.need) ok(!!need[o.need], `경로 ${a.key}: 욕구 id ${o.need}`);
@@ -419,7 +454,8 @@ async function runForWidth(browser, base, width, D) {
     const secTitles = await page.$$eval('[data-screen="emotion"] .sec-title', (e) => e.map((x) => x.textContent.replace(/^\d/, '')));
     ok(JSON.stringify(secTitles) === JSON.stringify(['기분 4칸으로 찾기', '핵심 감정으로 찾기', '다른 방법으로 찾기']), `[${width}px] [규칙 7] ① 기분 4칸 → ② 핵심 감정 → ③ 다른 방법 (${secTitles.join(' → ')})`);
     ok((await page.textContent('[data-testid="thought-open"]')).includes('상대가 나에게 한 일로 찾기'), `[${width}px] [규칙 7] "상대가 나에게 한 일로 찾기"`);
-    ok((await page.$$('[data-testid="ways"] .way')).length === 3, `[${width}px] [규칙 5] 다른 방법 3가지가 한 묶음`);
+    ok((await page.$$('[data-testid="ways"] .way')).length === 4, `[${width}px] [규칙 5] 다른 방법 4가지가 한 묶음`);
+    ok((await page.textContent('[data-testid="body-open"]')).includes('몸의 느낌으로 찾기'), `[${width}px] [규칙 12] "몸의 느낌으로 찾기" 입구`);
     const order = await page.evaluate(() => document.querySelector('.quad-grid').getBoundingClientRect().top < document.querySelector('[data-testid="core"]').getBoundingClientRect().top);
     ok(order, `[${width}px] [규칙 7] 기분 4칸이 핵심 감정보다 위`);
     ok((await page.$$('.quad')).length === 4, `[${width}px] 기분 4칸`);
@@ -602,6 +638,17 @@ async function runForWidth(browser, base, width, D) {
   ok((await page.getAttribute(`[data-thought="${sti}"]`, 'aria-pressed')) === 'true' && !(await page.isDisabled('[data-testid="nav-next"]')), `[${width}px] [규칙 7] 그 말이 골라진 채로 이어짐`);
   await page.click('[data-testid="nav-back"]');
   await h.expect('search', '상대가 나에게 한 일 → 낱말로 찾기');
+  for (const [q, want] of [['가슴이 답답해', 'b-chest-tight'], ['속이 타요', 'b-belly-burn'], ['열받아', 'b-head-hot'], ['목이 메어서', 'b-throat']]) {
+    await page.fill('[data-testid="search-input"]', q);
+    const got = await page.$$eval('[data-testid="search-body"]', (e) => e.map((x) => x.getAttribute('data-body')));
+    ok(got.includes(want), `[${width}px] [규칙 12] 몸 관용 표현 "${q}" → 몸의 느낌 ${want} (${got.join(', ')})`);
+  }
+  await page.fill('[data-testid="search-input"]', '가슴이 답답해');
+  await page.click('[data-testid="search-body"][data-body="b-chest-tight"]');
+  await h.expect('bodyWords', '낱말로 찾기 → 몸의 느낌 감정 후보');
+  ok(!!(await page.$('[data-body-card="b-chest-tight"]')), `[${width}px] [규칙 12] 그 몸의 느낌의 감정 후보가 바로 나옴`);
+  await page.click('[data-testid="nav-back"]');
+  await h.expect('search', '몸의 느낌 → 낱말로 찾기');
   await page.fill('[data-testid="search-input"]', '서운');
   await page.click('[data-testid="search-results"] .search-item >> nth=0');
   ok((await h.count()) === 1, `[${width}px] 찾은 낱말을 체크`);
@@ -618,20 +665,27 @@ async function runForWidth(browser, base, width, D) {
   await h.expect('approach', '잘 모르겠어요 → 몸의 느낌');
   {
     const bodyAp = D.approaches[0];
-    ok((await page.$$('[data-screen="approach"] .bgroup')).length === bodyAp.parts.length, `[${width}px] [규칙 11] 몸의 곳 ${bodyAp.parts.length}묶음`);
-    ok((await page.$$('[data-screen="approach"] [data-body]')).length === bodyAp.parts.flatMap((pt) => pt.feelings).length, `[${width}px] [규칙 11] 몸의 느낌이 모두 보임`);
+    ok((await page.$$('[data-screen="approach"] .bpart')).length === bodyAp.parts.length, `[${width}px] [규칙 11] 몸의 곳 ${bodyAp.parts.length}묶음`);
+    ok((await page.$$('[data-screen="approach"] [data-body]')).length === 0, `[${width}px] [규칙 12] 처음에는 곳만 보이고 느낌은 접혀 있음 (짧게)`);
+    for (const pt of bodyAp.parts) await page.click(`[data-testid="bpart-${pt.id}"]`);
+    ok((await page.$$('[data-screen="approach"] [data-body]')).length === bodyAp.parts.flatMap((pt) => pt.feelings).length, `[${width}px] [규칙 11] 곳을 모두 펼치면 몸의 느낌이 모두 보임 (여러 곳을 함께 펼침)`);
+    for (const pt of bodyAp.parts) if (!['head', 'chest', 'limbs'].includes(pt.id)) await page.click(`[data-testid="bpart-${pt.id}"]`);
+    ok((await page.$$('[data-screen="approach"] .bpart.open')).length === 3, `[${width}px] [규칙 12] 다시 누르면 접힘`);
     ok(await page.isDisabled('[data-testid="nav-next"]'), `[${width}px] [규칙 8] 몸의 느낌을 고르기 전에는 다음 단추가 꺼짐`);
     ok(!!(await page.$('#app > section .opt[data-num="5"]')), `[${width}px] 몸의 느낌 화면에도 "이 중엔 없어요"`);
-    const bpick = ['b-chest-pound', 'b-belly-ache', 'b-fist'];
+    const bpick = ['b-chest-pound', 'b-mouth-dry', 'b-fist'];
     for (const id of bpick) await page.click(`[data-body="${id}"]`);
     const pressed = await page.$$eval('[data-body][aria-pressed="true"]', (e) => e.map((x) => x.getAttribute('data-body')));
     ok(JSON.stringify(pressed.sort()) === JSON.stringify(bpick.slice().sort()), `[${width}px] [규칙 1] 서로 다른 곳의 몸의 느낌 3개를 함께 고름`);
-    ok((await page.textContent('[data-testid="body-count"]')).includes('3개'), `[${width}px] [규칙 11] 고른 몸의 느낌 3개 표시`);
+    ok((await page.textContent('[data-testid="body-count"]')).includes('3개') && (await page.textContent('[data-bpart="chest"] .bpart-count')).includes('✓1'), `[${width}px] [규칙 11] 고른 몸의 느낌 3개, 곳마다 고른 수 표시`);
     const bText = await page.textContent('#app');
     BANNED_UI.forEach((re) => ok(!re.test(bText), `[${width}px] [규칙 1] 몸의 느낌 화면에 "${re.source}" 없음`));
     await h.snap('approach');
     await page.click('[data-testid="nav-next"]');
     await h.expect('bodyWords', '몸의 느낌 → 감정 후보');
+    ok(!(await page.$('[data-testid="care-note"]')), `[${width}px] [규칙 12] 진료 안내가 필요 없는 느낌에는 안내 없음`);
+    ok((await page.textContent('[data-body-card="b-chest-pound"] [data-testid="body-ask"]').catch(() => '')).length > 5, `[${width}px] [규칙 12] "가슴이 두근거렸어요"에 상황 질문`);
+    ok(!!(await page.$('[data-screen="bodyWords"] .sit-chip')), `[${width}px] [규칙 12] 감정 후보 화면에 있었던 일이 함께 보임 (상황으로 좁히기)`);
     const cards = await page.$$eval('[data-body-card]', (e) => e.map((x) => x.getAttribute('data-body-card')));
     ok(JSON.stringify(cards) === JSON.stringify(bpick), `[${width}px] [규칙 11] 고른 몸의 느낌마다 감정 후보 묶음 (${cards.join(', ')})`);
     const BF = {};
@@ -656,11 +710,137 @@ async function runForWidth(browser, base, width, D) {
     await h.expect('approach', '감정 후보 → 몸의 느낌');
     const kept = await page.$$eval('[data-body][aria-pressed="true"]', (e) => e.length);
     ok(kept === 3 && (await h.count()) === 4, `[${width}px] [규칙 6] 돌아와도 고른 몸의 느낌 3개·감정 4개가 남아 있음`);
+    await page.click('[data-body="b-breath"]');
     await page.click('[data-testid="nav-next"]');
     await h.expect('bodyWords', '몸의 느낌 → 감정 후보 (다시)');
+    ok(await page.isVisible('[data-testid="care-note"]'), `[${width}px] [규칙 12] "숨이 가쁘고 얕아졌어요"를 고르면 진료 안내`);
+    await h.snap('body-care');
     await page.click('[data-testid="nav-next"]');
     await h.expect('intensity', '몸의 느낌 → 강도');
     ok((await page.$$('.int-block')).length === 4, `[${width}px] 몸의 느낌으로 고른 감정 4개가 강도 화면에`);
+    await page.click('.topbar .top-btn >> nth=1');
+  }
+  /* 2-8c. "몸의 느낌으로 찾기" 입구 [규칙 12], 이전으로 돌아와 "잘 모르겠어요"를 다시 눌러도 몸의 느낌부터 */
+  await newGame(page, h, '몸 입구 점검');
+  await page.click('[data-testid="body-open"]');
+  await h.expect('approach', '몸의 느낌으로 찾기');
+  ok((await page.getAttribute('#app > section', 'data-approach')) === 'body', `[${width}px] [규칙 12] "몸의 느낌으로 찾기" → 몸의 느낌 화면`);
+  await h.opt(5);
+  await h.expect('approach', '몸의 느낌 → 이 중엔 없어요');
+  ok((await page.getAttribute('#app > section', 'data-approach')) === 'action', `[${width}px] 몸의 느낌에서 "이 중엔 없어요" → 하고 싶었던 행동`);
+  await page.click('[data-testid="nav-back"]');
+  await page.click('[data-testid="nav-back"]');
+  await h.expect('emotion', '몸의 느낌 → 감정 고르기');
+  await page.click('[data-testid="not-sure"]');
+  ok((await page.getAttribute('#app > section', 'data-approach')) === 'body', `[${width}px] 돌아와 "잘 모르겠어요"를 눌러도 몸의 느낌부터`);
+  await page.click('[data-testid="nav-back"]');
+  await page.click('[data-testid="not-sure"]');
+  ok((await page.getAttribute('#app > section', 'data-approach')) === 'body', `[${width}px] "잘 모르겠어요" → 이전 → 다시 눌러도 몸의 느낌부터 (세는 값이 남지 않음)`);
+  await page.click('.topbar .top-btn >> nth=1');
+
+  /* 2-8d. 몸의 느낌 단계(쉽게·자세히·적어서 찾기), 몸 그림, 결, 세기, 몸에 대 보기, 양방향 질문, 기록 [규칙 13] */
+  await newGame(page, h, '팀장님이 회의에서 내 보고서를 다시 하라고 했다.');
+  await page.click('.core-chip[data-id="ang19"]');
+  await page.click('[data-testid="body-open"]');
+  await h.expect('approach', '몸의 느낌 단계');
+  {
+    const BF = {};
+    D.approaches[0].parts.forEach((pt) => pt.feelings.forEach((f) => { BF[f.id] = f; }));
+    const allF = Object.values(BF);
+    ok((await page.getAttribute('#app > section', 'data-body-mode')) === 'easy', `[${width}px] [규칙 13] 처음에는 "쉽게" 단계`);
+    ok((await page.$$('[data-testid="body-modes"] .body-mode')).length === 3, `[${width}px] [규칙 13] 단계 탭 3개`);
+    ok((await page.$$('[data-testid="tex-box"] [data-tex]')).length === 4, `[${width}px] [규칙 13] "쉽게"에는 느낌의 결 4가지`);
+    await page.click('[data-tex="tight"]');
+    const tightN = await page.$$eval('[data-testid="tex-panel"] [data-body]', (e) => e.length);
+    ok(tightN === allF.filter((f) => f.tex === 'tight').length, `[${width}px] [규칙 13] "조임·압박"을 누르면 그 결의 느낌 ${tightN}개가 곳과 상관없이 모임`);
+    await page.click('[data-testid="tex-panel"] [data-body="b-chest-tight"]');
+    await page.click('[data-tex="tight"]');
+    ok(!(await page.$('[data-testid="tex-panel"]')), `[${width}px] [규칙 13] 결을 다시 누르면 닫힘`);
+    // 자세히: 몸 그림 12곳
+    await page.click('[data-body-mode="detail"]');
+    ok((await page.getAttribute('#app > section', 'data-body-mode')) === 'detail', `[${width}px] [규칙 13] "자세히" 단계`);
+    ok((await page.$$('[data-testid="body-figure"] [data-area]')).length === 12, `[${width}px] [규칙 13] 몸 그림에 누를 곳 12곳`);
+    const figLabels = await page.$$eval('[data-testid="body-figure"] .fig-label', (e) => e.map((x) => ({ t: x.textContent, h: x.getBoundingClientRect().height, r: x.getBoundingClientRect().right, l: x.getBoundingClientRect().left })));
+    const vw = await page.evaluate(() => document.documentElement.clientWidth);
+    ok(figLabels.length === 11 && D.bodyAreas.filter((a) => a.id !== 'whole').every((a) => figLabels.some((x) => x.t === a.label)), `[${width}px] [규칙 13] 몸 그림 옆에 곳 이름 11개 (온몸은 단추) ${figLabels.map((x) => x.t).join('·')}`);
+    ok(figLabels.every((x) => x.h >= 16 && x.l >= 0 && x.r <= vw), `[${width}px] [규칙 13] 곳 이름이 16px 이상이고 화면 안에 있음 (${figLabels.map((x) => Math.round(x.h)).join(',')})`);
+    await page.click('[data-fig-label="pit"]');
+    ok(!!(await page.$('[data-barea="pit"].open')), `[${width}px] [규칙 13] 곳 이름(명치)을 눌러도 그 곳이 펼쳐짐`);
+    ok((await page.$$('[data-testid="tex-box"] [data-tex]')).length === 10, `[${width}px] [규칙 13] "자세히"에는 느낌의 결 10가지`);
+    ok(await page.$eval('svg [data-area="chest"]', (e) => e.classList.contains('picked')), `[${width}px] [규칙 13] 고른 느낌이 있는 곳(가슴)은 몸 그림에 색이 칠해짐`);
+    await page.click('svg [data-area="belly"] rect');
+    ok(!!(await page.$('[data-barea="belly"].open')) && (await page.textContent('[data-testid="fig-note"]')).includes('배(속)'), `[${width}px] [규칙 13] 몸 그림의 배를 누르면 아래 배의 느낌이 펼쳐짐`);
+    ok((await page.$$('[data-barea="belly"] [data-body]')).length === allF.filter((f) => f.area === 'belly').length, `[${width}px] [규칙 13] 펼친 곳에는 그 곳의 느낌만`);
+    await page.click('[data-testid="body-figure"] button[data-area="whole"]');
+    ok(!!(await page.$('[data-barea="whole"].open')), `[${width}px] [규칙 13] "온몸" 단추`);
+    await h.snap('body-detail');
+    // 적어서 찾기: 자유 입력 + 관용 표현 사전
+    await page.click('[data-body-mode="write"]');
+    await page.fill('[data-testid="body-write-input"]', '속이 타요');
+    ok(!!(await page.$('[data-testid="body-write-results"] [data-body="b-belly-burn"]')), `[${width}px] [규칙 13] "속이 타요"를 적으면 "속이 타고 애가 탔어요"`);
+    await page.click('[data-testid="body-write-results"] [data-body="b-belly-burn"]');
+    await page.click('[data-testid="bdict-chest"]');
+    const dictN = await page.$$eval('[data-bdict="chest"] .dict-item', (e) => e.length);
+    ok(dictN === D.approaches[0].parts.find((pt) => pt.id === 'chest').feelings.length && (await page.textContent('[data-bdict="chest"]')).includes('가슴에 돌덩이를 얹은 듯하다'), `[${width}px] [규칙 13] 관용 표현 사전: 목·가슴 느낌 ${dictN}개와 관용 표현`);
+    await h.snap('body-write');
+    await page.click('[data-body-mode="easy"]');
+    ok((await page.textContent('[data-testid="body-count"]')).includes('2개'), `[${width}px] [규칙 13] 단계를 바꿔도 고른 몸의 느낌 2개가 남아 있음`);
+    await page.click('[data-testid="nav-next"]');
+    await h.expect('bodyWords', '몸의 느낌 단계 → 감정 후보');
+    // 세기
+    await page.click('[data-body-card="b-chest-tight"] [data-level="3"]');
+    ok((await page.getAttribute('[data-body-card="b-chest-tight"] [data-level="3"]', 'aria-pressed')) === 'true', `[${width}px] [규칙 13] 느낌의 세기 "강"`);
+    // 몸에 대 보기: 꼭 맞음 / 다름 → 가까운 낱말
+    const ct = BF['b-chest-tight'].emotions;
+    await page.click(`[data-body-card="b-chest-tight"] .chip[data-id="${ct[0]}"]`);
+    ok((await page.getAttribute('[data-testid="body-fit"]', 'data-fit-for')) === ct[0], `[${width}px] [규칙 13] 낱말을 고르면 "몸의 느낌에 대 보면 맞나요?"`);
+    await page.click('[data-testid="body-fit"] [data-fit="exact"]');
+    ok((await page.getAttribute('[data-testid="body-fit"] [data-fit="exact"]', 'aria-pressed')) === 'true', `[${width}px] [규칙 13] "꼭 맞음"`);
+    await page.click(`[data-body-card="b-chest-tight"] .chip[data-id="${ct[1]}"]`);
+    await page.click('[data-testid="body-fit"] [data-fit="diff"]');
+    ok((await page.getAttribute(`[data-body-card="b-chest-tight"] .chip[data-id="${ct[1]}"]`, 'aria-pressed')) === 'false' && !!(await page.$('[data-body-card="b-chest-tight"] [data-testid="near-box"]')), `[${width}px] [규칙 13] "다름"이면 그 낱말을 풀고 가까운 낱말을 보여 줌`);
+    const near = await page.$$eval('[data-testid="near-box"] .chip', (e) => e.map((x) => x.getAttribute('data-id')));
+    ok(near.length >= 2 && near.every((id) => EMO[id] && EMO[id].cat === EMO[ct[1]].cat && id !== ct[1]), `[${width}px] [규칙 13] 가까운 낱말은 같은 범주 (${near.map((id) => EMO[id].word).join(', ')})`);
+    await page.click(`[data-testid="near-box"] .chip[data-id="${near[0]}"]`);
+    ok((await page.getAttribute('[data-testid="body-fit"]', 'data-fit-for')) === near[0], `[${width}px] [규칙 13] 가까운 낱말을 고르면 그 낱말도 몸에 대 봄`);
+    await page.click('[data-testid="body-fit"] [data-fit="close"]');
+    ok((await h.count()) === 3, `[${width}px] 분노 + 몸에서 고른 2개 = 3개`);
+    await h.snap('body-words-fit');
+    await page.click('[data-testid="nav-next"]');
+    await h.expect('intensity', '몸의 느낌 단계 → 강도');
+    ok(!!(await page.$('[data-emobody="ang19"]')) && !(await page.$(`[data-emobody="${ct[0]}"]`)), `[${width}px] [규칙 13] 몸에서 찾지 않은 감정(분노)에만 "몸 어디에서 느껴졌나요?"`);
+    await page.click('[data-emobody="ang19"]');
+    ok((await page.$$('[data-emobody-box="ang19"] [data-emoarea]')).length === 12, `[${width}px] [규칙 13] 몸의 곳 12곳에서 고름`);
+    await page.click('[data-emobody-box="ang19"] [data-emoarea="chest"]');
+    await page.click('[data-emobody-box="ang19"] [data-emoarea="arms"]');
+    ok((await page.textContent('[data-emobody="ang19"]')).includes('가슴, 팔·손'), `[${width}px] [규칙 13] 고른 곳이 단추에 나옴`);
+    await setAllIntensity(page, 6);
+    await h.snap('intensity-emobody');
+    await page.click('[data-testid="nav-next"]');
+    await h.cause(1);
+    await h.expect('need', '몸의 느낌 단계 → 욕구');
+    await page.click('[data-testid="nav-next"]');
+    await h.expect('result', '몸의 느낌 단계 → 마음 카드');
+    const feelText = await page.textContent('[data-testid="result-body-feel"]').catch(() => '');
+    ok(feelText.includes(BF['b-chest-tight'].label + '(강)') && feelText.includes(BF['b-belly-burn'].label), `[${width}px] [규칙 13] 마음 카드에 몸의 느낌과 세기 (${feelText})`);
+    ok((await page.textContent('[data-testid="result-emobody"]').catch(() => '')).includes('분노 — 가슴 · 팔·손'), `[${width}px] [규칙 13] 마음 카드에 감정별 몸의 곳`);
+    ok(!(await page.$('[data-testid="repeat-note"]')), `[${width}px] [규칙 13] 한 번 기록으로는 반복 안내가 없음`);
+    const saved = await page.evaluate(() => { const r = window.__maeum.records(); return r[r.length - 1]; });
+    ok(saved.body && saved.body.length === 2 && saved.body.find((b) => b.id === 'b-chest-tight').level === 3 && saved.body.every((b) => b.area)
+      && JSON.stringify(saved.emoBody) === JSON.stringify({ ang19: ['chest', 'arms'] }) && saved.fit && saved.fit[ct[0]] === 'exact' && saved.fit[near[0]] === 'close' && !saved.fit[ct[1]],
+      `[${width}px] [규칙 13] 기록에 몸의 느낌·세기·곳·감정별 곳·대 보기 답이 저장됨 ${JSON.stringify({ body: saved.body, emoBody: saved.emoBody, fit: saved.fit })}`);
+    await h.snap('result-body');
+    for (let k = 0; k < 3; k++) await page.click('[data-testid="nav-back"]');
+    await h.expect('intensity', '마음 카드 → 강도');
+    ok((await page.textContent('[data-emobody="ang19"]')).includes('가슴, 팔·손'), `[${width}px] [규칙 6] 돌아와도 감정별 몸의 곳이 남아 있음`);
+    await page.click('.topbar .top-btn >> nth=1');
+    await page.click('[data-testid="menu-records"]');
+    ok((await page.textContent('[data-testid="rec-body"] >> nth=0')).includes(BF['b-chest-tight'].label), `[${width}px] [규칙 13] 지난 기록에 몸의 느낌`);
+    await page.click('[data-testid="rec-edit"] >> nth=0');
+    await h.expect('situation', '몸 기록 수정');
+    await page.click('[data-testid="nav-next"]');
+    await page.click('[data-testid="body-open"]');
+    ok((await page.textContent('[data-testid="body-count"]')).includes('2개'), `[${width}px] [규칙 13] 기록을 고칠 때 몸의 느낌이 다시 채워짐`);
     await page.click('.topbar .top-btn >> nth=1');
   }
 
@@ -817,6 +997,21 @@ async function runForWidth(browser, base, width, D) {
   await page.click('.topbar .top-btn');
   await page.click('[data-testid="menu-dex"]');
   await h.expect('dex', '감정 도감');
+  {
+    const Q = D.bodyQuiz;
+    await page.click('[data-testid="quiz-open"]');
+    await h.expect('bodyQuiz', '몸 느낌 연습');
+    ok((await page.textContent('[data-testid="quiz-step"]')).includes(`1 / ${Q.length}`), `[${width}px] [규칙 13] 몸 느낌 연습 카드 1 / ${Q.length}`);
+    const wrong = Q[0].options.find((id) => id !== Q[0].answer);
+    await page.click(`[data-quiz-opt="${wrong}"]`);
+    const fb = await page.textContent('[data-testid="quiz-feedback"]');
+    ok(fb.includes('달라도 괜찮아요') && fb.includes(EMO[Q[0].answer].word) && !/\d+점|틀렸/.test(fb), `[${width}px] [규칙 13] 다르게 골라도 점수 없이 흔한 감정과 "사람마다 다를 수 있어요" (${fb})`);
+    await h.snap('quiz');
+    for (let k = 1; k < Q.length; k++) await page.click('[data-testid="nav-next"]');
+    ok((await page.textContent('[data-testid="quiz-step"]')).includes(`${Q.length} / ${Q.length}`) && (await page.textContent('[data-testid="nav-next"]')).includes('감정 도감으로'), `[${width}px] [규칙 13] 마지막 카드에서 "감정 도감으로"`);
+    await page.click('[data-testid="nav-next"]');
+    await h.expect('dex', '몸 느낌 연습 → 감정 도감');
+  }
   const total = await page.evaluate(() => window.__maeum.totalWords());
   ok((await page.textContent('[data-testid="dex-total"]')).includes(`${total}개 중`), `[${width}px] 도감 전체 ${total}개`);
   ok((await page.$$('.dex-tab')).length === 4, `[${width}px] [규칙 9] 도감은 기분 4칸으로 나뉨`);
@@ -881,6 +1076,38 @@ async function runForWidth(browser, base, width, D) {
   await h.expect('home', '기록 수정 → 처음 화면');
   await page.click('[data-testid="menu-records"]');
   await page.click('.topbar .top-btn');
+
+  /* 2-11b. 주간 보고서의 몸의 느낌 경향·여러 주 반복 안내 [규칙 13] */
+  await page.evaluate(() => {
+    const key = 'maeum-chatgi-v1';
+    const d = JSON.parse(localStorage.getItem(key));
+    const mk = (daysAgo) => {
+      const t = new Date(); t.setDate(t.getDate() - daysAgo); t.setHours(9, 0, 0, 0);
+      const p = (n) => (n < 10 ? '0' : '') + n;
+      return { id: 'bodyseed' + daysAgo, ts: t.toISOString(), date: t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate()), situation: '몸 경향 점검', family: 'red', emotionId: 'fear31', emotionWord: '불안함', hidden: false, intensity: 5, cause: 'word', causeText: '', needId: 'saf1', needWord: '안전함', summary: '요약', path: 'body', five: 1,
+        body: [{ id: 'b-chest-tight', label: '가슴이 답답하고 돌덩이를 얹은 것 같았어요', area: 'chest', level: 2 }], emoBody: { fear31: ['chest'] } };
+    };
+    d.records.unshift(mk(17), mk(10), mk(2));
+    localStorage.setItem(key, JSON.stringify(d));
+  });
+  await page.reload();
+  await page.click('[data-testid="menu-report"]');
+  await h.expect('report', '몸의 느낌 경향');
+  {
+    const lines = await page.$$eval('[data-testid="report-body-line"]', (e) => e.map((x) => x.textContent));
+    ok(lines.some((t) => t.includes('불안함을 고른 날에는 주로 “가슴이 답답하고 돌덩이를 얹은 것 같았어요”를 함께 골랐어요')), `[${width}px] [규칙 13] 보고서에 감정·몸의 느낌 경향 (${lines.join(' / ')})`);
+    ok(lines.some((t) => t.includes('불안함을 고른 날에는 주로 가슴에서 느꼈어요')), `[${width}px] [규칙 13] 보고서에 감정·몸의 곳 경향`);
+    ok(await page.isVisible('[data-testid="repeat-note"]') && !/화병|진단/.test(await page.textContent('[data-testid="repeat-note"]')), `[${width}px] [규칙 13] 가슴 답답함이 3주에 걸쳐 기록되면 진단명 없이 상담·진료 안내`);
+    await h.snap('report-body');
+  }
+  await page.evaluate(() => {
+    const key = 'maeum-chatgi-v1';
+    const d = JSON.parse(localStorage.getItem(key));
+    d.records = d.records.filter((r) => !String(r.id).startsWith('bodyseed'));
+    localStorage.setItem(key, JSON.stringify(d));
+  });
+  await page.reload();
+  await h.expect('home', '몸 경향 점검 기록 지운 뒤');
 
   /* 2-12. 기록 옮기기 → 전체 삭제 → 되살리기 */
   await page.click('[data-testid="menu-backup"]');

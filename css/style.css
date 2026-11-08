@@ -720,3 +720,80 @@ body.no-scroll { overflow: hidden; }
 .body-card { background: #EEF8F6; }
 .body-card .thought-head { color: #0B6B62; font-size: 19px; }
 [data-testid="body-count"] { color: #0B6B62; }
+/* 몸의 느낌: 몸의 곳 6묶음은 접어 두고 누르면 펼쳐요 (docs/body-reactions.md 5-6(5) 짧게) */
+.bpart-list { display: flex; flex-direction: column; gap: 8px; }
+.bpart { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); border: 1.5px solid transparent; }
+.bpart.open { border-color: #9FD9D2; }
+.bpart-head {
+  width: 100%; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  font: inherit; color: var(--ink); text-align: left; background: none; border: 0; cursor: pointer;
+}
+.bpart-body { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bpart-name { font-size: 18px; font-weight: 800; }
+.bpart-where { font-size: 16px; color: var(--ink-soft); }
+.bpart-count { font-size: 16px; font-weight: 800; color: #0B6B62; background: #DDF3F0; border-radius: 12px; padding: 2px 8px; }
+.bpart-chips { padding: 0 14px 14px; }
+.body-ask { font-size: 16px; line-height: 1.5; color: #0B6B62; font-weight: 700; }
+.care-note {
+  font-size: 16px; line-height: 1.5; color: var(--ink);
+  background: #FFF6E5; border-left: 4px solid #E0A100; border-radius: 10px; padding: 8px 12px;
+}
+.search-body { --accent: #0E8A7E; background: #EEF8F6; }
+/* 몸의 느낌 단계 탭: 쉽게 / 자세히 / 적어서 찾기 (5-6(8)) */
+.body-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.body-mode {
+  min-height: 56px; padding: 8px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font: inherit; color: var(--ink); background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; cursor: pointer; text-align: center;
+}
+.body-mode.on { background: #DDF3F0; border: 2px solid #0E8A7E; }
+.body-mode-name { font-size: 17px; font-weight: 800; }
+.body-mode-hint { font-size: 16px; line-height: 1.3; color: var(--ink-soft); }
+.tex-box { display: flex; flex-direction: column; gap: 8px; }
+.chip-tex { --accent: #0E8A7E; }
+.tex-panel { background: #EEF8F6; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+/* 몸 그림 (12곳) */
+.fig-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.body-fig { width: 100%; max-width: 340px; height: auto; touch-action: manipulation; }
+.fig-area { cursor: pointer; }
+.fig-area > * { fill: #EEF2F6; stroke: #8E9AA8; stroke-width: 1.5; }
+.fig-area.picked > * { fill: #9FD9D2; stroke: #0B6B62; }
+.fig-area.open > * { stroke: #0E8A7E; stroke-width: 3; }
+.fig-area:focus-visible > * { stroke: #1F5FBF; stroke-width: 3; }
+.fig-deco { pointer-events: none; }
+.fig-deco circle { fill: #586173; }
+.fig-outline, .fig-line { fill: none; stroke: #586173; stroke-width: 1.5; }
+.fig-whole { --accent: #0E8A7E; }
+.fig-note { font-size: 16px; font-weight: 700; color: #0B6B62; text-align: center; }
+/* 적어서 찾기 · 관용 표현 사전 */
+.dict-title { margin-top: 8px; }
+.dict-list { list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0 14px 14px; }
+.dict-item { display: flex; flex-direction: column; gap: 4px; }
+.dict-idioms { font-size: 16px; line-height: 1.5; color: var(--ink-soft); }
+/* 느낌의 세기 · 몸에 대 보기 · 가까운 낱말 */
+.blevel { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.blevel-label { font-size: 16px; font-weight: 700; color: var(--ink-soft); margin-right: 4px; }
+.blevel-btn {
+  min-width: 52px; min-height: 44px; font: inherit; font-size: 16px; font-weight: 700; color: var(--ink);
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 22px; cursor: pointer;
+}
+.blevel-btn.on { background: #0E8A7E; border-color: #0E8A7E; color: #fff; }
+.body-fit { background: var(--surface); }
+.near-box { display: flex; flex-direction: column; gap: 6px; border-top: 1px dashed #9FD9D2; padding-top: 8px; }
+/* 강도 화면: 몸 어디에서 느껴졌나요? */
+.emobody { display: flex; flex-direction: column; gap: 8px; }
+.emobody-toggle {
+  min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px;
+  font: inherit; font-size: 16px; font-weight: 700; color: #0B6B62; text-align: left;
+  background: #EEF8F6; border: 1.5px solid #9FD9D2; border-radius: 12px; cursor: pointer;
+}
+/* 몸 느낌 연습 */
+.quiz-open { --accent: #0E8A7E; }
+.quiz-step { font-size: 16px; font-weight: 700; color: var(--ink-soft); text-align: center; }
+.quiz-sit { font-size: 18px; font-weight: 700; line-height: 1.5; }
+.fig-head > * { stroke: none; }
+.fig-head.open > * { stroke: #0E8A7E; stroke-width: 3; }
+/* 몸 그림 옆 곳 이름 (이름을 눌러도 그 곳이 펼쳐져요) */
+.fig-area > text.fig-label { fill: var(--ink); stroke: none; font-size: 16px; font-weight: 700; font-family: inherit; }
+.fig-area.picked > text.fig-label, .fig-area.open > text.fig-label { fill: #0B6B62; font-weight: 900; }
+.fig-leaders { pointer-events: none; }
+.fig-leaders line { stroke: #B4BEC9; stroke-width: 1; }
