@@ -844,6 +844,38 @@ async function runForWidth(browser, base, width, D) {
     await page.click('.topbar .top-btn >> nth=1');
   }
 
+  /* 2-8e. 몸의 느낌 단계는 들어올 때마다 "쉽게"부터 (2026-11-08 지적: 잘 모르겠어요 → 자세히로 열림) [규칙 13] */
+  {
+    const modeNow = () => page.getAttribute('#app > section', 'data-body-mode');
+    // 전에 "자세히"를 고르고 끝낸 뒤 새 기록에서 "잘 모르겠어요"를 눌러도 "쉽게"
+    await newGame(page, h, '단계 점검 1');
+    await page.click('[data-testid="body-open"]');
+    await page.click('[data-body-mode="detail"]');
+    ok((await modeNow()) === 'detail', `[${width}px] [규칙 13] 몸의 느낌에서 "자세히"를 고름`);
+    await page.click('.topbar .top-btn >> nth=1');
+    await newGame(page, h, '단계 점검 2');
+    await page.click('[data-testid="not-sure"]');
+    ok((await modeNow()) === 'easy', `[${width}px] [규칙 13] 새 기록의 "잘 모르겠어요"는 "쉽게"부터 (전에 고른 "자세히"가 남지 않음)`);
+    // 같은 기록 안에서 "자세히"를 고르고 감정 고르기로 돌아가 "잘 모르겠어요"·"몸의 느낌으로 찾기"를 눌러도 "쉽게"
+    await page.click('[data-body-mode="detail"]');
+    await page.click('[data-testid="nav-back"]');
+    await h.expect('emotion', '자세히 → 감정 고르기');
+    await page.click('[data-testid="not-sure"]');
+    ok((await modeNow()) === 'easy', `[${width}px] [규칙 13] 돌아와 "잘 모르겠어요"를 다시 눌러도 "쉽게"부터`);
+    await page.click('[data-testid="nav-back"]');
+    await page.click('[data-testid="body-open"]');
+    ok((await modeNow()) === 'easy', `[${width}px] [규칙 13] "몸의 느낌으로 찾기"도 "쉽게"부터`);
+    // 화면 안에서 고른 단계는 다음 화면에 갔다가 돌아와도 그대로
+    await page.click('[data-body-mode="detail"]');
+    await page.click('svg [data-area="chest"] rect');
+    await page.click('[data-barea="chest"] [data-body="b-chest-pound"]');
+    await page.click('[data-testid="nav-next"]');
+    await h.expect('bodyWords', '자세히 → 감정 후보');
+    await page.click('[data-testid="nav-back"]');
+    ok((await modeNow()) === 'detail', `[${width}px] [규칙 13] 감정 후보에서 돌아오면 고른 단계("자세히")가 그대로`);
+    await page.click('.topbar .top-btn >> nth=1');
+  }
+
   /* 2-9. 잘 모르겠어요 → 몸 느낌 → … → 이름 붙이기 어려운 감정 */
   await newGame(page, h, '그냥 오늘 하루가 이상했다.');
   await page.click('[data-testid="not-sure"]');
