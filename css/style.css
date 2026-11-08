@@ -708,3 +708,15 @@ body.no-scroll { overflow: hidden; }
 .dex-row dt { font-size: 16px; font-weight: 800; color: color-mix(in srgb, var(--accent) 75%, #000); }
 .dex-row dd { margin: 0; font-size: 17px; line-height: 1.5; }
 /* 낱말 수가 홀수인 범주: 마지막 낱말(.wide)이 한 줄을 채워 빈 칸을 남기지 않아요 */
+
+/* 상대가 나에게 한 일: 묶음마다 "떠오르는 생각"·"있었던 일" 두 줄, 여러 개 고르기 (2026-11-08) */
+.trow { display: flex; flex-direction: column; gap: 6px; }
+.trow + .trow { border-top: 1px dashed var(--line); padding-top: 10px; }
+.trow-label { font-size: 16px; font-weight: 700; color: var(--ink-soft); }
+.sel-count { font-size: 17px; font-weight: 800; color: #4B2FB8; text-align: center; }
+/* 몸의 느낌: 몸의 곳별 묶음, 여러 개 고르기 */
+.chip-body { --accent: #0E8A7E; text-align: left; }
+.bgroup .tgroup-num { background: #DDF3F0; color: #0B6B62; }
+.body-card { background: #EEF8F6; }
+.body-card .thought-head { color: #0B6B62; font-size: 19px; }
+[data-testid="body-count"] { color: #0B6B62; }

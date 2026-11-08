@@ -121,10 +121,12 @@ function checkData() {
   const catIds = new Set(D.quadrants.flatMap((q) => q.categories.map((c) => c.id)));
   Object.entries(D.needsByCategory).forEach(([cid, list]) => ok(catIds.has(cid) && list.every((id) => need[id]), `needsByCategory.${cid}: 범주·욕구 id 확인`));
   ok([...catIds].every((cid) => D.needsByCategory[cid]), '감정 범주마다 욕구 후보가 있음');
-  ok(D.thoughtWords.length >= 30, '생각이 섞인 말 30개 이상');
-  const grouped = (D.thoughtGroups || []).flatMap((g) => g.words);
-  ok(D.thoughtGroups.length === 6 && D.thoughtGroups.every((g) => g.id && g.label && g.words.length >= 3), '[규칙 7] 상대가 나에게 한 일: 여섯 묶음, 묶음마다 3개 이상');
-  ok(grouped.length === D.thoughtWords.length && D.thoughtWords.every((t) => grouped.filter((w) => w === t.word).length === 1), '[규칙 7] 생각이 섞인 말은 모두 한 묶음에 한 번씩');
+  ok(D.thoughtWords.length >= 70, `상대가 나에게 한 일: 말 70개 이상 (지금 ${D.thoughtWords.length}개)`);
+  const grouped = (D.thoughtGroups || []).flatMap((g) => g.words.concat(g.acts || []));
+  ok(D.thoughtGroups.length === 6 && D.thoughtGroups.every((g) => g.id && g.label && g.words.length >= 3), '[규칙 7] 상대가 나에게 한 일: 여섯 묶음, 묶음마다 떠오르는 생각 3개 이상');
+  ok(D.thoughtGroups.every((g) => (g.acts || []).length >= 5), '[규칙 11] 상대가 나에게 한 일: 묶음마다 구체적인 "있었던 일" 5개 이상');
+  ok(grouped.length === D.thoughtWords.length && D.thoughtWords.every((t) => grouped.filter((w) => w === t.word).length === 1), '[규칙 7] 상대가 나에게 한 말은 모두 한 묶음(생각 또는 있었던 일)에 한 번씩');
+  ok(D.thoughtGroups.flatMap((g) => g.acts).every((w) => /다$/.test(w)), '[규칙 11] "있었던 일"은 상대가 한 행동을 "~했다"꼴로 적음');
   ok(D.quadrants.every((q) => !/나쁘/.test(q.label)) && D.quadrants.filter((q) => /안 좋고/.test(q.label)).length === 2, '[규칙 7] 기분 4칸 이름: "기분이 나쁘고" 대신 "기분이 안 좋고"');
   ok(!/작은 실천 제안|무엇을 말해 주나요/.test(JSON.stringify(D.text) + JSON.stringify(D.guide)), '[규칙 6] 마음 카드에 작은 실천 제안·"무엇을 말해 주나요" 없음');
   ok(D.guide.sections.some((x) => /이전/.test(x.title) && /그대로 남아/.test(x.body)), '[규칙 6] 사용 방법에 이전 단계로 돌아가기 설명');
@@ -137,7 +139,15 @@ function checkData() {
   ok(D.needSearchSuggest.every((id) => need[id]), '욕구 찾기 추천 id가 모두 있음');
   // 5번 경로
   ok(D.approaches.length === 4, '5번 경로 4가지');
-  D.approaches.forEach((a) => a.options.forEach((o) => {
+  // [규칙 11] 몸의 느낌: 몸의 곳별 느낌, 느낌마다 감정 후보
+  const bodyAp = D.approaches[0];
+  ok(bodyAp.key === 'body' && Array.isArray(bodyAp.parts) && !bodyAp.options, '[규칙 11] 5번 경로 1번째는 몸의 느낌 (장면 대신 몸의 곳별 느낌)');
+  ok(bodyAp.parts.length >= 6 && bodyAp.parts.every((pt) => pt.id && pt.label && pt.feelings.length >= 4), `[규칙 11] 몸의 곳 6묶음 이상, 묶음마다 느낌 4개 이상 (${bodyAp.parts.map((pt) => pt.label + ' ' + pt.feelings.length).join(', ')})`);
+  const bodyFeels = bodyAp.parts.flatMap((pt) => pt.feelings);
+  ok(bodyFeels.length >= 30 && new Set(bodyFeels.map((f) => f.id)).size === bodyFeels.length && new Set(bodyFeels.map((f) => f.label)).size === bodyFeels.length, `[규칙 11] 몸의 느낌 30개 이상, id·이름이 겹치지 않음 (지금 ${bodyFeels.length}개)`);
+  bodyFeels.forEach((f) => ok(f.emotions.length >= 3 && f.emotions.every((id) => emo[id]) && new Set(f.emotions).size === f.emotions.length, `몸의 느낌 "${f.label}": 감정 후보 3개 이상, id 확인`));
+  ok(bodyAp.guide && bodyAp.wordsQuestion && bodyAp.wordsGuide && /모두/.test(bodyAp.guide) && /모두/.test(bodyAp.wordsGuide), '[규칙 1] 몸의 느낌·감정 후보 안내에 "모두" 고르기');
+  D.approaches.filter((a) => a.options).forEach((a) => a.options.forEach((o) => {
     ok(o.emotions.length === 4 && o.emotions.every((id) => emo[id]), `경로 ${a.key}/${o.label}: 감정 4개 id 확인`);
     if (o.need) ok(!!need[o.need], `경로 ${a.key}: 욕구 id ${o.need}`);
   }));
@@ -440,21 +450,42 @@ async function runForWidth(browser, base, width, D) {
   await page.click(`[data-testid="quad-panel"] .chip[data-id="${quadPicks.green[0]}"]`);
   ok((await h.count()) === NC + 12, `[${width}px] 다시 넣기`);
   await page.click('[data-testid="quad-close"]');
-  // 생각이 섞인 말 (가짜 느낌) → 밑의 느낌을 고르고 욕구 후보를 넘겨줌
+  // 상대가 나에게 한 일: 말을 여러 개 고르면 그 밑의 느낌·욕구를 한꺼번에 [규칙 11]
   const twi = D.thoughtWords.findIndex((t) => t.word === '무시당한');
   const tw = D.thoughtWords[twi];
+  const tai = D.thoughtWords.findIndex((t) => t.word === '말을 걸어도 대답하지 않았다');
+  const ta = D.thoughtWords[tai];
   await page.click('[data-testid="thought-open"]');
   await h.expect('thought', '상대가 나에게 한 일로 찾기');
   ok((await page.$$('[data-screen="thought"] .tgroup')).length === 6, `[${width}px] [규칙 7] 상대가 나에게 한 일: 여섯 묶음`);
+  ok((await page.$$('[data-screen="thought"] .tgroup .trow[data-trow="acts"]')).length === 6, `[${width}px] [규칙 11] 묶음마다 "있었던 일" 줄`);
+  ok((await page.$$('[data-screen="thought"] [data-thought]')).length === D.thoughtWords.length, `[${width}px] [규칙 11] 말 ${D.thoughtWords.length}개가 모두 보임`);
   ok((await h.count()) === NC + 12, `[${width}px] 따로 연 화면에도 고른 감정이 그대로`);
+  ok(await page.isDisabled('[data-testid="nav-next"]'), `[${width}px] [규칙 8] 말을 고르기 전에는 다음 단추가 꺼짐`);
   await page.click(`[data-thought="${twi}"]`);
-  ok(await page.isVisible('[data-testid="thought-card"]'), `[${width}px] "무시당한"을 누르면 번역 카드`);
-  ok((await page.textContent('[data-testid="thought-needs"]')).includes(NEEDW[tw.needs[0]]), `[${width}px] 번역 카드에 욕구 후보 "${NEEDW[tw.needs[0]]}"`);
-  const freeFeel = tw.feelings.find((id) => !Object.values(quadPicks).flat().includes(id) && !D.coreEmotions.includes(id));
-  await page.click(`[data-testid="thought-card"] .chip[data-id="${freeFeel}"]`);
+  await page.click(`[data-thought="${tai}"]`);
+  ok((await page.getAttribute(`[data-thought="${twi}"]`, 'aria-pressed')) === 'true' && (await page.getAttribute(`[data-thought="${tai}"]`, 'aria-pressed')) === 'true', `[${width}px] [규칙 1] 서로 다른 묶음의 말 2개를 함께 고름`);
+  ok((await page.textContent('[data-testid="thought-count"]')).includes('2개'), `[${width}px] [규칙 11] 고른 말 2개 표시`);
+  const tText = await page.textContent('#app');
+  BANNED_UI.forEach((re) => ok(!re.test(tText), `[${width}px] [규칙 1] 상대가 나에게 한 일 화면에 "${re.source}" 없음`));
+  await h.snap('thought');
+  await page.click('[data-testid="nav-next"]');
+  await h.expect('thoughtFeel', '상대가 나에게 한 일 → 그 밑의 감정');
+  const tFeels = await page.$$eval('[data-testid="thought-feelings"] .chip', (e) => e.map((x) => x.getAttribute('data-id')));
+  const wantFeels = [...new Set(tw.feelings.concat(ta.feelings))];
+  ok(tFeels.length === wantFeels.length && wantFeels.every((id) => tFeels.includes(id)), `[${width}px] [규칙 11] 고른 말 2개의 감정을 한꺼번에 (${tFeels.length}개)`);
+  const shared = tw.feelings.filter((id) => ta.feelings.includes(id));
+  if (shared.length) ok(tFeels[0] === shared[0], `[${width}px] [규칙 11] 두 말이 함께 가리키는 감정(${EMO[shared[0]].word})이 맨 앞`);
+  const tNeedText = await page.textContent('[data-testid="thought-needs"]');
+  ok(NEEDW[tw.needs[0]] && tNeedText.includes(NEEDW[tw.needs[0]]) && tNeedText.includes(NEEDW[ta.needs[ta.needs.length - 1]]), `[${width}px] [규칙 11] 두 말의 욕구 후보가 함께 나옴 (${tNeedText})`);
+  const freeFeel = tFeels.find((id) => !Object.values(quadPicks).flat().includes(id) && !D.coreEmotions.includes(id));
+  await page.click(`[data-testid="thought-feelings"] .chip[data-id="${freeFeel}"]`);
   const ALLN = NC + 13;
-  ok((await h.count()) === ALLN, `[${width}px] 번역 카드의 느낌 "${EMO[freeFeel].word}"도 함께 체크 (${ALLN}개)`);
+  ok((await h.count()) === ALLN, `[${width}px] 밑 감정 "${EMO[freeFeel].word}"도 함께 체크 (${ALLN}개)`);
   await h.snap('emotion-thought');
+  await page.click('[data-testid="nav-back"]');
+  await h.expect('thought', '그 밑의 감정 → 상대가 나에게 한 일');
+  ok((await page.getAttribute(`[data-thought="${twi}"]`, 'aria-pressed')) === 'true' && (await page.getAttribute(`[data-thought="${tai}"]`, 'aria-pressed')) === 'true', `[${width}px] [규칙 6] 돌아와도 고른 말 2개가 남아 있음`);
   await page.click('[data-testid="nav-back"]');
   await h.expect('emotion', '말로 찾기 → 감정 고르기');
   ok((await h.count()) === ALLN, `[${width}px] 돌아와도 말로 찾기에서 고른 감정이 남아 있음`);
@@ -479,7 +510,7 @@ async function runForWidth(browser, base, width, D) {
   await h.expect('need', '욕구');
   const cand = await suggestIds(page);
   ok(cand.length >= 6, `[${width}px] 욕구 후보 ${cand.length}개`);
-  ok(tw.needs.every((id) => cand.includes(id)), `[${width}px] "무시당한"의 욕구 후보가 먼저 나옴`);
+  ok(tw.needs.every((id) => cand.includes(id)) && ta.needs.every((id) => cand.includes(id)), `[${width}px] 고른 말 2개("무시당한"·"말을 걸어도 대답하지 않았다")의 욕구 후보가 먼저 나옴`);
   await page.click(`[data-testid="need-suggest"] .chip[data-need="${cand[0]}"]`);
   await page.click(`[data-testid="need-suggest"] .chip[data-need="${cand[1]}"]`);
   ok((await page.$$('.ncat')).length === 14, `[${width}px] 욕구 14범주`);
@@ -567,7 +598,8 @@ async function runForWidth(browser, base, width, D) {
   ok(!!(await page.$('[data-testid="search-thought"]')), `[${width}px] [규칙 7] "무시당했다"를 적으면 "상대가 나에게 한 일"로 이어 줌`);
   await page.click('[data-testid="search-thought"] >> nth=0');
   await h.expect('thought', '낱말로 찾기 → 상대가 나에게 한 일');
-  ok(await page.isVisible('[data-testid="thought-card"]'), `[${width}px] [규칙 7] 그 말의 밑 감정 카드가 바로 펼쳐짐`);
+  const sti = D.thoughtWords.findIndex((t) => t.word === '무시당한');
+  ok((await page.getAttribute(`[data-thought="${sti}"]`, 'aria-pressed')) === 'true' && !(await page.isDisabled('[data-testid="nav-next"]')), `[${width}px] [규칙 7] 그 말이 골라진 채로 이어짐`);
   await page.click('[data-testid="nav-back"]');
   await h.expect('search', '상대가 나에게 한 일 → 낱말로 찾기');
   await page.fill('[data-testid="search-input"]', '서운');
@@ -580,6 +612,58 @@ async function runForWidth(browser, base, width, D) {
   await page.click('.topbar .top-btn >> nth=1');
   await h.expect('home', '그만하기 → 처음 화면');
 
+  /* 2-8b. 잘 모르겠어요 → 몸의 느낌 여러 개 → 느낌마다 감정 후보 [규칙 11] */
+  await newGame(page, h, '회의 시간에 갑자기 발표를 시켰다.');
+  await page.click('[data-testid="not-sure"]');
+  await h.expect('approach', '잘 모르겠어요 → 몸의 느낌');
+  {
+    const bodyAp = D.approaches[0];
+    ok((await page.$$('[data-screen="approach"] .bgroup')).length === bodyAp.parts.length, `[${width}px] [규칙 11] 몸의 곳 ${bodyAp.parts.length}묶음`);
+    ok((await page.$$('[data-screen="approach"] [data-body]')).length === bodyAp.parts.flatMap((pt) => pt.feelings).length, `[${width}px] [규칙 11] 몸의 느낌이 모두 보임`);
+    ok(await page.isDisabled('[data-testid="nav-next"]'), `[${width}px] [규칙 8] 몸의 느낌을 고르기 전에는 다음 단추가 꺼짐`);
+    ok(!!(await page.$('#app > section .opt[data-num="5"]')), `[${width}px] 몸의 느낌 화면에도 "이 중엔 없어요"`);
+    const bpick = ['b-chest-pound', 'b-belly-ache', 'b-fist'];
+    for (const id of bpick) await page.click(`[data-body="${id}"]`);
+    const pressed = await page.$$eval('[data-body][aria-pressed="true"]', (e) => e.map((x) => x.getAttribute('data-body')));
+    ok(JSON.stringify(pressed.sort()) === JSON.stringify(bpick.slice().sort()), `[${width}px] [규칙 1] 서로 다른 곳의 몸의 느낌 3개를 함께 고름`);
+    ok((await page.textContent('[data-testid="body-count"]')).includes('3개'), `[${width}px] [규칙 11] 고른 몸의 느낌 3개 표시`);
+    const bText = await page.textContent('#app');
+    BANNED_UI.forEach((re) => ok(!re.test(bText), `[${width}px] [규칙 1] 몸의 느낌 화면에 "${re.source}" 없음`));
+    await h.snap('approach');
+    await page.click('[data-testid="nav-next"]');
+    await h.expect('bodyWords', '몸의 느낌 → 감정 후보');
+    const cards = await page.$$eval('[data-body-card]', (e) => e.map((x) => x.getAttribute('data-body-card')));
+    ok(JSON.stringify(cards) === JSON.stringify(bpick), `[${width}px] [규칙 11] 고른 몸의 느낌마다 감정 후보 묶음 (${cards.join(', ')})`);
+    const BF = {};
+    bodyAp.parts.forEach((pt) => pt.feelings.forEach((f) => { BF[f.id] = f; }));
+    for (const id of bpick) {
+      const got = await page.$$eval(`[data-body-card="${id}"] .chip`, (e) => e.map((x) => x.getAttribute('data-id')));
+      ok(JSON.stringify(got) === JSON.stringify(BF[id].emotions), `[${width}px] "${BF[id].label}"의 감정 후보 ${got.length}개`);
+    }
+    const a0 = BF[bpick[0]].emotions[0], a1 = BF[bpick[0]].emotions[1], b0 = BF[bpick[1]].emotions.find((x) => !BF[bpick[0]].emotions.includes(x)), c0 = BF[bpick[2]].emotions[0];
+    for (const [card, id] of [[bpick[0], a0], [bpick[0], a1], [bpick[1], b0], [bpick[2], c0]]) await page.click(`[data-body-card="${card}"] .chip[data-id="${id}"]`);
+    ok((await h.count()) === 4, `[${width}px] [규칙 1] 몸의 느낌 감정 후보에서 개수 제한 없이 4개 체크`);
+    const both = BF[bpick[0]].emotions.find((x) => BF[bpick[1]].emotions.includes(x));
+    if (both) {
+      await page.click(`[data-body-card="${bpick[1]}"] .chip[data-id="${both}"]`);
+      const on = await page.$$eval(`[data-body-card] .chip[data-id="${both}"]`, (e) => e.map((x) => x.getAttribute('aria-pressed')));
+      ok(on.length >= 2 && on.every((x) => x === 'true'), `[${width}px] 두 느낌에 함께 나온 감정(${EMO[both].word})은 한쪽에서 고르면 양쪽에 ✓`);
+      ok((await page.$$('[data-testid="pick-note"]')).length === 1, `[${width}px] 방금 고른 감정의 뜻은 한 번만 나옴`);
+      await page.click(`[data-body-card="${bpick[1]}"] .chip[data-id="${both}"]`);
+    }
+    await h.snap('body-words');
+    await page.click('[data-testid="nav-back"]');
+    await h.expect('approach', '감정 후보 → 몸의 느낌');
+    const kept = await page.$$eval('[data-body][aria-pressed="true"]', (e) => e.length);
+    ok(kept === 3 && (await h.count()) === 4, `[${width}px] [규칙 6] 돌아와도 고른 몸의 느낌 3개·감정 4개가 남아 있음`);
+    await page.click('[data-testid="nav-next"]');
+    await h.expect('bodyWords', '몸의 느낌 → 감정 후보 (다시)');
+    await page.click('[data-testid="nav-next"]');
+    await h.expect('intensity', '몸의 느낌 → 강도');
+    ok((await page.$$('.int-block')).length === 4, `[${width}px] 몸의 느낌으로 고른 감정 4개가 강도 화면에`);
+    await page.click('.topbar .top-btn >> nth=1');
+  }
+
   /* 2-9. 잘 모르겠어요 → 몸 느낌 → … → 이름 붙이기 어려운 감정 */
   await newGame(page, h, '그냥 오늘 하루가 이상했다.');
   await page.click('[data-testid="not-sure"]');
@@ -587,7 +671,6 @@ async function runForWidth(browser, base, width, D) {
   for (let k = 0; k < 4; k++) {
     await h.expect('approach', `5번 경로 ${k + 1}`);
     ok((await page.getAttribute('#app > section', 'data-approach')) === order[k], `[${width}px] 경로 ${k + 1}: ${order[k]}`);
-    if (k === 0) await h.snap('approach');
     await h.opt(5);
   }
   await h.expect('unnamed', '이름 붙이기 어려운 감정');

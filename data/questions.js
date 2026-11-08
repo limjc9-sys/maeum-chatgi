@@ -54,14 +54,20 @@ window.MAEUM_DATA.text = {
   searchWay: '낱말로 찾기',
   searchWayHint: '떠오르는 감정 낱말을 적어서 찾아요',
   thoughtWay: '상대가 나에게 한 일로 찾기',
-  thoughtWayHint: '"무시당했다", "배신당했다"처럼 상대가 한 일이 먼저 떠오를 때',
-  thoughtTitle: '상대가 나에게 한 일 가운데 떠오르는 말을 누르세요',
-  thoughtGuide: '"무시당했다", "버림받았다" 같은 말은 감정이 아니라 "상대가 나에게 이렇게 했다"는 생각이에요. 그 생각 밑에 있는 감정을 함께 찾아요. 여섯 묶음 가운데 가까운 것을 보고, 말을 누르세요.',
-  thoughtSearchHint: '상대가 나에게 한 일에 대한 생각이에요. 누르면 그 밑의 감정을 찾아요.',
-  thoughtFeelings: '이 생각 밑에는 이런 감정이 있었을 수 있어요. 맞는 것을 모두 누르세요.',
+  thoughtWayHint: '"무시당했다", "내 말을 끊었다"처럼 상대가 한 일이 먼저 떠오를 때',
+  thoughtTitle: '상대가 나에게 한 일 가운데 떠오르는 말을 모두 누르세요',
+  thoughtGuide: '"무시당했다", "버림받았다" 같은 말은 감정이 아니라 "상대가 나에게 이렇게 했다"는 생각이에요. 묶음마다 떠오르는 생각과 있었던 일이 있어요. 맞는 말을 모두 누르고 "다음"을 누르면, 그 밑에 있을 수 있는 감정을 한꺼번에 보여 드려요.',
+  thoughtWordsLabel: '떠오르는 생각',
+  thoughtActsLabel: '있었던 일',
+  thoughtPicked: '고른 말 {글}개',
+  thoughtSearchHint: '상대가 나에게 한 일에 대한 생각이에요. 누르면 이 말을 골라 둔 채로 이어져요.',
+  thoughtFeelTitle: '고른 일 밑에는 이런 감정이 있었을 수 있어요',
+  thoughtFeelGuide: '고른 말이 여럿 가리키는 감정부터 보여 드려요. 경향일 뿐 정답은 아니에요.',
+  thoughtFeelings: '맞는 것 같은 감정을 모두 누르세요.',
   thoughtNeeds: '이런 욕구가 중요했을 수 있어요. 욕구 단계에서 먼저 보여 드려요.',
   notSure: '잘 모르겠어요',
-  notSureHint: '몸의 느낌, 하고 싶었던 행동으로 찾아요',
+  notSureHint: '몸의 느낌(가슴·배·머리…)부터 차례로 물어봐요',
+  bodyPicked: '고른 몸의 느낌 {글}개',
   pickTitle: '고른 감정 {글}개',
   pickEmpty: '아직 고른 감정이 없어요. 낱말을 눌러 체크하세요.',
   pickNext: '다음 →',
@@ -203,7 +209,7 @@ window.MAEUM_DATA.guide = {
   sections: [
     { icon: '🧭', title: '이 앱은', body: '오늘 있었던 일에서 내 감정의 이름을 찾고, 그 감정 밑에 있는 욕구를 살펴보는 도구예요. 진단이나 검사가 아니에요. 정답도 없어요.' },
     { icon: '①', title: '있었던 일 적기', body: '1~3줄로 적어요. 적지 않고 시작해도 돼요.' },
-    { icon: '②', title: '감정 고르기', body: '세 방법은 위에서 아래로 서로 돕는 차례예요. ① 기분 4칸으로 찾기: 먼저 그때 기분과 가장 가까운 칸(노랑·초록·빨강·파랑)을 눌러 펼쳐요. ② 핵심 감정으로 찾기: 많은 사람이 자주 느끼는 6개(수치심·죄책감·분노·두려움·상실감·슬픔)가 바로 떠오르면 눌러요. ③ 다른 방법으로 찾기: ①·②에서 찾기 어려우면 낱말을 적어 찾거나, "무시당했다"처럼 상대가 나에게 한 일로 찾거나, "잘 모르겠어요"(몸 느낌·행동으로 찾기)를 써요. 어느 방법으로 고른 감정이든 위쪽에 함께 모이고, 몇 개를 골라도 괜찮아요. 누르면 뜻이 나오고, 다시 누르면 풀려요.' },
+    { icon: '②', title: '감정 고르기', body: '세 방법은 위에서 아래로 서로 돕는 차례예요. ① 기분 4칸으로 찾기: 먼저 그때 기분과 가장 가까운 칸(노랑·초록·빨강·파랑)을 눌러 펼쳐요. ② 핵심 감정으로 찾기: 많은 사람이 자주 느끼는 6개(수치심·죄책감·분노·두려움·상실감·슬픔)가 바로 떠오르면 눌러요. ③ 다른 방법으로 찾기: ①·②에서 찾기 어려우면 낱말을 적어 찾거나, "무시당했다", "내 말을 끊었다"처럼 상대가 나에게 한 일로 찾거나(여러 개 고르면 그 밑의 감정이 한꺼번에 나와요), "잘 모르겠어요"를 써요. "잘 모르겠어요"는 먼저 몸의 곳(머리·가슴·배 등)별 느낌을 여러 개 고르게 하고, 고른 느낌마다 이어질 수 있는 감정을 보여 줘요. 그다음은 하고 싶었던 행동·바랐던 것·옛 경험 차례예요. 어느 방법으로 고른 감정이든 위쪽에 함께 모이고, 몇 개를 골라도 괜찮아요. 누르면 뜻이 나오고, 다시 누르면 풀려요.' },
     { icon: '③', title: '강도', body: '고른 감정마다 1~10 가운데 크기를 골라요. 한 화면에 모두 나와요. 잘못 고른 것 같은 감정은 "빼기", 잘 모르겠는 감정은 "보류"를 누르세요. 보류한 감정은 강도 없이 마음 카드에 따로 적히고, 둘 다 "되살리기"로 되돌릴 수 있어요.' },
     { icon: '④', title: '원인', body: '그 마음이 무엇 때문에 생겼는지 가장 가까운 것 하나를 누르고 "다음"을 눌러요.' },
     { icon: '⑤', title: '욕구 고르기', body: '감정과 같은 차례예요. 1. 고른 감정과 함께 흔히 보이는 욕구가 먼저 나와요(경향일 뿐 정답은 아니에요). 2. 욕구 14범주를 펼쳐 더 찾아요. 3. 낱말로 찾을 수도 있어요. 맞는 것 같은 욕구는 몇 개든 모두 누르세요. 고르지 않고 "카드 만들기"를 눌러도 돼요.' },
@@ -316,6 +322,7 @@ window.MAEUM_DATA.causes = [
   감정 고르기 화면의 "잘 모르겠어요"를 누르면 시작하는 질문 방법.
   각 화면의 5번 "이 중엔 없어요"를 누를 때마다 차례대로 바뀌어요
   1번째: 몸 감각 → 2번째: 하고 싶었던 행동 → 3번째: 반대로(욕구부터) → 4번째: 비슷한 옛 경험
+  1번째(몸 감각)는 장면 하나가 아니라 몸의 곳별 느낌(parts)을 여러 개 골라요. 2~4번째는 장면(options) 하나를 골라요.
   그다음에도 5번을 누르면 "지금은 이름 붙이기 어려운 감정"으로 저장돼요.
   emotions 안의 이름표는 emotions.js의 id예요.
 */
@@ -324,12 +331,66 @@ window.MAEUM_DATA.approaches = [
     key: 'body',
     intro: '좋아요. 이번에는 몸에게 물어볼게요.',
     question: '그 일이 있던 순간, 몸은 어땠나요?',
+    guide: '몸의 곳마다 느낌이 있어요. 그때 느낀 것을 모두 누르고 "다음"을 누르세요. 몇 개를 골라도 괜찮아요.',
     wordsQuestion: '그 몸의 느낌에 이름을 붙인다면 무엇에 가까울까요?',
-    options: [
-      { label: '가슴이 두근거리고 몸이 가벼웠어요', emotions: ['joyH1', 'joyH5', 'joyH4', 'joy01'] },
-      { label: '목이 메고 가슴이 텅 빈 것 같았어요', emotions: ['sadH5', 'sadH6', 'sad02', 'sad32'] },
-      { label: '얼굴이 뜨겁고 주먹에 힘이 들어갔어요', emotions: ['angH4', 'angH3', 'angH6', 'ang14'] },
-      { label: '배가 아프고 몸이 굳었어요', emotions: ['fearH5', 'fearH2', 'fearH6', 'fear09'] }
+    wordsGuide: '고른 몸의 느낌마다 이어질 수 있는 감정이에요. 경향일 뿐 정답은 아니에요. 맞는 것 같은 감정을 모두 누르세요.',
+    /*
+      몸의 곳(parts)과 느낌(feelings). 느낌마다 이어질 수 있는 감정 낱말 id(emotions.js)를 적어요.
+      느낌-감정 연결은 작성자 추정이에요. 한 느낌이 서로 다른 감정으로 이어질 수 있어요(예: 다리에 힘이 풀림 → 안심됨·무서움).
+      id는 기록 중에 고른 것을 기억하는 데 써요. 바꾸지 마세요.
+    */
+    parts: [
+      { id: 'head', label: '머리·얼굴', feelings: [
+        { id: 'b-face-hot', label: '얼굴이 화끈거렸어요', emotions: ['fear13', 'fear14', 'ang29', 'fear23', 'ang06'] },
+        { id: 'b-head-ache', label: '머리가 지끈거렸어요', emotions: ['sad54', 'ang01', 'fear10', 'sad53'] },
+        { id: 'b-head-blank', label: '머리가 하얘지고 멍했어요', emotions: ['fearH2', 'blu13', 'fear33', 'fearH1', 'fear27'] },
+        { id: 'b-tears', label: '눈물이 핑 돌았어요', emotions: ['sad17', 'sad41', 'sad01', 'ang05', 'joy16'] },
+        { id: 'b-smile', label: '얼굴이 펴지고 웃음이 났어요', emotions: ['joy28', 'joy33', 'joy15', 'joyH2'] },
+        { id: 'b-teeth', label: '이를 꽉 물었어요', emotions: ['ang06', 'ang29', 'ang05', 'fear11'] },
+        { id: 'b-eyes-heavy', label: '눈꺼풀이 무거웠어요', emotions: ['sad53', 'blu19', 'sad28', 'sad13'] }
+      ] },
+      { id: 'chest', label: '목·가슴', feelings: [
+        { id: 'b-chest-pound', label: '가슴이 두근거렸어요', emotions: ['joy02', 'joyH5', 'fear09', 'fear31', 'fear18'] },
+        { id: 'b-chest-tight', label: '가슴이 답답하고 꽉 막혔어요', emotions: ['ang02', 'red17', 'ang05', 'sad57'] },
+        { id: 'b-chest-empty', label: '가슴이 텅 빈 것 같았어요', emotions: ['sadH1', 'sadH6', 'sad02', 'sad11'] },
+        { id: 'b-chest-drop', label: '가슴이 쿵 내려앉았어요', emotions: ['fear25', 'fear24', 'fear33', 'fear07'] },
+        { id: 'b-chest-ache', label: '가슴이 아리고 아팠어요', emotions: ['sad34', 'blu04', 'sad33', 'sad09'] },
+        { id: 'b-chest-warm', label: '가슴이 따뜻하고 벅찼어요', emotions: ['joyH1', 'joy16', 'joy13', 'joy14'] },
+        { id: 'b-throat', label: '목이 메었어요', emotions: ['blu03', 'sad32', 'sad17', 'sad30', 'joy16'] },
+        { id: 'b-breath', label: '숨이 가쁘고 얕아졌어요', emotions: ['fear31', 'fear02', 'fear05', 'fear42'] }
+      ] },
+      { id: 'belly', label: '배·속', feelings: [
+        { id: 'b-belly-ache', label: '배가 아프거나 속이 쓰렸어요', emotions: ['fear01', 'fear09', 'fear10', 'sad24', 'sad27'] },
+        { id: 'b-belly-sick', label: '속이 울렁거리고 메스꺼웠어요', emotions: ['ang20', 'ang16', 'fear31', 'fear09'] },
+        { id: 'b-belly-boil', label: '속이 부글부글 끓었어요', emotions: ['ang13', 'ang29', 'ang01', 'red02'] },
+        { id: 'b-belly-heavy', label: '속이 꽉 얹힌 것 같았어요', emotions: ['fearH5', 'fearH3', 'sad57', 'fear01'] },
+        { id: 'b-belly-open', label: '속이 뻥 뚫린 것 같았어요', emotions: ['joyH3', 'joy36', 'joy06', 'grn09'] },
+        { id: 'b-no-appetite', label: '입맛이 없었어요', emotions: ['sad15', 'sad30', 'fear01', 'sad14'] }
+      ] },
+      { id: 'back', label: '어깨·등', feelings: [
+        { id: 'b-shoulder-heavy', label: '어깨가 무겁고 뻐근했어요', emotions: ['fear10', 'fear11', 'sad13', 'sad57'] },
+        { id: 'b-shoulder-shrink', label: '어깨가 움츠러들었어요', emotions: ['fear15', 'fear16', 'fear13', 'fear28'] },
+        { id: 'b-shoulder-up', label: '어깨가 으쓱하고 허리가 펴졌어요', emotions: ['joy10', 'joy11', 'joy09', 'joy12'] },
+        { id: 'b-neck-stiff', label: '뒷목이 뻣뻣하게 당겼어요', emotions: ['ang29', 'ang17', 'ang13', 'fear09'] },
+        { id: 'b-back-chill', label: '등골이 오싹했어요', emotions: ['fear08', 'fear05', 'red08', 'red12'] }
+      ] },
+      { id: 'limbs', label: '팔·다리·손', feelings: [
+        { id: 'b-fist', label: '주먹에 힘이 들어갔어요', emotions: ['ang29', 'ang19', 'ang06', 'ang05'] },
+        { id: 'b-hands-shake', label: '손이 떨리고 땀이 났어요', emotions: ['fear12', 'fear09', 'red10', 'fear05'] },
+        { id: 'b-hands-cold', label: '손발이 차가워졌어요', emotions: ['fear07', 'fear09', 'fear06', 'fear27'] },
+        { id: 'b-legs-weak', label: '다리에 힘이 풀렸어요', emotions: ['blu20', 'sad06', 'joy07', 'fear05'] },
+        { id: 'b-restless', label: '가만히 있을 수가 없었어요', emotions: ['fear04', 'fear02', 'red06', 'joy01'] },
+        { id: 'b-jump', label: '몸이 들썩이고 뛰고 싶었어요', emotions: ['joy01', 'joy03', 'joy35', 'joy39'] }
+      ] },
+      { id: 'whole', label: '온몸', feelings: [
+        { id: 'b-freeze', label: '몸이 굳고 얼어붙었어요', emotions: ['fear27', 'fear06', 'fear09', 'fearH2'] },
+        { id: 'b-drained', label: '온몸에 힘이 빠지고 축 처졌어요', emotions: ['sad14', 'sad13', 'sad53', 'sad15', 'sad18'] },
+        { id: 'b-light', label: '몸이 가볍고 개운했어요', emotions: ['joy06', 'joyH4', 'grn09', 'joy28'] },
+        { id: 'b-relaxed', label: '몸이 노곤하게 풀렸어요', emotions: ['joy05', 'grn06', 'joy41', 'joy44', 'blu18'] },
+        { id: 'b-goosebumps', label: '온몸에 소름이 돋았어요', emotions: ['fear08', 'joy16', 'joy04', 'ang21'] },
+        { id: 'b-hot', label: '몸이 뜨겁고 열이 올랐어요', emotions: ['ang29', 'ang30', 'red01', 'joy03', 'fear13'] },
+        { id: 'b-numb', label: '몸에 아무 느낌이 없었어요', emotions: ['blu12', 'blu13', 'sad49', 'sad06'] }
+      ] }
     ]
   },
   {
