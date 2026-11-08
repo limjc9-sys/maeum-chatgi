@@ -408,13 +408,18 @@
     d.records = d.records.filter(function (r) { return r.id !== id; });
     save(d);
   }
+  /* "잘 모르겠어요"·"이 중엔 없어요": 다음 질문 방법으로 가요.
+     세는 값(five)은 화면을 옮긴 뒤에 바꿔요. 그래야 이전으로 돌아왔을 때 앞 화면의 값이 그대로 남아요 */
   function emotionFive() {
-    draft.five = (draft.five || 0) + 1;
-    if (draft.five <= D.approaches.length) {
-      go('approach', { index: draft.five - 1 });
-    } else {
-      go('unnamed', {});
-    }
+    var n = (draft.five || 0) + 1;
+    if (n <= D.approaches.length) go('approach', { index: n - 1 });
+    else go('unnamed', {});
+    draft.five = n;
+  }
+  /* "몸의 느낌으로 찾기": 몸의 느낌 화면으로 바로 가요. 거기서 "이 중엔 없어요"를 누르면 다음 방법(행동)으로 이어져요 */
+  function bodyOpen() {
+    go('approach', { index: 0 });
+    draft.five = 1;
   }
 
   /* 감정 고르기 — 개수 제한이 없어요. 한 칸·한 범주에서만 고르게 하지 않아요 (docs/design-rules.md 1번)
@@ -870,6 +875,7 @@
         el('div', { class: 'ways' },
           wayBtn('🔍', T.searchWay || '낱말로 찾기', T.searchWayHint, function () { go('search', {}); }, 'search-open'),
           wayBtn('💬', T.thoughtWay || '상대가 나에게 한 일로 찾기', T.thoughtWayHint, function () { go('thought', {}); }, 'thought-open'),
+          wayBtn('💓', T.bodyWay || '몸의 느낌으로 찾기', T.bodyWayHint, bodyOpen, 'body-open'),
           wayBtn('🤔', T.notSure, T.notSureHint, emotionFive, 'not-sure'))
       ),
       pickNav()
@@ -1097,13 +1103,13 @@
       extra: function (v) {
         if (!squash(v)) return [];
         var items = (D.thoughtWords || []).map(function (t, i) { return { word: t.word.replace(/\s*\(.*\)\s*/g, ''), desc: '', i: i }; });
-        return searchList(items, v).slice(0, 2).map(function (x) {
+        return bodyLinks(v).concat(searchList(items, v).slice(0, 2).map(function (x) {
           var t = D.thoughtWords[x.i];
           return el('button', {
             class: 'search-item search-thought', type: 'button', 'data-testid': 'search-thought', 'data-thought': String(x.i),
             onclick: function () { toggleThought(x.i, true); go('thought', {}); }
           }, el('span', { class: 'opt-body' }, el('span', { class: 'opt-label' }, '💬 “' + t.word + '” →'), el('span', { class: 'opt-hint' }, T.thoughtSearchHint || '')));
-        });
+        }));
       },
       item: function (w) {
         var fam = famOf(w);
@@ -1128,30 +1134,77 @@
     if (at === -1) draft.bodyPicks.push(id); else draft.bodyPicks.splice(at, 1);
     refresh();
   }
+  function addBody(id) {
+    if (!draft.bodyPicks) draft.bodyPicks = [];
+    if (draft.bodyPicks.indexOf(id) === -1) draft.bodyPicks.push(id);
+  }
+  /* 몸의 곳 6묶음은 접어 두고, 누르면 그 곳의 느낌이 펼쳐져요(여러 곳을 함께 펼칠 수 있어요).
+     몸 확인은 짧고 중립적으로 — docs/body-reactions.md 5-6(5) */
   function bodyScreen(ap, p) {
     var bp = bodyPicks();
-    return screen('approach', { 'data-approach': ap.key }, topBar(), progress(), pickBar(),
+    var open = draft.openParts || [];
+    return screen('approach', { 'data-approach': ap.key }, topBar(), progress(), pickBar(), situationChip(),
       heading(ap.question, ap.intro),
       el('p', { class: 'guide' }, ap.guide || ''),
-      ap.parts.map(function (pt, gi) {
-        return el('section', { class: 'tgroup bgroup', 'data-bpart': pt.id },
-          el('h2', { class: 'tgroup-title' }, el('span', { class: 'tgroup-num', 'aria-hidden': 'true' }, String(gi + 1)), el('span', null, pt.label)),
-          el('div', { class: 'chips' }, pt.feelings.map(function (f) {
+      el('div', { class: 'bpart-list' }, ap.parts.map(function (pt) {
+        var isOpen = open.indexOf(pt.id) !== -1;
+        var n = pt.feelings.filter(function (f) { return bp.indexOf(f.id) !== -1; }).length;
+        return el('section', { class: 'bpart' + (isOpen ? ' open' : ''), 'data-bpart': pt.id },
+          el('button', {
+            class: 'bpart-head', type: 'button', 'aria-expanded': String(isOpen), 'data-testid': 'bpart-' + pt.id,
+            onclick: function () {
+              var o = (draft.openParts || []).slice();
+              var at = o.indexOf(pt.id);
+              if (at === -1) o.push(pt.id); else o.splice(at, 1);
+              draft.openParts = o;
+              refresh();
+            }
+          },
+            el('span', { class: 'bpart-body' }, el('span', { class: 'bpart-name' }, pt.label), el('span', { class: 'bpart-where' }, pt.where || '')),
+            n ? el('span', { class: 'bpart-count' }, '✓' + n) : null,
+            el('span', { class: 'toggle-mark', 'aria-hidden': 'true' }, isOpen ? '−' : '+')),
+          isOpen ? el('div', { class: 'chips bpart-chips' }, pt.feelings.map(function (f) {
             var on = bp.indexOf(f.id) !== -1;
             return el('button', { class: 'chip chip-body' + (on ? ' on' : ''), type: 'button', 'data-body': f.id, 'aria-pressed': String(on), onclick: function () { toggleBody(f.id); } }, (on ? '✓ ' : '') + f.label);
-          })));
-      }),
+          })) : null);
+      })),
       bp.length ? el('p', { class: 'sel-count', 'data-testid': 'body-count' }, '✓ ' + fill(T.bodyPicked || '고른 몸의 느낌 {글}개', { '글': String(bp.length) })) : null,
       el('div', { class: 'opts' }, fiveOption()),
       navBar({ next: { onClick: function () { go('bodyWords', { index: p.index }); }, disabled: !bp.length } })
     );
   }
+  /* 낱말로 찾기 → 몸의 느낌. "가슴이 답답해", "속이 타"처럼 몸 관용 표현을 적으면 이어 줘요 (docs/body-reactions.md 5-6(3)) */
+  var BODY_IDIOMS = null;
+  function bodyLinks(v) {
+    var q = squash(v);
+    if (q.length < 2) return [];
+    if (!BODY_IDIOMS) {
+      BODY_IDIOMS = [];
+      Object.keys(BODY).forEach(function (id) {
+        (BODY[id].idioms || []).forEach(function (t) { BODY_IDIOMS.push({ id: id, core: squash(t).replace(/다$/, '') }); });
+      });
+    }
+    var found = [];
+    BODY_IDIOMS.forEach(function (x) {
+      var c = x.core, c1 = c.slice(0, -1);
+      var hit = q.indexOf(c) === 0 || (q.length >= 3 && c.indexOf(q) === 0) || (c1.length >= 3 && q.indexOf(c1) === 0);
+      if (hit && found.indexOf(x.id) === -1) found.push(x.id);
+    });
+    return found.slice(0, 3).map(function (id) {
+      return el('button', {
+        class: 'search-item search-body', type: 'button', 'data-testid': 'search-body', 'data-body': id,
+        onclick: function () { addBody(id); go('bodyWords', { index: 0 }); }
+      }, el('span', { class: 'opt-body' }, el('span', { class: 'opt-label' }, '💓 “' + BODY[id].label + '” →'), el('span', { class: 'opt-hint' }, T.bodySearchHint || '')));
+    });
+  }
   /* 고른 몸의 느낌마다 이어질 수 있는 감정 낱말 (개수 제한 없이 체크) */
   screens.bodyWords = function (p) {
     var ap = D.approaches[p.index || 0];
-    return screen('bodyWords', null, topBar(), progress(), pickBar(),
+    var care = bodyPicks().some(function (id) { return BODY[id].care; });
+    return screen('bodyWords', null, topBar(), progress(), pickBar(), situationChip(),
       heading(ap.wordsQuestion),
       el('p', { class: 'guide' }, ap.wordsGuide || T.wordsGuide || ''),
+      care && ap.careNote ? el('p', { class: 'care-note', 'data-testid': 'care-note' }, 'ⓘ ' + ap.careNote) : null,
       (function () {
         var noted = false; /* 같은 감정이 여러 느낌에 나와도 뜻은 한 번만 보여 줘요 */
         return bodyPicks().map(function (id) {
@@ -1161,6 +1214,7 @@
           if (note) noted = true;
           return el('div', { class: 'thought-card body-card', 'data-body-card': id },
             el('p', { class: 'thought-head' }, '“' + f.label + '”'),
+            f.ask ? el('p', { class: 'body-ask', 'data-testid': 'body-ask' }, '🤔 ' + f.ask) : null,
             el('div', { class: 'chips' }, ids.map(function (eid) { return chip(eid, ap.key); })),
             note);
         });

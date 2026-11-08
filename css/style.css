@@ -720,3 +720,22 @@ body.no-scroll { overflow: hidden; }
 .body-card { background: #EEF8F6; }
 .body-card .thought-head { color: #0B6B62; font-size: 19px; }
 [data-testid="body-count"] { color: #0B6B62; }
+/* 몸의 느낌: 몸의 곳 6묶음은 접어 두고 누르면 펼쳐요 (docs/body-reactions.md 5-6(5) 짧게) */
+.bpart-list { display: flex; flex-direction: column; gap: 8px; }
+.bpart { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); border: 1.5px solid transparent; }
+.bpart.open { border-color: #9FD9D2; }
+.bpart-head {
+  width: 100%; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  font: inherit; color: var(--ink); text-align: left; background: none; border: 0; cursor: pointer;
+}
+.bpart-body { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bpart-name { font-size: 18px; font-weight: 800; }
+.bpart-where { font-size: 16px; color: var(--ink-soft); }
+.bpart-count { font-size: 16px; font-weight: 800; color: #0B6B62; background: #DDF3F0; border-radius: 12px; padding: 2px 8px; }
+.bpart-chips { padding: 0 14px 14px; }
+.body-ask { font-size: 16px; line-height: 1.5; color: #0B6B62; font-weight: 700; }
+.care-note {
+  font-size: 16px; line-height: 1.5; color: var(--ink);
+  background: #FFF6E5; border-left: 4px solid #E0A100; border-radius: 10px; padding: 8px 12px;
+}
+.search-body { --accent: #0E8A7E; background: #EEF8F6; }

@@ -66,7 +66,10 @@ window.MAEUM_DATA.text = {
   thoughtFeelings: '맞는 것 같은 감정을 모두 누르세요.',
   thoughtNeeds: '이런 욕구가 중요했을 수 있어요. 욕구 단계에서 먼저 보여 드려요.',
   notSure: '잘 모르겠어요',
-  notSureHint: '몸의 느낌(가슴·배·머리…)부터 차례로 물어봐요',
+  notSureHint: '몸의 느낌, 하고 싶었던 행동, 바랐던 것을 차례로 물어봐요',
+  bodyWay: '몸의 느낌으로 찾기',
+  bodyWayHint: '"가슴이 답답했다", "얼굴이 화끈거렸다"처럼 몸이 먼저 느껴질 때',
+  bodySearchHint: '몸의 느낌이에요. 누르면 이 느낌에 이어지는 감정을 보여 드려요.',
   bodyPicked: '고른 몸의 느낌 {글}개',
   pickTitle: '고른 감정 {글}개',
   pickEmpty: '아직 고른 감정이 없어요. 낱말을 눌러 체크하세요.',
@@ -209,7 +212,7 @@ window.MAEUM_DATA.guide = {
   sections: [
     { icon: '🧭', title: '이 앱은', body: '오늘 있었던 일에서 내 감정의 이름을 찾고, 그 감정 밑에 있는 욕구를 살펴보는 도구예요. 진단이나 검사가 아니에요. 정답도 없어요.' },
     { icon: '①', title: '있었던 일 적기', body: '1~3줄로 적어요. 적지 않고 시작해도 돼요.' },
-    { icon: '②', title: '감정 고르기', body: '세 방법은 위에서 아래로 서로 돕는 차례예요. ① 기분 4칸으로 찾기: 먼저 그때 기분과 가장 가까운 칸(노랑·초록·빨강·파랑)을 눌러 펼쳐요. ② 핵심 감정으로 찾기: 많은 사람이 자주 느끼는 6개(수치심·죄책감·분노·두려움·상실감·슬픔)가 바로 떠오르면 눌러요. ③ 다른 방법으로 찾기: ①·②에서 찾기 어려우면 낱말을 적어 찾거나, "무시당했다", "내 말을 끊었다"처럼 상대가 나에게 한 일로 찾거나(여러 개 고르면 그 밑의 감정이 한꺼번에 나와요), "잘 모르겠어요"를 써요. "잘 모르겠어요"는 먼저 몸의 곳(머리·가슴·배 등)별 느낌을 여러 개 고르게 하고, 고른 느낌마다 이어질 수 있는 감정을 보여 줘요. 그다음은 하고 싶었던 행동·바랐던 것·옛 경험 차례예요. 어느 방법으로 고른 감정이든 위쪽에 함께 모이고, 몇 개를 골라도 괜찮아요. 누르면 뜻이 나오고, 다시 누르면 풀려요.' },
+    { icon: '②', title: '감정 고르기', body: '세 방법은 위에서 아래로 서로 돕는 차례예요. ① 기분 4칸으로 찾기: 먼저 그때 기분과 가장 가까운 칸(노랑·초록·빨강·파랑)을 눌러 펼쳐요. ② 핵심 감정으로 찾기: 많은 사람이 자주 느끼는 6개(수치심·죄책감·분노·두려움·상실감·슬픔)가 바로 떠오르면 눌러요. ③ 다른 방법으로 찾기: ①·②에서 찾기 어려우면 낱말을 적어 찾거나, "무시당했다", "내 말을 끊었다"처럼 상대가 나에게 한 일로 찾거나(여러 개 고르면 그 밑의 감정이 한꺼번에 나와요), "가슴이 답답했다"처럼 몸의 느낌으로 찾거나, "잘 모르겠어요"를 써요. 몸의 느낌으로 찾기는 먼저 느껴진 곳(머리·가슴·배 등)을 눌러 느낌을 여러 개 고르면, 고른 느낌마다 이어질 수 있는 감정을 보여 줘요. 같은 느낌도 상황에 따라 다른 감정일 수 있어서, 그 일을 떠올리며 골라요. 낱말로 찾기에 "속이 타요"처럼 적어도 이어져요. "잘 모르겠어요"는 몸의 느낌 → 하고 싶었던 행동 → 바랐던 것 → 옛 경험 차례로 물어봐요. 어느 방법으로 고른 감정이든 위쪽에 함께 모이고, 몇 개를 골라도 괜찮아요. 누르면 뜻이 나오고, 다시 누르면 풀려요.' },
     { icon: '③', title: '강도', body: '고른 감정마다 1~10 가운데 크기를 골라요. 한 화면에 모두 나와요. 잘못 고른 것 같은 감정은 "빼기", 잘 모르겠는 감정은 "보류"를 누르세요. 보류한 감정은 강도 없이 마음 카드에 따로 적히고, 둘 다 "되살리기"로 되돌릴 수 있어요.' },
     { icon: '④', title: '원인', body: '그 마음이 무엇 때문에 생겼는지 가장 가까운 것 하나를 누르고 "다음"을 눌러요.' },
     { icon: '⑤', title: '욕구 고르기', body: '감정과 같은 차례예요. 1. 고른 감정과 함께 흔히 보이는 욕구가 먼저 나와요(경향일 뿐 정답은 아니에요). 2. 욕구 14범주를 펼쳐 더 찾아요. 3. 낱말로 찾을 수도 있어요. 맞는 것 같은 욕구는 몇 개든 모두 누르세요. 고르지 않고 "카드 만들기"를 눌러도 돼요.' },
@@ -298,6 +301,16 @@ window.MAEUM_DATA.guide = {
       '손선주·박미숙·박지은·손진훈 (2012). 한국어 감정표현단어의 추출과 범주화. 감성과학, 15(1), 105–120.',
       '홍영지·남예은·이윤형 (2016). 정서가, 각성가 및 구체성 평정을 통한 한국어 정서단어 목록 개발. 인지과학, 27(3), 377–406.'
     ] },
+    { group: '몸의 반응', items: [
+      'Nummenmaa, L., Glerean, E., Hari, R., & Hietanen, J. K. (2014). Bodily maps of emotions. PNAS, 111(2), 646–651.',
+      'Nummenmaa, L., Hari, R., Hietanen, J. K., & Glerean, E. (2018). Maps of subjective feelings. PNAS, 115(37), 9198–9203.',
+      'Jung, W. M., Ryu, Y., Lee, Y. S., Wallraven, C., & Chae, Y. (2017). Role of interoceptive accuracy in topographical changes in emotion-induced bodily sensations. PLoS ONE, 12(9), e0183211.',
+      '박소영·주은선 (2019). 한국적 정서표현의 특징에 관한 탐색적 연구. 한국심리학회지: 일반, 38(1), 25–52.',
+      'Craig, A. D. (2002). How do you feel? Interoception: the sense of the physiological condition of the body. Nature Reviews Neuroscience, 3, 655–666.',
+      'Ventura-Bort, C., Wendt, J., & Weymar, M. (2021). The role of interoceptive sensibility and emotional conceptualization for the experience of emotions. Frontiers in Psychology, 12, 712418.',
+      'Trevisan, D. A., Tsheringla, S., & McPartland, J. C. (2023). On the relation between interoceptive attention and health anxiety. Cogent Psychology.',
+      'Gendlin, E. T. (1981). Focusing. Bantam Books.'
+    ] },
     { group: '앱 설계·효과 연구', items: [
       'Chernev, A., Böckenholt, U., & Goodman, J. (2015). Choice overload: A conceptual review and meta-analysis. Journal of Consumer Psychology, 25(2), 333–358.',
       'Linardon, J., et al. (2019). The efficacy of app-supported smartphone interventions for mental health problems: a meta-analysis of randomized controlled trials. World Psychiatry, 18(3), 325–336.',
@@ -330,66 +343,152 @@ window.MAEUM_DATA.approaches = [
   {
     key: 'body',
     intro: '좋아요. 이번에는 몸에게 물어볼게요.',
-    question: '그 일이 있던 순간, 몸은 어땠나요?',
-    guide: '몸의 곳마다 느낌이 있어요. 그때 느낀 것을 모두 누르고 "다음"을 누르세요. 몇 개를 골라도 괜찮아요.',
+    question: '그 일이 있던 순간, 몸에서 가장 먼저 느껴진 곳은 어디였나요?',
+    guide: '곳을 누르면 느낌이 펼쳐져요. 맞는 느낌을 모두 누르고 "다음"을 누르세요. 다른 곳도 함께 골라도 돼요.',
     wordsQuestion: '그 몸의 느낌에 이름을 붙인다면 무엇에 가까울까요?',
-    wordsGuide: '고른 몸의 느낌마다 이어질 수 있는 감정이에요. 경향일 뿐 정답은 아니에요. 맞는 것 같은 감정을 모두 누르세요.',
+    wordsGuide: '고른 몸의 느낌마다 이어질 수 있는 감정이에요. 같은 느낌도 상황에 따라 다른 감정일 수 있어요. 그 일을 떠올리며 낱말을 몸의 느낌에 대 보고, 맞는 것 같은 감정을 모두 누르세요. 아니다 싶으면 다시 눌러 풀어요.',
+    careNote: '몸의 증상이 계속되거나 심하면 감정 탐색보다 진료가 먼저예요.',
     /*
-      몸의 곳(parts)과 느낌(feelings). 느낌마다 이어질 수 있는 감정 낱말 id(emotions.js)를 적어요.
-      느낌-감정 연결은 작성자 추정이에요. 한 느낌이 서로 다른 감정으로 이어질 수 있어요(예: 다리에 힘이 풀림 → 안심됨·무서움).
+      몸의 곳(parts)과 느낌(feelings) — docs/body-reactions.md(몸의 반응 보완 장)의 4-2 연결표·2-7 관용 표현을 따라 정리했어요.
+      - parts: 몸 그림의 12곳을 6묶음으로 모았어요(where = 묶음에 든 곳).
+      - emotions: 그 느낌에 이어질 수 있는 감정 낱말 id(emotions.js). 경향일 뿐 정답이 아니에요.
+      - src: 근거 표시 — N(Nummenmaa 외 2014·2018), P(박소영·주은선 2019), H(화병 임상진료지침), A(작성자 추정)
+      - idioms: 그 느낌을 말하는 한국어 관용 표현. 낱말로 찾기에 이렇게 적으면 이 느낌으로 이어 줘요.
+      - ask: 여러 감정에 걸치는 느낌에 붙이는 상황 질문(감정 후보를 좁히는 데 써요).
+      - care: true면 "진료가 먼저예요" 안내를 보여 줘요(가슴이 아림·숨이 가쁨·어지러움).
       id는 기록 중에 고른 것을 기억하는 데 써요. 바꾸지 마세요.
     */
     parts: [
-      { id: 'head', label: '머리·얼굴', feelings: [
-        { id: 'b-face-hot', label: '얼굴이 화끈거렸어요', emotions: ['fear13', 'fear14', 'ang29', 'fear23', 'ang06'] },
-        { id: 'b-head-ache', label: '머리가 지끈거렸어요', emotions: ['sad54', 'ang01', 'fear10', 'sad53'] },
-        { id: 'b-head-blank', label: '머리가 하얘지고 멍했어요', emotions: ['fearH2', 'blu13', 'fear33', 'fearH1', 'fear27'] },
-        { id: 'b-tears', label: '눈물이 핑 돌았어요', emotions: ['sad17', 'sad41', 'sad01', 'ang05', 'joy16'] },
-        { id: 'b-smile', label: '얼굴이 펴지고 웃음이 났어요', emotions: ['joy28', 'joy33', 'joy15', 'joyH2'] },
-        { id: 'b-teeth', label: '이를 꽉 물었어요', emotions: ['ang06', 'ang29', 'ang05', 'fear11'] },
-        { id: 'b-eyes-heavy', label: '눈꺼풀이 무거웠어요', emotions: ['sad53', 'blu19', 'sad28', 'sad13'] }
+      { id: 'head', label: '머리·얼굴', where: '머리 · 눈 · 얼굴 · 입 · 턱', feelings: [
+        { id: 'b-head-hot', label: '머리가 뜨겁고 터질 것 같았어요', emotions: ['ang29', 'ang19', 'ang01', 'red01'], src: 'N·P',
+          idioms: ['열이 나다', '불이 나다', '열 받다', '머리 뚜껑이 열리다', '피가 거꾸로 솟다', '혈압이 오르다', '눈에서 불이 나다', '눈이 뒤집히다', '핏대를 세우다'] },
+        { id: 'b-head-ache', label: '머리가 지끈거렸어요', emotions: ['sad54', 'ang01', 'fear10', 'sad53'], src: 'A',
+          idioms: ['골치가 아프다', '머리가 아프다'] },
+        { id: 'b-head-blank', label: '눈앞이 하얘지거나 캄캄해졌어요', emotions: ['fear24', 'fear33', 'fearH2', 'sad16', 'sad19'], src: 'P',
+          idioms: ['눈앞이 하얘지다', '머릿속이 하얘지다', '눈앞이 캄캄하다'],
+          ask: '갑자기 놀란 일이었나요, 앞이 막막한 일이었나요?' },
+        { id: 'b-eyes-wide', label: '눈이 휘둥그레지고 입이 떡 벌어졌어요', emotions: ['fear24', 'yel28', 'fear26', 'fear33'], src: 'P',
+          idioms: ['눈이 휘둥그레지다', '입이 떡 벌어지다', '어안이 벙벙하다'] },
+        { id: 'b-dizzy', label: '머리가 핑 돌고 어지러웠어요', emotions: ['fear33', 'fearH2', 'fear43', 'fear31'], src: 'A',
+          idioms: ['머리가 핑 돌다', '어지럽다'], care: true },
+        { id: 'b-face-hot', label: '얼굴이 화끈거리고 달아올랐어요', emotions: ['fear13', 'fear14', 'fear23', 'ang29', 'joy02'], src: 'P·A',
+          idioms: ['얼굴이 화끈거리다', '얼굴이 달아오르다', '귀까지 빨개지다', '낯이 뜨겁다', '얼굴이 빨개지다', '얼굴이 붉으락푸르락하다', '뒤통수가 따갑다'],
+          ask: '부끄러운 일이었나요, 화가 난 일이었나요, 마음이 설레는 일이었나요?' },
+        { id: 'b-brow', label: '미간이 찌푸려졌어요', emotions: ['angH2', 'ang16', 'ang04', 'ang01'], src: 'P',
+          idioms: ['미간이 찌푸려지다', '눈에 거슬리다', '눈엣가시 같다'] },
+        { id: 'b-tears', label: '눈시울이 뜨겁고 코끝이 찡했어요', emotions: ['sad30', 'sad17', 'joy16', 'ang05'], src: 'P',
+          idioms: ['눈시울이 붉어지다', '눈시울이 뜨거워지다', '코끝이 찡하다', '눈물이 핑 돌다'],
+          ask: '슬프거나 서러운 일이었나요, 마음이 크게 움직인 고마운 일이었나요?' },
+        { id: 'b-mouth-dry', label: '입이 바싹 마르고 마른침을 삼켰어요', emotions: ['fear09', 'fear31', 'fear07'], src: 'P',
+          idioms: ['입이 바싹 마르다', '마른침을 삼키다'] },
+        { id: 'b-teeth', label: '이를 악물었어요', emotions: ['ang06', 'ang29', 'ang05', 'ang31'], src: 'P',
+          idioms: ['이를 악물다', '이가 갈리다', '치가 떨리다'] },
+        { id: 'b-smile', label: '입꼬리가 올라가고 웃음이 났어요', emotions: ['joy28', 'joy33', 'joy15', 'joyH2'], src: 'P',
+          idioms: ['입이 귀에 걸리다', '입꼬리가 올라가다', '콧노래가 나오다', '눈이 반짝이다'] }
       ] },
-      { id: 'chest', label: '목·가슴', feelings: [
-        { id: 'b-chest-pound', label: '가슴이 두근거렸어요', emotions: ['joy02', 'joyH5', 'fear09', 'fear31', 'fear18'] },
-        { id: 'b-chest-tight', label: '가슴이 답답하고 꽉 막혔어요', emotions: ['ang02', 'red17', 'ang05', 'sad57'] },
-        { id: 'b-chest-empty', label: '가슴이 텅 빈 것 같았어요', emotions: ['sadH1', 'sadH6', 'sad02', 'sad11'] },
-        { id: 'b-chest-drop', label: '가슴이 쿵 내려앉았어요', emotions: ['fear25', 'fear24', 'fear33', 'fear07'] },
-        { id: 'b-chest-ache', label: '가슴이 아리고 아팠어요', emotions: ['sad34', 'blu04', 'sad33', 'sad09'] },
-        { id: 'b-chest-warm', label: '가슴이 따뜻하고 벅찼어요', emotions: ['joyH1', 'joy16', 'joy13', 'joy14'] },
-        { id: 'b-throat', label: '목이 메었어요', emotions: ['blu03', 'sad32', 'sad17', 'sad30', 'joy16'] },
-        { id: 'b-breath', label: '숨이 가쁘고 얕아졌어요', emotions: ['fear31', 'fear02', 'fear05', 'fear42'] }
+      { id: 'chest', label: '목·가슴', where: '목 · 목구멍 · 가슴 · 심장', feelings: [
+        { id: 'b-throat', label: '목이 메고 꽉 막혔어요', emotions: ['blu03', 'sad17', 'ang05', 'ang02', 'sad30'], src: 'P·H',
+          idioms: ['목이 메다', '목이 막히다', '한이 맺히다'] },
+        { id: 'b-chest-tight', label: '가슴이 답답하고 돌덩이를 얹은 것 같았어요', emotions: ['fear31', 'fear01', 'ang05', 'ang29', 'sad30', 'ang02'], src: 'N·P·H',
+          idioms: ['가슴이 답답하다', '가슴에 돌덩이를 얹은 듯하다', '숨통이 조여 오다', '숨이 막히다'],
+          ask: '걱정되는 일이었나요, 억울하거나 화나는 일이었나요, 슬픈 일이었나요?' },
+        { id: 'b-chest-rise', label: '가슴에서 뜨거운 것이 치밀어 올랐어요', emotions: ['ang29', 'ang05', 'ang06', 'red02'], src: 'P·H',
+          idioms: ['울화가 치밀다', '부아가 치밀다', '속에서 욱하다', '속에서 천불이 나다'] },
+        { id: 'b-chest-ache', label: '가슴이 아리고 미어졌어요', emotions: ['sad30', 'sad33', 'sad11', 'sad20', 'sad34'], src: 'P',
+          idioms: ['가슴이 미어지다', '가슴이 찢어지다', '가슴이 아리다', '가슴이 시리다', '가슴이 먹먹하다', '억장이 무너지다', '가슴이 무너지다', '애간장이 녹다'], care: true },
+        { id: 'b-chest-prick', label: '가슴이 뜨끔하고 콕콕 찔렸어요', emotions: ['sad23', 'sad20', 'sadH2', 'sad22'], src: 'A',
+          idioms: ['가슴이 뜨끔하다', '양심이 찔리다', '가슴이 콕콕 찔리다', '마음에 걸리다', '눈에 밟히다', '볼 낯이 없다', '면목이 없다', '가슴을 치다', '발 뻗고 못 자다', '머리를 쥐어박고 싶다'] },
+        { id: 'b-chest-warm', label: '가슴이 따뜻하고 뭉클했어요', emotions: ['joy13', 'grn18', 'joy16', 'joy14'], src: 'N·P',
+          idioms: ['가슴이 따뜻해지다', '가슴이 뭉클하다', '마음이 녹다'] },
+        { id: 'b-chest-full', label: '가슴이 벅차고 부풀어 올랐어요', emotions: ['joyH1', 'joy28', 'joy09', 'yel03'], src: 'P',
+          idioms: ['가슴이 벅차다'] },
+        { id: 'b-chest-empty', label: '가슴이 텅 비고 구멍이 난 것 같았어요', emotions: ['sadH6', 'sad02', 'sad06', 'sadH1'], src: 'P',
+          idioms: ['가슴에 구멍이 뚫리다', '가슴이 텅 비다', '마음이 허하다'] },
+        { id: 'b-chest-drop', label: '심장이 철렁 내려앉았어요', emotions: ['fear25', 'fear24', 'fear07', 'fear31'], src: 'P',
+          idioms: ['심장이 철렁 내려앉다', '가슴이 덜컥하다', '간이 콩알만 해지다', '간이 떨리다', '심장이 쪼그라들다'] },
+        { id: 'b-chest-pound', label: '가슴이 두근거렸어요', emotions: ['joy02', 'joyH5', 'fear31', 'fear09', 'fear18'], src: 'N·A',
+          idioms: ['가슴이 두근거리다', '가슴이 뛰다', '가슴이 설레다', '심장이 간질간질하다'],
+          ask: '기다리던 좋은 일이었나요, 걱정되거나 떨리는 일이었나요?' },
+        { id: 'b-breath', label: '숨이 가쁘고 얕아졌어요', emotions: ['fear31', 'fear02', 'fear05', 'fear42'], src: 'A',
+          idioms: ['숨이 가쁘다', '숨이 멎을 것 같다'], care: true },
+        { id: 'b-breath-easy', label: '숨이 트이고 고르게 쉬어졌어요', emotions: ['joy07', 'joy41', 'grn06', 'joyH3'], src: 'P',
+          idioms: ['숨이 고르다', '한숨 돌리다', '숨통이 트이다'] }
       ] },
-      { id: 'belly', label: '배·속', feelings: [
-        { id: 'b-belly-ache', label: '배가 아프거나 속이 쓰렸어요', emotions: ['fear01', 'fear09', 'fear10', 'sad24', 'sad27'] },
-        { id: 'b-belly-sick', label: '속이 울렁거리고 메스꺼웠어요', emotions: ['ang20', 'ang16', 'fear31', 'fear09'] },
-        { id: 'b-belly-boil', label: '속이 부글부글 끓었어요', emotions: ['ang13', 'ang29', 'ang01', 'red02'] },
-        { id: 'b-belly-heavy', label: '속이 꽉 얹힌 것 같았어요', emotions: ['fearH5', 'fearH3', 'sad57', 'fear01'] },
-        { id: 'b-belly-open', label: '속이 뻥 뚫린 것 같았어요', emotions: ['joyH3', 'joy36', 'joy06', 'grn09'] },
-        { id: 'b-no-appetite', label: '입맛이 없었어요', emotions: ['sad15', 'sad30', 'fear01', 'sad14'] }
+      { id: 'belly', label: '배·속', where: '명치 · 윗배 · 배', feelings: [
+        { id: 'b-belly-knot', label: '명치가 꽉 막히고 체한 것 같았어요', emotions: ['ang05', 'ang13', 'fear01', 'fearH5'], src: 'H·P',
+          idioms: ['명치가 막히다', '체한 것 같다', '속이 얹히다'] },
+        { id: 'b-belly-burn', label: '속이 타고 애가 탔어요', emotions: ['fear01', 'fear02', 'ang29', 'sad56'], src: 'P',
+          idioms: ['속이 타다', '애가 타다', '가슴을 졸이다', '피가 마르다'],
+          ask: '걱정되는 일이었나요, 화가 나는 일이었나요?' },
+        { id: 'b-belly-boil', label: '속이 부글부글 끓었어요', emotions: ['ang13', 'ang29', 'ang19', 'red02'], src: 'P',
+          idioms: ['속이 부글부글 끓다', '속이 터지다', '복장이 터지다'] },
+        { id: 'b-belly-sick', label: '속이 울렁거리고 메스꺼웠어요', emotions: ['ang20', 'angH2', 'red18', 'fear31'], src: 'N·P',
+          idioms: ['속이 메스껍다', '구역질나다', '비위가 상하다', '비위가 뒤틀리다', '속이 뒤집히다', '속이 울렁거리다', '정이 떨어지다', '밥맛 떨어지다'],
+          ask: '싫고 못마땅한 일이었나요, 불안한 일이었나요?' },
+        { id: 'b-belly-ache', label: '배가 아프고 속이 쓰렸어요', emotions: ['fear01', 'fear10', 'sad24', 'sad27', 'ang15'], src: 'A',
+          idioms: ['배가 아프다', '속이 쓰리다', '배알이 꼴리다'],
+          ask: '걱정되는 일이었나요, 남이 잘되어 샘나는 일이었나요?' },
+        { id: 'b-belly-open', label: '속이 뻥 뚫리고 후련했어요', emotions: ['joyH3', 'joy36', 'joy06', 'grn09'], src: 'P',
+          idioms: ['속이 후련하다', '가슴이 뻥 뚫리다', '체증이 내려가다', '먹지 않아도 배부르다'] },
+        { id: 'b-no-appetite', label: '입맛이 없었어요', emotions: ['sad15', 'sad30', 'fear01', 'sad14'], src: 'P',
+          idioms: ['입맛이 없다', '밥이 안 넘어가다'] }
       ] },
-      { id: 'back', label: '어깨·등', feelings: [
-        { id: 'b-shoulder-heavy', label: '어깨가 무겁고 뻐근했어요', emotions: ['fear10', 'fear11', 'sad13', 'sad57'] },
-        { id: 'b-shoulder-shrink', label: '어깨가 움츠러들었어요', emotions: ['fear15', 'fear16', 'fear13', 'fear28'] },
-        { id: 'b-shoulder-up', label: '어깨가 으쓱하고 허리가 펴졌어요', emotions: ['joy10', 'joy11', 'joy09', 'joy12'] },
-        { id: 'b-neck-stiff', label: '뒷목이 뻣뻣하게 당겼어요', emotions: ['ang29', 'ang17', 'ang13', 'fear09'] },
-        { id: 'b-back-chill', label: '등골이 오싹했어요', emotions: ['fear08', 'fear05', 'red08', 'red12'] }
+      { id: 'back', label: '어깨·등', where: '어깨 · 등 · 뒷목 · 허리', feelings: [
+        { id: 'b-neck-stiff', label: '뒷목이 당기고 뻐근했어요', emotions: ['ang29', 'fear10', 'fear09', 'ang17'], src: 'P',
+          idioms: ['뒷목을 잡다', '뒷골이 당기다', '뒷목이 뻐근하다'] },
+        { id: 'b-shoulder-heavy', label: '어깨가 무겁고 처졌어요', emotions: ['fear10', 'sad20', 'sad13', 'sad05'], src: 'P',
+          idioms: ['어깨가 무겁다', '어깨가 처지다'],
+          ask: '해야 할 일이 버거운 때였나요, 미안하거나 실망한 일이었나요?' },
+        { id: 'b-shoulder-shrink', label: '어깨가 움츠러들고 고개를 못 들었어요', emotions: ['fear15', 'fear16', 'fear13', 'fear23'], src: 'P·A',
+          idioms: ['고개를 못 들다', '얼굴을 들 수 없다', '쥐구멍에라도 숨고 싶다', '몸 둘 바를 모르다', '눈 둘 곳이 없다', '벌거벗겨진 것 같다', '체면이 구겨지다'] },
+        { id: 'b-shoulder-up', label: '어깨가 들썩이고 쫙 펴졌어요', emotions: ['joy01', 'joy28', 'joy10', 'joy11'], src: 'P',
+          idioms: ['어깨가 들썩이다', '어깨춤이 나다', '어깨가 펴지다'] },
+        { id: 'b-shoulder-light', label: '어깨가 가벼워지고 긴장이 풀렸어요', emotions: ['joy07', 'joy06', 'grn06', 'joy05'], src: 'P',
+          idioms: ['어깨가 가벼워지다', '긴장이 풀리다', '마음이 놓이다'] },
+        { id: 'b-back-chill', label: '등골이 오싹했어요', emotions: ['fear08', 'fear05', 'fear07', 'red12'], src: 'P',
+          idioms: ['등골이 오싹하다', '간담이 서늘하다'] }
       ] },
-      { id: 'limbs', label: '팔·다리·손', feelings: [
-        { id: 'b-fist', label: '주먹에 힘이 들어갔어요', emotions: ['ang29', 'ang19', 'ang06', 'ang05'] },
-        { id: 'b-hands-shake', label: '손이 떨리고 땀이 났어요', emotions: ['fear12', 'fear09', 'red10', 'fear05'] },
-        { id: 'b-hands-cold', label: '손발이 차가워졌어요', emotions: ['fear07', 'fear09', 'fear06', 'fear27'] },
-        { id: 'b-legs-weak', label: '다리에 힘이 풀렸어요', emotions: ['blu20', 'sad06', 'joy07', 'fear05'] },
-        { id: 'b-restless', label: '가만히 있을 수가 없었어요', emotions: ['fear04', 'fear02', 'red06', 'joy01'] },
-        { id: 'b-jump', label: '몸이 들썩이고 뛰고 싶었어요', emotions: ['joy01', 'joy03', 'joy35', 'joy39'] }
+      { id: 'limbs', label: '팔·다리', where: '팔 · 손 · 다리 · 발', feelings: [
+        { id: 'b-fist', label: '주먹을 불끈 쥐었어요', emotions: ['ang29', 'ang19', 'ang06', 'ang05'], src: 'N·P',
+          idioms: ['주먹을 불끈 쥐다', '주먹이 운다'] },
+        { id: 'b-hands-shake', label: '손이 떨리고 식은땀이 났어요', emotions: ['fear12', 'fear09', 'red10', 'fear05', 'ang29'], src: 'N·P',
+          idioms: ['손에 땀을 쥐다', '식은땀이 나다', '손이 떨리다'],
+          ask: '무섭거나 긴장되는 일이었나요, 화가 나서 떨렸나요?' },
+        { id: 'b-hands-cold', label: '손발이 차가워졌어요', emotions: ['fear07', 'fear09', 'fear33', 'fear27'], src: 'P',
+          idioms: ['손발이 차가워지다', '손발이 얼음장 같다'] },
+        { id: 'b-hands-curl', label: '손발이 오그라들고 간질거렸어요', emotions: ['fear14', 'fear22', 'fear29'], src: 'P',
+          idioms: ['손발이 오그라들다', '몸이 근질근질하다'] },
+        { id: 'b-legs-weak', label: '다리에 힘이 풀리고 후들거렸어요', emotions: ['fear24', 'fear05', 'joy07', 'blu20'], src: 'P·A',
+          idioms: ['다리가 풀리다', '다리가 후들거리다', '오금이 저리다'],
+          ask: '놀라거나 무서운 일이었나요, 큰일이 끝나 마음이 놓인 때였나요?' },
+        { id: 'b-restless', label: '가만히 있을 수 없어 발을 동동 굴렀어요', emotions: ['fear04', 'fear02', 'red06', 'fear01'], src: 'P',
+          idioms: ['발을 동동 구르다', '안절부절못하다', '좌불안석이다'] },
+        { id: 'b-feet-light', label: '발걸음이 가벼웠어요', emotions: ['joy28', 'joy06', 'joy01', 'joy03'], src: 'P',
+          idioms: ['발걸음이 가볍다'] },
+        { id: 'b-feet-heavy', label: '발걸음이 무거웠어요', emotions: ['sad30', 'sad57', 'sad05', 'sad13'], src: 'P',
+          idioms: ['발걸음이 무겁다'] }
       ] },
-      { id: 'whole', label: '온몸', feelings: [
-        { id: 'b-freeze', label: '몸이 굳고 얼어붙었어요', emotions: ['fear27', 'fear06', 'fear09', 'fearH2'] },
-        { id: 'b-drained', label: '온몸에 힘이 빠지고 축 처졌어요', emotions: ['sad14', 'sad13', 'sad53', 'sad15', 'sad18'] },
-        { id: 'b-light', label: '몸이 가볍고 개운했어요', emotions: ['joy06', 'joyH4', 'grn09', 'joy28'] },
-        { id: 'b-relaxed', label: '몸이 노곤하게 풀렸어요', emotions: ['joy05', 'grn06', 'joy41', 'joy44', 'blu18'] },
-        { id: 'b-goosebumps', label: '온몸에 소름이 돋았어요', emotions: ['fear08', 'joy16', 'joy04', 'ang21'] },
-        { id: 'b-hot', label: '몸이 뜨겁고 열이 올랐어요', emotions: ['ang29', 'ang30', 'red01', 'joy03', 'fear13'] },
-        { id: 'b-numb', label: '몸에 아무 느낌이 없었어요', emotions: ['blu12', 'blu13', 'sad49', 'sad06'] }
+      { id: 'whole', label: '온몸', where: '온몸 · 피부 · 털', feelings: [
+        { id: 'b-freeze', label: '몸이 굳고 얼어붙었어요', emotions: ['fear09', 'fear07', 'fear23', 'fear27'], src: 'P',
+          idioms: ['몸이 굳다', '얼어붙다', '숨을 죽이다'],
+          ask: '무섭거나 긴장되는 일이었나요, 부끄러운 일이었나요?' },
+        { id: 'b-drained', label: '온몸에 힘이 빠지고 축 처졌어요', emotions: ['sad30', 'sad15', 'sad05', 'sad14'], src: 'N·P',
+          idioms: ['맥이 풀리다', '몸이 물먹은 솜 같다', '힘이 쭉 빠지다'] },
+        { id: 'b-heavy', label: '몸이 천근만근 무겁고 지쳤어요', emotions: ['sad13', 'sad53', 'blu21', 'blu23'], src: 'A',
+          idioms: ['몸이 천근만근이다', '녹초가 되다', '파김치가 되다', '진이 빠지다', '기진맥진하다', '눈꺼풀이 무겁다'] },
+        { id: 'b-light', label: '몸이 가볍고 붕 뜨는 것 같았어요', emotions: ['joy28', 'joy06', 'yel04', 'joy01'], src: 'P',
+          idioms: ['날아갈 것 같다', '몸이 붕 뜨다'] },
+        { id: 'b-warm', label: '온몸이 따뜻하고 포근했어요', emotions: ['joy41', 'grn18', 'joy07', 'grn19'], src: 'N·P',
+          idioms: ['온몸이 따뜻하다', '마음이 포근하다'] },
+        { id: 'b-relaxed', label: '몸이 노곤하게 풀렸어요', emotions: ['joy05', 'joy07', 'joy41', 'joy44'], src: 'A',
+          idioms: ['몸이 노곤해지다', '발 뻗고 자다'] },
+        { id: 'b-goosebumps', label: '온몸에 소름이 돋고 털이 곤두섰어요', emotions: ['fear08', 'fear07', 'fear19', 'ang21'], src: 'P',
+          idioms: ['소름이 돋다', '소름 끼치다', '머리털이 곤두서다', '몸서리치다'] },
+        { id: 'b-hot', label: '온몸이 뜨겁고 열이 올랐어요', emotions: ['ang29', 'ang30', 'red01', 'fear13'], src: 'P·H',
+          idioms: ['온몸에 열이 오르다', '몸이 달아오르다'],
+          ask: '화가 난 일이었나요, 부끄러운 일이었나요?' },
+        { id: 'b-numb', label: '몸에 아무 느낌이 없고 멍했어요', emotions: ['fear33', 'blu15', 'blu23', 'blu13', 'blu12'], src: 'P·A',
+          idioms: ['멍하다', '아무 느낌이 없다', '넋이 나가다'] }
       ] }
     ]
   },
