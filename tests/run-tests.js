@@ -145,7 +145,10 @@ function checkData() {
   ok(CORE_WORDS.length % 3 === 0, '[규칙 5] 핵심 감정은 3개씩 줄이 꽉 차는 개수 (빈 칸 없음)');
   ok(D.quadrants.every((q) => q.face), '[규칙 5] 기분 4칸마다 얼굴 그림(face)');
   ok(D.coreEmotions.every((id) => D.coreFaces && D.coreFaces[id]), '[규칙 5] 핵심 감정마다 얼굴 그림(coreFaces)');
-  ok(D.guide && D.guide.sections.length >= 6 && D.guide.install.length >= 2, '사용 방법: 설명 6개 이상, 설치 방법');
+  const I = D.guide.install || {};
+  ok(D.guide && D.guide.sections.length >= 6, '사용 방법: 설명 6개 이상');
+  ok(I.android && I.ios && I.android.steps.length >= 6 && I.ios.steps.length >= 6 && I.warn && /크롬/.test(I.warn) && /사파리/.test(I.warn) && I.after.length >= 3,
+    '[규칙 2] 설치 방법: 안드로이드·아이폰 따로, 단계별, 메신저 안의 화면 주의, 설치 뒤 안내');
   const refs = D.guide.references.flatMap((g) => g.items);
   ok(refs.length >= 15 && refs.every((r) => /\(\d{4}\)/.test(r) || /한국NVC센터/.test(r)), `참고자료 15개 이상, 연도 표기 (지금 ${refs.length}개)`);
   // [규칙 1·2] 금지된 문구
@@ -315,6 +318,14 @@ async function runForWidth(browser, base, width, D) {
   await h.expect('guide', '처음 열면 사용 방법');
   ok((await page.$$('[data-testid="guide-section"]')).length === D.guide.sections.length, `[${width}px] 사용 방법 설명 ${D.guide.sections.length}개`);
   ok(!!(await page.$('[data-screen="guide"] [data-testid="install-help"]')), `[${width}px] [규칙 2] 홈 화면 설치 방법은 사용 방법 안에 있음`);
+  await page.click('[data-testid="install-help"] > summary');
+  ok(await page.isVisible('[data-testid="install-android"]') && await page.isVisible('[data-testid="install-ios"]') && await page.isVisible('[data-testid="install-warn"]'), `[${width}px] [규칙 2] 설치 방법을 펼치면 주의·안드로이드·아이폰이 나옴`);
+  ok((await page.textContent('[data-testid="install-address"]')).startsWith('http'), `[${width}px] 설치 방법에 앱 주소`);
+  await page.click('[data-testid="install-android"] > summary');
+  await page.click('[data-testid="install-ios"] > summary');
+  ok((await page.$$('[data-testid="install-android"] .install-steps li')).length === D.guide.install.android.steps.length, `[${width}px] 안드로이드 설치 단계 ${D.guide.install.android.steps.length}개`);
+  await h.snap('guide-install');
+  await page.click('[data-testid="install-help"] > summary');
   const refN = D.guide.references.flatMap((g) => g.items).length;
   ok((await page.$$('[data-testid="guide-refs"] .ref-item')).length === refN, `[${width}px] [규칙 2] 사용 방법 끝에 참고자료 ${refN}개`);
   const refsLast = await page.evaluate(() => {

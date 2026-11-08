@@ -252,6 +252,23 @@ h1:focus { outline: none; }
 .install summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-weight: 700; color: var(--guide-dark); }
 .install p { margin: 0 0 10px; }
 .install .btn { margin-bottom: 10px; }
+.install-warn { background: #FFF4E5; color: #6B3A00; border-radius: 10px; padding: 10px 12px; }
+.install-warn.now { background: #FDE8E8; color: #8A1C1C; font-weight: 700; }
+.install-ok { font-weight: 700; color: var(--ok); }
+.install-addr { background: var(--guide-soft); border-radius: 12px; padding: 10px 12px 2px; margin-bottom: 10px; }
+.install-addr-label { font-weight: 800; color: var(--guide-dark); margin: 0 0 2px !important; }
+.install-addr-url { font-size: 17px; font-weight: 700; word-break: break-all; user-select: all; -webkit-user-select: all; }
+.install-part { border: 1.5px solid var(--line); border-radius: 12px; padding: 0 12px; margin-bottom: 10px; background: var(--surface); }
+.install-part summary { min-height: 52px; display: flex; align-items: center; cursor: pointer; font-weight: 800; font-size: 17px; color: var(--ink); }
+.install-part[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.install-steps { margin: 0 0 10px; padding-left: 24px; display: flex; flex-direction: column; gap: 8px; }
+.install-steps li { font-size: 17px; line-height: 1.5; padding-left: 2px; }
+.install-steps li::marker { font-weight: 900; color: var(--guide); }
+.install-trouble { background: var(--brand-soft); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; }
+.install-trouble-title { font-weight: 800; margin: 0 0 4px !important; }
+.install-trouble ul, .install-after { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.install-after { list-style: none; padding-left: 0; margin-bottom: 12px; }
+.install-part summary:focus-visible { outline: 3px solid var(--guide); outline-offset: 2px; }
 .refs { background: var(--surface); border: 1.5px solid var(--guide-soft); border-radius: 14px; padding: 4px 14px; }
 .refs[open] { padding-bottom: 14px; }
 .refs summary {
