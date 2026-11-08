@@ -417,12 +417,14 @@
      세는 값(five)은 화면을 옮긴 뒤에 바꿔요. 그래야 이전으로 돌아왔을 때 앞 화면의 값이 그대로 남아요 */
   function emotionFive() {
     var n = (draft.five || 0) + 1;
+    if (n === 1) draft.bodyMode = 'easy'; /* 몸의 느낌은 늘 "쉽게"부터 */
     if (n <= D.approaches.length) go('approach', { index: n - 1 });
     else go('unnamed', {});
     draft.five = n;
   }
   /* "몸의 느낌으로 찾기": 몸의 느낌 화면으로 바로 가요. 거기서 "이 중엔 없어요"를 누르면 다음 방법(행동)으로 이어져요 */
   function bodyOpen() {
+    draft.bodyMode = 'easy'; /* 몸의 느낌은 늘 "쉽게"부터 */
     go('approach', { index: 0 });
     draft.five = 1;
   }
@@ -1165,16 +1167,17 @@
   (D.bodyTextures || []).forEach(function (x) { TEX[x.id] = x; });
   var BODY_PARTS = (D.approaches[0] && D.approaches[0].parts) || [];
   function allBody() { return Object.keys(BODY).map(function (id) { return BODY[id]; }); }
-  /* 몸의 느낌 화면 단계: 쉽게(6곳·4계열) / 자세히(몸 그림 12곳·10계열) / 적어서 찾기 (5-6(8)). 고른 단계는 휴대폰에 남아요 */
+  /* 몸의 느낌 화면 단계: 쉽게(6곳·4계열) / 자세히(몸 그림 12곳·10계열) / 적어서 찾기 (5-6(8)).
+     들어올 때마다 "쉽게"부터 보여요("잘 모르겠어요"·"몸의 느낌으로 찾기" 모두). 고른 단계는 그 화면에 있는 동안만,
+     감정 후보로 갔다가 돌아와도 남아요. 휴대폰에는 남기지 않아요 (2026-11-08 지적: 전에 고른 "자세히"가 남아
+     "잘 모르겠어요"가 자세히로 열렸음) */
   var BODYMODE_KEY = 'maeum-chatgi-bodymode';
+  try { window.localStorage.removeItem(BODYMODE_KEY); } catch (e) { /* 전 판에서 남긴 값 지우기 */ }
   function bodyMode() {
-    var m = 'easy';
-    try { m = window.localStorage.getItem(BODYMODE_KEY) || 'easy'; } catch (e) { /* 무시 */ }
+    var m = (draft && draft.bodyMode) || 'easy';
     return (D.bodyModes || []).some(function (x) { return x.id === m; }) ? m : 'easy';
   }
-  function setBodyMode(m) {
-    try { window.localStorage.setItem(BODYMODE_KEY, m); } catch (e) { /* 무시 */ }
-  }
+  function setBodyMode(m) { draft.bodyMode = m; }
   function bchip(f) {
     var on = bodyPicks().indexOf(f.id) !== -1;
     return el('button', { class: 'chip chip-body' + (on ? ' on' : ''), type: 'button', 'data-body': f.id, 'aria-pressed': String(on), onclick: function () { toggleBody(f.id); } }, (on ? '✓ ' : '') + f.label);
