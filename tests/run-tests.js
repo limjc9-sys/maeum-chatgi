@@ -760,9 +760,15 @@ async function runForWidth(browser, base, width, D) {
     await page.click('[data-body-mode="detail"]');
     ok((await page.getAttribute('#app > section', 'data-body-mode')) === 'detail', `[${width}px] [규칙 13] "자세히" 단계`);
     ok((await page.$$('[data-testid="body-figure"] [data-area]')).length === 12, `[${width}px] [규칙 13] 몸 그림에 누를 곳 12곳`);
+    const figLabels = await page.$$eval('[data-testid="body-figure"] .fig-label', (e) => e.map((x) => ({ t: x.textContent, h: x.getBoundingClientRect().height, r: x.getBoundingClientRect().right, l: x.getBoundingClientRect().left })));
+    const vw = await page.evaluate(() => document.documentElement.clientWidth);
+    ok(figLabels.length === 11 && D.bodyAreas.filter((a) => a.id !== 'whole').every((a) => figLabels.some((x) => x.t === a.label)), `[${width}px] [규칙 13] 몸 그림 옆에 곳 이름 11개 (온몸은 단추) ${figLabels.map((x) => x.t).join('·')}`);
+    ok(figLabels.every((x) => x.h >= 16 && x.l >= 0 && x.r <= vw), `[${width}px] [규칙 13] 곳 이름이 16px 이상이고 화면 안에 있음 (${figLabels.map((x) => Math.round(x.h)).join(',')})`);
+    await page.click('[data-fig-label="pit"]');
+    ok(!!(await page.$('[data-barea="pit"].open')), `[${width}px] [규칙 13] 곳 이름(명치)을 눌러도 그 곳이 펼쳐짐`);
     ok((await page.$$('[data-testid="tex-box"] [data-tex]')).length === 10, `[${width}px] [규칙 13] "자세히"에는 느낌의 결 10가지`);
     ok(await page.$eval('svg [data-area="chest"]', (e) => e.classList.contains('picked')), `[${width}px] [규칙 13] 고른 느낌이 있는 곳(가슴)은 몸 그림에 색이 칠해짐`);
-    await page.click('svg [data-area="belly"]');
+    await page.click('svg [data-area="belly"] rect');
     ok(!!(await page.$('[data-barea="belly"].open')) && (await page.textContent('[data-testid="fig-note"]')).includes('배(속)'), `[${width}px] [규칙 13] 몸 그림의 배를 누르면 아래 배의 느낌이 펼쳐짐`);
     ok((await page.$$('[data-barea="belly"] [data-body]')).length === allF.filter((f) => f.area === 'belly').length, `[${width}px] [규칙 13] 펼친 곳에는 그 곳의 느낌만`);
     await page.click('[data-testid="body-figure"] button[data-area="whole"]');

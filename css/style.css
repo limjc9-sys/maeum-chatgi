@@ -753,7 +753,7 @@ body.no-scroll { overflow: hidden; }
 .tex-panel { background: #EEF8F6; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 /* 몸 그림 (12곳) */
 .fig-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.body-fig { width: min(240px, 72vw); height: auto; touch-action: manipulation; }
+.body-fig { width: 100%; max-width: 340px; height: auto; touch-action: manipulation; }
 .fig-area { cursor: pointer; }
 .fig-area > * { fill: #EEF2F6; stroke: #8E9AA8; stroke-width: 1.5; }
 .fig-area.picked > * { fill: #9FD9D2; stroke: #0B6B62; }
@@ -792,3 +792,8 @@ body.no-scroll { overflow: hidden; }
 .quiz-sit { font-size: 18px; font-weight: 700; line-height: 1.5; }
 .fig-head > * { stroke: none; }
 .fig-head.open > * { stroke: #0E8A7E; stroke-width: 3; }
+/* 몸 그림 옆 곳 이름 (이름을 눌러도 그 곳이 펼쳐져요) */
+.fig-area > text.fig-label { fill: var(--ink); stroke: none; font-size: 16px; font-weight: 700; font-family: inherit; }
+.fig-area.picked > text.fig-label, .fig-area.open > text.fig-label { fill: #0B6B62; font-weight: 900; }
+.fig-leaders { pointer-events: none; }
+.fig-leaders line { stroke: #B4BEC9; stroke-width: 1; }

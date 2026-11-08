@@ -1237,22 +1237,38 @@
       var sec = app.querySelector('[data-barea="' + id + '"]');
       if (sec && sec.scrollIntoView) { try { sec.scrollIntoView({ block: 'nearest' }); } catch (e) { /* 무시 */ } }
     }
+    var LABELS = {
+      head: ['L', 22, 70], face: ['L', 60, 66], neck: ['L', 98, 88], chest: ['L', 146, 62], belly: ['L', 202, 62],
+      eyes: ['R', 44, 134], mouth: ['R', 80, 128], back: ['R', 112, 152], arms: ['R', 150, 172], pit: ['R', 174, 138], legs: ['R', 258, 134]
+    };
+    var leaders = mk('g', { class: 'fig-leaders', 'aria-hidden': 'true' });
     function region(id, shapes) {
       var g = mk('g', {
         class: 'fig-area' + (['head', 'eyes', 'face', 'mouth'].indexOf(id) !== -1 ? ' fig-head' : '') + (picked[id] ? ' picked' : '') + (open.indexOf(id) !== -1 ? ' open' : ''),
         'data-area': id, role: 'button', tabindex: '0', 'aria-label': AREA[id].label + (picked[id] ? ', 고른 느낌 있음' : '')
       });
       shapes.forEach(function (sh) { g.appendChild(mk(sh[0], sh[1])); });
+      var lb = LABELS[id];
+      if (lb) {
+        var left = lb[0] === 'L';
+        var t = mk('text', { x: left ? 18 : 182, y: lb[1], 'text-anchor': left ? 'end' : 'start', class: 'fig-label', 'data-fig-label': id });
+        t.textContent = AREA[id].label;
+        g.appendChild(t);
+        leaders.appendChild(mk('line', { x1: left ? 21 : 179, y1: lb[1] - 5, x2: lb[2], y2: lb[1] - 5 }));
+      }
       g.addEventListener('click', function () { tapArea(id); });
       g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tapArea(id); } });
       return g;
     }
-    var svg = mk('svg', { viewBox: '0 0 200 300', class: 'body-fig', role: 'group', 'aria-label': T.bodyFigLabel || '몸 그림' });
+    var svg = mk('svg', { viewBox: '0 0 320 300', class: 'body-fig', role: 'group', 'aria-label': T.bodyFigLabel || '몸 그림' });
     var defs = mk('defs', {});
     var clip = mk('clipPath', { id: 'fig-head-clip' });
     clip.appendChild(mk('rect', { x: 64, y: 6, width: 72, height: 80, rx: 34 }));
     defs.appendChild(clip);
     svg.appendChild(defs);
+    var root = svg; /* 그림을 가운데로 옮기고(양옆에 곳 이름), 그 안에 곳을 그려요 */
+    svg = mk('g', { transform: 'translate(60,0)' });
+    root.appendChild(svg);
     var headBand = function (y, h) { return ['rect', { x: 64, y: y, width: 72, height: h, 'clip-path': 'url(#fig-head-clip)' }]; };
     svg.appendChild(region('head', [headBand(6, 26)]));
     svg.appendChild(region('eyes', [headBand(32, 16)]));
@@ -1274,8 +1290,9 @@
     deco.appendChild(mk('circle', { cx: 114, cy: 40, r: 3.5 }));
     deco.appendChild(mk('path', { d: 'M88,72 Q100,80 112,72', class: 'fig-line' }));
     svg.appendChild(deco);
+    svg.insertBefore(leaders, svg.firstChild);
     var shown = open.filter(function (id) { return AREA[id]; }).map(function (id) { return AREA[id].label; });
-    return el('div', { class: 'fig-wrap', 'data-testid': 'body-figure' }, svg,
+    return el('div', { class: 'fig-wrap', 'data-testid': 'body-figure' }, root,
       el('button', {
         class: 'chip fig-whole' + (picked.whole ? ' on' : ''), type: 'button', 'data-area': 'whole', 'aria-pressed': String(open.indexOf('whole') !== -1),
         onclick: function () { tapArea('whole'); }
