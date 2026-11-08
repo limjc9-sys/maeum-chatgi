@@ -339,21 +339,79 @@ window.MAEUM_DATA.thoughtWords = [
   { word: '실망시킨', feelings: ['sad05', 'sad30'], needs: ['nd015'] },
   { word: '찬밥 신세가 된', feelings: ['sad01', 'sad04'], needs: ['nd021', 'nd025'] },
   { word: '쓸모없는 (나는)', feelings: ['sad30', 'fear23a'], needs: ['mean1', 'nd039'] },
-  { word: '하찮은 (나는)', feelings: ['sad01', 'sad30'], needs: ['nd036'] }
+  { word: '하찮은 (나는)', feelings: ['sad01', 'sad30'], needs: ['nd036'] },
+
+  /* 있었던 일 — 위의 생각보다 구체적인, 상대가 실제로 한 행동이에요 (2026-11-08 추가).
+     느낌·욕구 연결은 작성자 추정이에요. 묶음은 아래 thoughtGroups의 acts에 적어요. */
+  /* 버려지고 밀려났다 */
+  { word: '연락을 끊었다', feelings: ['sad02', 'sad01', 'fear31', 'sadH1'], needs: ['nd017', 'nd025', 'nd015'] },
+  { word: '나만 빼고 모였다', feelings: ['sad03', 'sad01', 'sad02', 'blu04'], needs: ['nd021', 'con5', 'nd022'] },
+  { word: '말을 걸어도 대답하지 않았다', feelings: ['sad01', 'ang09', 'sad03', 'fear29'], needs: ['nd025', 'nd036', 'con1'] },
+  { word: '내가 힘들 때 곁에 없었다', feelings: ['sad01', 'angH5', 'sad02', 'sad16'], needs: ['con3', 'nd026', 'con6'] },
+  { word: '다른 사람만 챙겼다', feelings: ['sad01', 'angH1', 'sad24', 'sad03'], needs: ['nd025', 'nd035', 'res2'] },
+  { word: '약속을 자꾸 미뤘다', feelings: ['sad01', 'sad05', 'ang01', 'sadH1'], needs: ['nd035', 'res5', 'nd022'] },
+  /* 무시당하고 깔보였다 */
+  { word: '내 말을 중간에 끊었다', feelings: ['ang01', 'ang02', 'ang09', 'ang16'], needs: ['con1', 'res1', 'nd043'] },
+  { word: '내 생각을 묻지 않고 정했다', feelings: ['ang09', 'sad01', 'ang16', 'ang02'], needs: ['res3', 'free1', 'res1'] },
+  { word: '인사를 받아 주지 않았다', feelings: ['sad01', 'ang16', 'fear29', 'ang09'], needs: ['res1', 'nd025', 'nd036'] },
+  { word: '내 말을 듣고 비웃었다', feelings: ['ang10', 'fear13', 'ang11', 'ang12'], needs: ['res1', 'nd034', 'con7'] },
+  { word: '나를 어린애 취급했다', feelings: ['ang12', 'ang16', 'ang11', 'ang02'], needs: ['res1', 'nd037', 'nd053'] },
+  { word: '고맙다는 말 한마디 없었다', feelings: ['sad01', 'angH5', 'ang37', 'sad46'], needs: ['nd032', 'grow3', 'nd031'] },
+  /* 비난받고 깎아내려졌다 */
+  { word: '남들 앞에서 꾸짖었다', feelings: ['fear13', 'fear23', 'ang11', 'ang05'], needs: ['nd034', 'res1', 'nd055'] },
+  { word: '잘못을 다 내 탓으로 돌렸다', feelings: ['ang05', 'ang06', 'ang29', 'sad09'], needs: ['res2', 'clar3', 'nd042'] },
+  { word: '다른 사람과 비교했다', feelings: ['sad25', 'fear16', 'ang16', 'sad01'], needs: ['con7', 'nd040', 'res1'] },
+  { word: '내 모습이나 말투를 놀렸다', feelings: ['fear13', 'ang10', 'sad01', 'ang11'], needs: ['res1', 'nd034', 'con7'] },
+  { word: '해 놓은 일을 트집 잡았다', feelings: ['ang01', 'sad05', 'ang05', 'fear15'], needs: ['grow3', 'nd031', 'grow4'] },
+  { word: '사정을 듣지도 않고 혼냈다', feelings: ['ang05', 'ang02', 'sad01', 'sad17'], needs: ['con1', 'nd042', 'clar4'] },
+  /* 속고 배신당했다 */
+  { word: '약속을 어겼다', feelings: ['sad05', 'ang08', 'ang01', 'sad01'], needs: ['res5', 'nd015', 'nd049'] },
+  { word: '거짓말을 했다', feelings: ['ang08', 'ang29', 'sad05', 'fearH4'], needs: ['res7', 'nd015', 'nd047'] },
+  { word: '내 비밀을 다른 사람에게 말했다', feelings: ['ang08', 'fear13', 'ang29', 'fear31'], needs: ['nd015', 'nd055', 'nd013'] },
+  { word: '뒤에서 내 흉을 봤다', feelings: ['ang08', 'ang29', 'sad01', 'ang10'], needs: ['nd015', 'res1', 'nd049'] },
+  { word: '내가 한 일을 자기가 한 것처럼 말했다', feelings: ['ang05', 'ang06', 'ang16', 'ang08'], needs: ['grow3', 'res2', 'res7'] },
+  { word: '필요할 때만 나를 찾았다', feelings: ['sad46', 'sad01', 'ang16', 'ang08'], needs: ['nd028', 'nd033', 'nd046'] },
+  /* 억눌리고 휘둘렸다 */
+  { word: '하기 싫은 일을 억지로 시켰다', feelings: ['ang02', 'ang26', 'ang01', 'ang03'], needs: ['free1', 'free5', 'nd051'] },
+  { word: '하나하나 간섭하고 잔소리했다', feelings: ['ang25', 'ang01', 'ang02', 'angH2'], needs: ['free1', 'free2', 'nd053'] },
+  { word: '빨리 하라고 재촉했다', feelings: ['fear02', 'ang01', 'fear11', 'red06'], needs: ['free2', 'saf5', 'rest4'] },
+  { word: '내 물건을 허락 없이 썼다', feelings: ['ang16', 'ang01', 'ang29', 'ang15'], needs: ['res6', 'res1', 'nd055'] },
+  { word: '내 휴대폰이나 일기를 몰래 봤다', feelings: ['ang29', 'ang16', 'ang08', 'fear13'], needs: ['nd055', 'res6', 'nd015'] },
+  { word: '쉴 틈 없이 일을 몰아줬다', feelings: ['sad13', 'ang01', 'fear11', 'fear10'], needs: ['rest1', 'nd067', 'res2'] },
+  /* 위협받고 해를 입었다 */
+  { word: '소리를 지르며 화를 냈다', feelings: ['fear05', 'fear06', 'ang29', 'fear24'], needs: ['saf1', 'nd013', 'res1'] },
+  { word: '때리거나 밀쳤다', feelings: ['fear05', 'ang29', 'fear07', 'ang19'], needs: ['saf1', 'saf4', 'nd034'] },
+  { word: '욕을 했다', feelings: ['ang10', 'ang29', 'fear05', 'sad09'], needs: ['res1', 'nd034', 'saf1'] },
+  { word: '겁주는 말을 했다', feelings: ['fear05', 'fear31', 'fear07', 'fear06'], needs: ['saf1', 'nd013', 'nd014'] },
+  { word: '계속 따라다니며 괴롭혔다', feelings: ['fear05', 'fear31', 'ang29', 'sad35'], needs: ['saf1', 'saf4', 'nd052'] },
+  { word: '내 물건을 망가뜨리거나 빼앗았다', feelings: ['ang29', 'sad09', 'ang06', 'fear05'], needs: ['res6', 'res2', 'saf1'] }
 ];
 
 /*
   생각이 섞인 말의 묶음 — 감정 고르기 ③ "상대가 나에게 한 일로 찾기" 화면에서 이 차례로 나와요.
-  words 안의 말은 위 thoughtWords의 word와 똑같이 적어요. 말마다 한 묶음에만 넣어요.
+  words = 떠오르는 생각("무시당한"), acts = 있었던 일(상대가 실제로 한 행동, "내 말을 중간에 끊었다").
+  안의 말은 위 thoughtWords의 word와 똑같이 적어요. 말마다 한 묶음에, words나 acts 한 곳에만 넣어요.
   묶음 이름과 나눔은 작성자 추정이에요(상대가 한 일의 종류로 나눔).
 */
 window.MAEUM_DATA.thoughtGroups = [
-  { id: 'left', label: '버려지고 밀려났다', words: ['버림받은', '거절당한', '방치된', '소외된', '투명인간 취급당한', '찬밥 신세가 된', '사랑받지 못한', '지지받지 못한'] },
-  { id: 'looked', label: '무시당하고 깔보였다', words: ['무시당한', '모욕당한', '깔보인', '인정받지 못한', '당연시된', '말을 안 들어준'] },
-  { id: 'blamed', label: '비난받고 깎아내려졌다', words: ['비난받은', '비판받은', '오해받은', '부족한 사람이 된', '쓸모없는 (나는)', '하찮은 (나는)'] },
-  { id: 'betray', label: '속고 배신당했다', words: ['배신당한', '속은', '이용당한', '실망시킨'] },
-  { id: 'control', label: '억눌리고 휘둘렸다', words: ['강요당한', '통제당한', '조종당한', '갇힌', '혹사당한', '침해당한'] },
-  { id: 'harm', label: '위협받고 해를 입었다', words: ['위협당한', '공격당한', '괴롭힘당한', '학대당한', '피해자가 된'] }
+  { id: 'left', label: '버려지고 밀려났다',
+    words: ['버림받은', '거절당한', '방치된', '소외된', '투명인간 취급당한', '찬밥 신세가 된', '사랑받지 못한', '지지받지 못한'],
+    acts: ['연락을 끊었다', '나만 빼고 모였다', '말을 걸어도 대답하지 않았다', '내가 힘들 때 곁에 없었다', '다른 사람만 챙겼다', '약속을 자꾸 미뤘다'] },
+  { id: 'looked', label: '무시당하고 깔보였다',
+    words: ['무시당한', '모욕당한', '깔보인', '인정받지 못한', '당연시된', '말을 안 들어준'],
+    acts: ['내 말을 중간에 끊었다', '내 생각을 묻지 않고 정했다', '인사를 받아 주지 않았다', '내 말을 듣고 비웃었다', '나를 어린애 취급했다', '고맙다는 말 한마디 없었다'] },
+  { id: 'blamed', label: '비난받고 깎아내려졌다',
+    words: ['비난받은', '비판받은', '오해받은', '부족한 사람이 된', '쓸모없는 (나는)', '하찮은 (나는)'],
+    acts: ['남들 앞에서 꾸짖었다', '잘못을 다 내 탓으로 돌렸다', '다른 사람과 비교했다', '내 모습이나 말투를 놀렸다', '해 놓은 일을 트집 잡았다', '사정을 듣지도 않고 혼냈다'] },
+  { id: 'betray', label: '속고 배신당했다',
+    words: ['배신당한', '속은', '이용당한', '실망시킨'],
+    acts: ['약속을 어겼다', '거짓말을 했다', '내 비밀을 다른 사람에게 말했다', '뒤에서 내 흉을 봤다', '내가 한 일을 자기가 한 것처럼 말했다', '필요할 때만 나를 찾았다'] },
+  { id: 'control', label: '억눌리고 휘둘렸다',
+    words: ['강요당한', '통제당한', '조종당한', '갇힌', '혹사당한', '침해당한'],
+    acts: ['하기 싫은 일을 억지로 시켰다', '하나하나 간섭하고 잔소리했다', '빨리 하라고 재촉했다', '내 물건을 허락 없이 썼다', '내 휴대폰이나 일기를 몰래 봤다', '쉴 틈 없이 일을 몰아줬다'] },
+  { id: 'harm', label: '위협받고 해를 입었다',
+    words: ['위협당한', '공격당한', '괴롭힘당한', '학대당한', '피해자가 된'],
+    acts: ['소리를 지르며 화를 냈다', '때리거나 밀쳤다', '욕을 했다', '겁주는 말을 했다', '계속 따라다니며 괴롭혔다', '내 물건을 망가뜨리거나 빼앗았다'] }
 ];
 
 /* "욕구 낱말로 찾기"에서 아무것도 적지 않았을 때 먼저 보여 주는 욕구 */
