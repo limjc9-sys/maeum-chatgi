@@ -417,14 +417,14 @@
      세는 값(five)은 화면을 옮긴 뒤에 바꿔요. 그래야 이전으로 돌아왔을 때 앞 화면의 값이 그대로 남아요 */
   function emotionFive() {
     var n = (draft.five || 0) + 1;
-    if (n === 1) draft.bodyMode = 'easy'; /* 몸의 느낌은 늘 "쉽게"부터 */
+    if (n === 1) resetBodyView(); /* 몸의 느낌은 들어올 때마다 처음 모습부터 */
     if (n <= D.approaches.length) go('approach', { index: n - 1 });
     else go('unnamed', {});
     draft.five = n;
   }
   /* "몸의 느낌으로 찾기": 몸의 느낌 화면으로 바로 가요. 거기서 "이 중엔 없어요"를 누르면 다음 방법(행동)으로 이어져요 */
   function bodyOpen() {
-    draft.bodyMode = 'easy'; /* 몸의 느낌은 늘 "쉽게"부터 */
+    resetBodyView(); /* 몸의 느낌은 들어올 때마다 처음 모습부터 */
     go('approach', { index: 0 });
     draft.five = 1;
   }
@@ -1160,24 +1160,15 @@
     if (!draft.bodyPicks) draft.bodyPicks = [];
     if (draft.bodyPicks.indexOf(id) === -1) draft.bodyPicks.push(id);
   }
-  /* 몸의 곳(12곳)·느낌의 결(10계열) — data/questions.js의 bodyAreas·bodyTextures */
+  /* 몸의 곳(12곳) — data/questions.js의 bodyAreas */
   var AREA = {};
   (D.bodyAreas || []).forEach(function (x) { AREA[x.id] = x; });
-  var TEX = {};
-  (D.bodyTextures || []).forEach(function (x) { TEX[x.id] = x; });
-  var BODY_PARTS = (D.approaches[0] && D.approaches[0].parts) || [];
   function allBody() { return Object.keys(BODY).map(function (id) { return BODY[id]; }); }
-  /* 몸의 느낌 화면 단계: 쉽게(6곳·4계열) / 자세히(몸 그림 12곳·10계열) / 적어서 찾기 (5-6(8)).
-     들어올 때마다 "쉽게"부터 보여요("잘 모르겠어요"·"몸의 느낌으로 찾기" 모두). 고른 단계는 그 화면에 있는 동안만,
-     감정 후보로 갔다가 돌아와도 남아요. 휴대폰에는 남기지 않아요 (2026-11-08 지적: 전에 고른 "자세히"가 남아
-     "잘 모르겠어요"가 자세히로 열렸음) */
+  /* 몸의 느낌 화면 — 한 화면으로 단순하게 (2026-11-08 지적: 쉽게·자세히 탭과 결 찾기·사전이 겹쳐 조잡하고 복잡함).
+     몸 그림 → 누른 곳의 느낌 → 고른 느낌 → (필요하면) 적어서 찾기. 단계 탭·느낌의 결 찾기·관용 표현 사전 목록은 두지 않아요 */
   var BODYMODE_KEY = 'maeum-chatgi-bodymode';
   try { window.localStorage.removeItem(BODYMODE_KEY); } catch (e) { /* 전 판에서 남긴 값 지우기 */ }
-  function bodyMode() {
-    var m = (draft && draft.bodyMode) || 'easy';
-    return (D.bodyModes || []).some(function (x) { return x.id === m; }) ? m : 'easy';
-  }
-  function setBodyMode(m) { draft.bodyMode = m; }
+  function resetBodyView() { draft.bodyArea = null; draft.bodyWriteOpen = false; }
   function bchip(f) {
     var on = bodyPicks().indexOf(f.id) !== -1;
     return el('button', { class: 'chip chip-body' + (on ? ' on' : ''), type: 'button', 'data-body': f.id, 'aria-pressed': String(on), onclick: function () { toggleBody(f.id); } }, (on ? '✓ ' : '') + f.label);
@@ -1188,56 +1179,23 @@
     if (at === -1) o.push(id); else o.splice(at, 1);
     draft[key] = o;
   }
-  /* 접었다 펴는 묶음 (곳 6묶음·12곳·사전이 함께 써요) */
-  function foldBox(kind, id, title, sub, feelings, openKey, extra) {
-    var isOpen = (draft[openKey] || []).indexOf(id) !== -1;
-    var bp = bodyPicks();
-    var n = feelings.filter(function (f) { return bp.indexOf(f.id) !== -1; }).length;
-    var attrs = { class: 'bpart' + (isOpen ? ' open' : '') };
-    attrs['data-' + kind] = id;
-    return el('section', attrs,
-      el('button', {
-        class: 'bpart-head', type: 'button', 'aria-expanded': String(isOpen), 'data-testid': kind + '-' + id,
-        onclick: function () { toggleIn(openKey, id); refresh(); }
-      },
-        el('span', { class: 'bpart-body' }, el('span', { class: 'bpart-name' }, title), sub ? el('span', { class: 'bpart-where' }, sub) : null),
-        n ? el('span', { class: 'bpart-count' }, '✓' + n) : null,
-        el('span', { class: 'toggle-mark', 'aria-hidden': 'true' }, isOpen ? '−' : '+')),
-      isOpen ? (extra ? extra() : el('div', { class: 'chips bpart-chips' }, feelings.map(bchip))) : null);
-  }
-  /* 느낌의 결로 찾기: 결을 누르면 그 결의 느낌이 곳과 상관없이 모여요 */
-  function texFilter(list) {
-    var cur = draft.bodyTex && list.some(function (t) { return t.id === draft.bodyTex; }) ? draft.bodyTex : null;
-    var feels = cur ? allBody().filter(function (f) { return f.tex === cur; }) : [];
-    return el('section', { class: 'tex-box', 'data-testid': 'tex-box' },
-      el('p', { class: 'trow-label' }, T.bodyTexTitle || '느낌의 결로 찾기'),
-      el('div', { class: 'chips' }, list.map(function (t) {
-        var on = cur === t.id;
-        return el('button', {
-          class: 'chip chip-tex' + (on ? ' on' : ''), type: 'button', 'data-tex': t.id, 'aria-pressed': String(on),
-          onclick: function () { draft.bodyTex = on ? null : t.id; refresh(); }
-        }, t.icon + ' ' + t.label);
-      })),
-      cur ? el('div', { class: 'tex-panel', 'data-testid': 'tex-panel' },
-        el('p', { class: 'guide' }, fill(T.bodyTexGuide || '“{글}” 느낌이에요.', { '글': TEX[cur].label })),
-        el('div', { class: 'chips' }, feels.map(bchip))) : null);
-  }
-  /* 몸 그림 (12곳). 누르면 아래 그 곳의 느낌이 펼쳐져요. 고른 느낌이 있는 곳은 색이 칠해져요 */
+  /* 몸 그림 (12곳, 양옆에 곳 이름). 곳이나 이름을 누르면 바로 아래에 그 곳의 느낌이 나와요(한 번에 한 곳).
+     고른 느낌이 있는 곳은 색이 칠해져요 */
   function bodyFigure() {
     var NS = 'http://www.w3.org/2000/svg';
     var bp = bodyPicks();
     var picked = {};
     bp.forEach(function (id) { picked[BODY[id].area] = true; });
-    var open = draft.openAreas || [];
+    var open = draft.bodyArea ? [draft.bodyArea] : [];
     function mk(tag, attrs) {
       var n = document.createElementNS(NS, tag);
       Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
       return n;
     }
     function tapArea(id) {
-      if (open.indexOf(id) === -1) toggleIn('openAreas', id);
+      draft.bodyArea = draft.bodyArea === id ? null : id;
       refresh();
-      var sec = app.querySelector('[data-barea="' + id + '"]');
+      var sec = app.querySelector('[data-testid="body-panel"]');
       if (sec && sec.scrollIntoView) { try { sec.scrollIntoView({ block: 'nearest' }); } catch (e) { /* 무시 */ } }
     }
     var LABELS = {
@@ -1254,6 +1212,7 @@
       var lb = LABELS[id];
       if (lb) {
         var left = lb[0] === 'L';
+        g.appendChild(mk('rect', { x: left ? -50 : 178, y: lb[1] - 19, width: 72, height: 26, class: 'fig-hit' }));
         var t = mk('text', { x: left ? 18 : 182, y: lb[1], 'text-anchor': left ? 'end' : 'start', class: 'fig-label', 'data-fig-label': id });
         t.textContent = AREA[id].label;
         g.appendChild(t);
@@ -1294,16 +1253,20 @@
     deco.appendChild(mk('path', { d: 'M88,72 Q100,80 112,72', class: 'fig-line' }));
     svg.appendChild(deco);
     svg.insertBefore(leaders, svg.firstChild);
-    var shown = open.filter(function (id) { return AREA[id]; }).map(function (id) { return AREA[id].label; });
     return el('div', { class: 'fig-wrap', 'data-testid': 'body-figure' }, root,
       el('button', {
         class: 'chip fig-whole' + (picked.whole ? ' on' : ''), type: 'button', 'data-area': 'whole', 'aria-pressed': String(open.indexOf('whole') !== -1),
         onclick: function () { tapArea('whole'); }
-      }, '🧍 ' + AREA.whole.label),
-      el('p', { class: 'fig-note', 'data-testid': 'fig-note' }, shown.length ? (T.bodyFigOpen || '펼친 곳') + ': ' + shown.join(' · ') : (T.bodyFigGuide || '몸 그림에서 느껴진 곳을 누르세요.')));
+      }, '🧍 ' + AREA.whole.label));
   }
-  /* 적어서 찾기: 몸 표현을 적으면 맞는 느낌이 나오고, 아래에 관용 표현 사전이 있어요 */
-  function bodyWrite() {
+  /* 적어서 찾기 (접혀 있음): 몸 표현을 적으면 맞는 느낌이 나와요. 관용 표현으로 찾아요 */
+  function bodyWriteBox() {
+    var open = !!draft.bodyWriteOpen;
+    var head = el('button', {
+      class: 'emobody-toggle body-write-toggle', type: 'button', 'data-testid': 'body-write-toggle', 'aria-expanded': String(open),
+      onclick: function () { draft.bodyWriteOpen = !open; refresh(); }
+    }, T.bodyWriteToggle || '✏️ 몸 표현을 적어서 찾기', el('span', { class: 'toggle-mark', 'aria-hidden': 'true' }, open ? '−' : '+'));
+    if (!open) return el('div', { class: 'body-write' }, head);
     var input = el('input', {
       class: 'input', type: 'search', maxlength: '30', autocomplete: 'off', enterkeyhint: 'search', id: 'body-write',
       placeholder: T.bodyWritePlaceholder || '예) 가슴이 답답해', 'data-testid': 'body-write-input'
@@ -1322,56 +1285,27 @@
     input.addEventListener('input', function () { draft.bodyText = input.value; show(); });
     input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); } });
     show();
-    return [
+    return el('div', { class: 'body-write open' }, head,
       el('label', { class: 'sr-only', for: 'body-write' }, T.bodyWritePlaceholder || '몸 표현 적기'),
-      input, info, box,
-      el('h2', { class: 'sec-title dict-title' }, T.bodyDictTitle || '몸 관용 표현 사전'),
-      el('p', { class: 'guide' }, T.bodyDictGuide || ''),
-      el('div', { class: 'bpart-list' }, BODY_PARTS.map(function (pt) {
-        return foldBox('bdict', pt.id, pt.label, pt.where, pt.feelings, 'openDict', function () {
-          return el('ul', { class: 'dict-list' }, pt.feelings.map(function (f) {
-            return el('li', { class: 'dict-item' }, bchip(f), el('p', { class: 'dict-idioms' }, f.idioms.join(' · ')));
-          }));
-        });
-      }))
-    ];
+      input, info, box);
   }
-  /* 몸의 느낌 — 단계 탭 3개, 처음에는 곳만 보이고 누르면 느낌이 펼쳐져요 (짧고 중립적으로, 5-6(5)) */
   function bodyScreen(ap, p) {
     var bp = bodyPicks();
-    var mode = bodyMode();
-    var tabs = el('div', { class: 'body-modes', role: 'tablist', 'data-testid': 'body-modes' }, (D.bodyModes || []).map(function (m) {
-      var on = m.id === mode;
-      return el('button', {
-        class: 'body-mode' + (on ? ' on' : ''), type: 'button', role: 'tab', 'aria-selected': String(on), 'data-body-mode': m.id,
-        onclick: function () { setBodyMode(m.id); refresh(); }
-      }, el('span', { class: 'body-mode-name' }, m.label), el('span', { class: 'body-mode-hint' }, m.hint));
-    }));
-    var content;
-    if (mode === 'detail') {
-      content = [
-        bodyFigure(),
-        texFilter(D.bodyTextures || []),
-        el('div', { class: 'bpart-list' }, (D.bodyAreas || []).map(function (ar) {
-          return foldBox('barea', ar.id, ar.label, null, allBody().filter(function (f) { return f.area === ar.id; }), 'openAreas');
-        }))
-      ];
-    } else if (mode === 'write') {
-      content = bodyWrite();
-    } else {
-      content = [
-        texFilter((D.bodyTextures || []).filter(function (t) { return t.basic; })),
-        el('div', { class: 'bpart-list' }, ap.parts.map(function (pt) {
-          return foldBox('bpart', pt.id, pt.label, pt.where, pt.feelings, 'openParts');
-        }))
-      ];
-    }
-    return screen('approach', { 'data-approach': ap.key, 'data-body-mode': mode }, topBar(), progress(), pickBar(), situationChip(),
+    var area = draft.bodyArea && AREA[draft.bodyArea] ? draft.bodyArea : null;
+    var feels = area ? allBody().filter(function (f) { return f.area === area; }) : [];
+    return screen('approach', { 'data-approach': ap.key }, topBar(), progress(), pickBar(), situationChip(),
       heading(ap.question, ap.intro),
-      el('p', { class: 'guide' }, mode === 'write' ? (T.bodyWriteLead || ap.guide) : (mode === 'detail' ? (T.bodyDetailLead || ap.guide) : ap.guide)),
-      tabs,
-      content,
-      bp.length ? el('p', { class: 'sel-count', 'data-testid': 'body-count' }, '✓ ' + fill(T.bodyPicked || '고른 몸의 느낌 {글}개', { '글': String(bp.length) })) : null,
+      el('p', { class: 'guide' }, ap.guide || ''),
+      bodyFigure(),
+      area ? el('section', { class: 'bpanel', 'data-testid': 'body-panel', 'data-barea': area },
+        el('h2', { class: 'bpanel-title' }, AREA[area].label),
+        el('div', { class: 'chips' }, feels.map(bchip))) : null,
+      bp.length ? el('section', { class: 'body-picked', 'data-testid': 'body-picked' },
+        el('p', { class: 'sel-count', 'data-testid': 'body-count' }, '✓ ' + fill(T.bodyPicked || '고른 몸의 느낌 {글}개', { '글': String(bp.length) })),
+        el('div', { class: 'pick-chips' }, bp.map(function (id) {
+          return el('button', { class: 'pick-chip pick-chip-body', type: 'button', 'data-unpick': id, 'aria-label': BODY[id].label + ' 빼기', onclick: function () { toggleBody(id); } }, BODY[id].label + ' ✕');
+        }))) : null,
+      bodyWriteBox(),
       el('div', { class: 'opts' }, fiveOption()),
       navBar({ next: { onClick: function () { go('bodyWords', { index: p.index }); }, disabled: !bp.length } })
     );
