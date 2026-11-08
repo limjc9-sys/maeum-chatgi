@@ -653,19 +653,54 @@
     if (current.screen === 'guide') refresh();
   });
   /* 홈 화면에 설치하는 방법 (사용 방법 화면 안에 있어요) */
+  /* 앱 주소: 지금 열린 주소에서 파일 이름·뒤 표시를 뺀 것 */
+  function appAddress() {
+    var u = location.origin + location.pathname.replace(/[^/]*$/, '');
+    return /^https?:/.test(u) ? u : 'https://limjc9-sys.github.io/maeum-chatgi/';
+  }
+  function copyAddress() {
+    var a = appAddress();
+    var done = function () { toast((D.guide.install || {}).copied || '주소를 복사했어요.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(a).then(done, function () { window.prompt('주소를 길게 눌러 복사하세요', a); });
+    } else {
+      window.prompt('주소를 길게 눌러 복사하세요', a);
+    }
+  }
+  function installPart(part, kind, open) {
+    var I = D.guide.install || {};
+    return el('details', { class: 'install-part', 'data-testid': 'install-' + kind, open: open ? '' : null },
+      el('summary', null, (kind === 'ios' ? '🍎 ' : '🤖 ') + part.title),
+      el('ol', { class: 'install-steps' }, part.steps.map(function (t) { return el('li', null, t); })),
+      part.trouble && part.trouble.length ? el('div', { class: 'install-trouble' },
+        el('p', { class: 'install-trouble-title' }, '❓ ' + (I.troubleTitle || '안 될 때')),
+        el('ul', null, part.trouble.map(function (t) { return el('li', null, t); }))) : null);
+  }
+  /* 홈 화면에 앱으로 설치하는 방법 (사용 방법 화면 안). 휴대폰 종류에 맞는 쪽을 먼저 펼쳐요 */
   function installHelp() {
-    var G = D.guide || {};
-    var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+    var I = (D.guide || {}).install || {};
+    var ua = navigator.userAgent || '';
+    var isIOS = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+    var isAndroid = /Android/i.test(ua);
+    var inApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\//i.test(ua);
+    var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
     return el('details', { class: 'install', 'data-testid': 'install-help' },
       el('summary', null, '📲 ' + (T.installTitle || '홈 화면에 앱으로 설치하는 방법')),
-      standalone || window.navigator.standalone ? el('p', null, '이미 홈 화면에 설치해서 쓰고 있어요.') : null,
+      standalone ? el('p', { class: 'install-ok' }, '✅ 이미 홈 화면에 설치해서 쓰고 있어요.') : null,
       deferredInstall ? el('button', {
         class: 'btn btn-guide', type: 'button', onclick: function () {
           deferredInstall.prompt();
           deferredInstall = null;
         }
       }, '지금 설치하기') : null,
-      (G.install || []).map(function (line) { return el('p', null, line); })
+      el('p', { class: 'install-warn' + (inApp ? ' now' : ''), 'data-testid': 'install-warn' }, '⚠️ ' + (inApp ? '지금 메신저 안의 화면이에요. ' : '') + (I.warn || '')),
+      el('div', { class: 'install-addr' },
+        el('p', { class: 'install-addr-label' }, I.address || '앱 주소'),
+        el('p', { class: 'install-addr-url', 'data-testid': 'install-address' }, appAddress()),
+        el('button', { class: 'btn btn-secondary', type: 'button', 'data-testid': 'install-copy', onclick: copyAddress }, '📋 ' + (I.copy || '주소 복사하기'))),
+      I.android ? installPart(I.android, 'android', isAndroid) : null,
+      I.ios ? installPart(I.ios, 'ios', isIOS) : null,
+      el('ul', { class: 'install-after' }, (I.after || []).map(function (t) { return el('li', null, '✅ ' + t); }))
     );
   }
 
